@@ -6,8 +6,8 @@
   <title>Lembaga Infaq Nurul Hayah</title>
   
   <!-- Favicon / Web Icon Resmi -->
-  <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
-  <link rel="shortcut icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
+  <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19709513/Primary_Logo_1.jpg-removebg-preview.png">
+  <link rel="shortcut icon" type="image/jpeg" href="https://www.upload.ee/image/19709513/Primary_Logo_1.jpg-removebg-preview.png">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -311,19 +311,6 @@
               </main>
 
               <PublicFooter settings={settings} />
-
-              <a
-                href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}?text=Assalamualaikum%20Lembaga%20Infaq%20Nurul%20Hayah,%20saya%20ingin%20berkonsultasi%20mengenai%20infaq.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Layanan WhatsApp"
-                className="fixed bottom-6 left-6 z-40 bg-[#1F5946] hover:bg-[#174435] text-white p-3.5 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 group border-2 border-[#B89355]/30"
-              >
-                <Icons.WhatsApp />
-                <span className="max-w-0 overflow-hidden whitespace-nowrap group-hover:max-w-xs transition-all duration-300 ease-in-out font-medium text-xs px-0 group-hover:px-2">
-                  Layanan Donatur
-                </span>
-              </a>
             </>
           )}
         </div>
@@ -697,7 +684,7 @@
         amount: '50000',
         customAmount: '',
         programTitle: selectedProgram ? selectedProgram.title : (programs[0]?.title || "Infaq Umum"),
-        paymentMethod: "Bank Transfer",
+        paymentMethod: "WhatsApp Transfer",
         notes: ''
       });
 
@@ -714,11 +701,28 @@
 
       const handleSubmit = (e) => {
         e.preventDefault();
-        if (!formData.amount || Number(formData.amount) < 5000) {
+        const finalAmount = Number(formData.amount);
+        if (!finalAmount || finalAmount < 5000) {
           alert("Nominal infaq minimal Rp 5.000");
           return;
         }
+
+        const donorName = formData.isAnon ? "Hamba Allah" : (formData.name || "Hamba Allah");
+        const cleanWA = settings.whatsapp.replace(/\D/g, '');
+
+        let waText = `Assalamualaikum Lembaga Infaq Nurul Hayah,\n\n`;
+        waText += `Saya ingin menyalurkan infaq dengan rincian berikut:\n`;
+        waText += `• Nama: ${donorName}\n`;
+        waText += `• Nominal Infaq: ${formatIDR(finalAmount)}\n`;
+        waText += `• Program: ${formData.programTitle}\n`;
+        if (formData.phone) waText += `• No. WA/HP: ${formData.phone}\n`;
+        if (formData.notes) waText += `• Doa/Niat: ${formData.notes}\n`;
+        waText += `\nMohon informasi Nomor Rekening / QRIS untuk pengiriman infaq. Terima kasih.`;
+
+        const waUrl = `https://wa.me/${cleanWA}?text=${encodeURIComponent(waText)}`;
+
         onSubmitInfaq(formData);
+        window.open(waUrl, '_blank');
       };
 
       if (successData) {
@@ -746,21 +750,17 @@
                   <span className="text-slate-500">Nama Donatur:</span>
                   <span className="font-semibold text-slate-800">{successData.donorName}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-500">Metode:</span>
-                  <span className="font-semibold text-slate-800">{successData.paymentMethod}</span>
-                </div>
               </div>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-2">
                 <a
-                  href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}?text=Assalamualaikum%20Lembaga%20Infaq%20Nurul%20Hayah,%20saya%20sudah%20berinfaq%20dengan%20ID:%20${successData.id}%20sebesar%20${formatIDR(successData.amount)}`}
+                  href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(`Assalamualaikum Lembaga Infaq Nurul Hayah,\n\nSaya ingin meminta Nomor Rekening / QRIS untuk transaksi ID: ${successData.id} sebesar ${formatIDR(successData.amount)}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex-1 py-3.5 bg-[#1F5946] hover:bg-[#174435] text-white rounded-xl font-bold text-sm flex items-center justify-center space-x-2"
+                  className="flex-1 py-3.5 bg-[#1F5946] hover:bg-[#174435] text-white rounded-xl font-bold text-sm flex items-center justify-center space-x-2 shadow-md"
                 >
                   <Icons.WhatsApp />
-                  <span>Konfirmasi via WhatsApp</span>
+                  <span>Buka WhatsApp (Minta Rekening / QRIS)</span>
                 </a>
                 <button
                   onClick={() => { onReset(); onBack(); }}
@@ -785,7 +785,7 @@
                 Form Salurkan Infaq
               </h1>
               <p className="text-slate-500 text-xs sm:text-sm mt-1">
-                "Amanah Bersama, Sejahtera dan Berdaya"
+                Isi data di bawah ini, lalu klik tombol untuk langsung terhubung ke WhatsApp kami untuk mendapatkan Nomor Rekening / QRIS.
               </p>
             </div>
 
@@ -811,7 +811,7 @@
 
               <div>
                 <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                  Pilih Nominal Infaq
+                  Nominal Infaq
                 </label>
                 <div className="grid grid-cols-3 gap-2.5 mb-3">
                   {presetAmounts.map((val) => (
@@ -916,8 +916,8 @@
                 type="submit"
                 className="w-full py-4 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-2xl shadow-xl transition duration-200 flex items-center justify-center space-x-2 text-base"
               >
-                <span className="text-[#B89355]"><Icons.Heart /></span>
-                <span>Lanjutkan Infaq ({formatIDR(Number(formData.amount))})</span>
+                <Icons.WhatsApp />
+                <span>Minta No. Rekening / QRIS via WhatsApp ({formatIDR(Number(formData.amount))})</span>
               </button>
             </form>
           </div>
@@ -1007,13 +1007,13 @@
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="max-w-2xl mx-auto mb-12">
               <span className="text-xs font-bold uppercase tracking-widest text-[#1F5946] bg-emerald-50 px-3.5 py-1 rounded-full border border-emerald-100">
-                Layanan Donatur
+                Informasi Kontak
               </span>
               <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-3">
                 Kantor & Informasi Kontak Resmi
               </h2>
               <p className="text-slate-600 text-sm mt-3 leading-relaxed">
-                Amil kami siap melayani konsultasi perhitungan infaq, jemput donasi, serta konfirmasi transaksi infaq Anda.
+                Amil kami siap melayani konsultasi perhitungan infaq, permintaan QRIS / Nomor Rekening, serta konfirmasi transaksi infaq Anda.
               </p>
             </div>
 
