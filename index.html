@@ -598,6 +598,155 @@
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
+              {!isLogin && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Lengkap</label>
+                  <input
+                    type="text"
+                    required
+                    placeholder="Nama Anda"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="email@domain.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password</label>
+                <input
+                  type="password"
+                  required
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full py-3 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-2xl text-xs shadow-md transition"
+              >
+                {isLogin ? "Masuk Akun" : "Daftar Akun"}
+              </button>
+            </form>
+
+            <div className="mt-5 text-center text-xs text-slate-500">
+              {isLogin ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
+              <button
+                onClick={() => setIsLogin(!isLogin)}
+                className="font-bold text-[#1F5946] hover:underline"
+              >
+                {isLogin ? "Daftar Sekarang" : "Masuk di Sini"}
+              </button>
+            </div>
+
+          </div>
+        </div>
+      );
+    }
+
+    function HeroSection({ onOpenInfaq }) {
+      return (
+        <section id="beranda" className="relative min-h-[70vh] flex items-center justify-center bg-white text-slate-900 pt-16 pb-16 overflow-hidden border-b border-slate-100">
+          <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#1F5946_1px,transparent_1px)] [background-size:20px_20px]"></div>
+          <div className="absolute top-10 right-10 w-96 h-96 bg-[#B89355]/5 rounded-full blur-3xl pointer-events-none"></div>
+          <div className="absolute bottom-10 left-10 w-96 h-96 bg-[#1F5946]/5 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6 leading-[1.15] text-[#1F5946]">
+              Berbagi Kebaikan,<br />
+              <span className="text-[#B89355]">
+                Menebar Kebermanfaatan
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed font-normal">
+              Bersama <strong className="text-[#1F5946]">Lembaga Infaq Nurul Hayah</strong>, mari wujudkan infaq yang amanah untuk membantu sesama dan memberikan manfaat bagi umat.
+            </p>
+
+            <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+              <a
+                href={`https://wa.me/${INITIAL_SETTINGS.whatsapp.replace(/\D/g, '')}?text=Assalamualaikum%20Lembaga%20Infaq%20Nurul%20Hayah,%20saya%20ingin%20menghubungi%20layanan.`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full sm:w-auto px-8 py-4 bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 border border-[#1F5946]"
+              >
+                <Icons.WhatsApp />
+                <span>Kontak Layanan</span>
+              </a>
+              
+              <a
+                href="#program"
+                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-[#1F5946] font-bold text-base rounded-2xl border-2 border-[#1F5946]/30 hover:border-[#1F5946] transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm"
+              >
+                <span>Lihat Program</span>
+                <Icons.ArrowRight />
+              </a>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function ProgramsSection({ programs, selectedCategory, setSelectedCategory, onSelectProgram, onInfaqNow }) {
+      const categories = ["Semua", "Pendidikan", "Santunan", "Wakaf & Pembangunan", "Paket Sembako", "Ramadhan"];
+
+      const filteredPrograms = useMemo(() => {
+        if (selectedCategory === "Semua") return programs;
+        return programs.filter(p => p.category === selectedCategory);
+      }, [programs, selectedCategory]);
+
+      return (
+        <section id="program" className="py-24 bg-white border-b border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-widest text-[#1F5946] bg-emerald-50 px-3.5 py-1 rounded-full border border-emerald-100">
+                  Pilihan Kebaikan
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-2">
+                  Program Lembaga Infaq Nurul Hayah
+                </h2>
+                <p className="text-slate-600 text-sm mt-2 max-w-xl">
+                  Salurkan kebaikan jariyah Anda untuk program-program yang telah terverifikasi tepat sasaran.
+                </p>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mt-6 md:mt-0">
+                {categories.map((cat, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => setSelectedCategory(cat)}
+                    className={`px-4 py-2 rounded-full text-xs font-bold transition ${
+                      selectedCategory === cat
+                        ? 'bg-[#1F5946] text-white shadow-sm'
+                        : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {cat}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {filteredPrograms.length === 0 ? (
+              <div className="text-center py-16 bg-slate-50 rounded-3xl border border-slate-200">
+                <p className="text-slate-500 font-semibold text-sm">Belum ada program infaq yang ditampilkan saat ini.</p>
+              </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {filteredPrograms.map((prog) => {
