@@ -6,8 +6,8 @@
   <title>Lembaga Infaq Nurul Hayah</title>
   
   <!-- Favicon / Web Icon Resmi -->
-  <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19709513/Primary_Logo_1.jpg-removebg-preview.png">
-  <link rel="shortcut icon" type="image/jpeg" href="https://www.upload.ee/image/19709513/Primary_Logo_1.jpg-removebg-preview.png">
+  <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
+  <link rel="shortcut icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
 
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -359,23 +359,7 @@
               ))}
             </div>
 
-            <div className="hidden sm:flex items-center space-x-3">
-              <button
-                onClick={onOpenInfaq}
-                className="px-6 py-2.5 rounded-full bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all duration-200 flex items-center space-x-2 border border-[#1F5946]"
-              >
-                <span className="text-[#B89355]"><Icons.Heart /></span>
-                <span>Salurkan Infaq</span>
-              </button>
-            </div>
-
             <div className="flex lg:hidden items-center space-x-2">
-              <button
-                onClick={onOpenInfaq}
-                className="px-3 py-1.5 rounded-full bg-[#1F5946] text-white font-bold text-xs flex items-center space-x-1"
-              >
-                <span>Infaq</span>
-              </button>
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 className="p-2 text-slate-700 focus:outline-none rounded-lg hover:bg-slate-50"
@@ -398,15 +382,6 @@
                   {link.label}
                 </a>
               ))}
-              <div className="pt-2">
-                <button
-                  onClick={() => { onOpenInfaq(); setMobileMenuOpen(false); }}
-                  className="w-full py-3 rounded-xl bg-[#1F5946] text-white font-bold text-center shadow-md flex justify-center items-center space-x-2"
-                >
-                  <span className="text-[#B89355]"><Icons.Heart /></span>
-                  <span>Salurkan Infaq Sekarang</span>
-                </button>
-              </div>
             </div>
           )}
         </nav>
@@ -431,13 +406,15 @@
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <button
-                onClick={onOpenInfaq}
+              <a
+                href={`https://wa.me/${INITIAL_SETTINGS.whatsapp.replace(/\D/g, '')}?text=Assalamualaikum%20Lembaga%20Infaq%20Nurul%20Hayah,%20saya%20ingin%20menghubungi%20layanan.`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="w-full sm:w-auto px-8 py-4 bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 border border-[#1F5946]"
               >
-                <span className="text-[#B89355]"><Icons.Heart /></span>
-                <span>Salurkan Infaq</span>
-              </button>
+                <Icons.WhatsApp />
+                <span>Kontak Layanan</span>
+              </a>
               
               <a
                 href="#program"
@@ -1034,7 +1011,14 @@
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm">Telepon / WhatsApp</h4>
-                  <p className="text-slate-600 text-xs mt-1 leading-relaxed font-semibold text-[#1F5946]">{settings.whatsapp}</p>
+                  <a 
+                    href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`} 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-slate-600 text-xs mt-1 leading-relaxed font-semibold text-[#1F5946] hover:underline block"
+                  >
+                    {settings.whatsapp}
+                  </a>
                 </div>
               </div>
 
@@ -1044,7 +1028,12 @@
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 text-sm">Email Resmi</h4>
-                  <p className="text-slate-600 text-xs mt-1 leading-relaxed">{settings.email}</p>
+                  <a 
+                    href={`mailto:${settings.email}`} 
+                    className="text-slate-600 text-xs mt-1 leading-relaxed hover:underline block font-semibold text-slate-800"
+                  >
+                    {settings.email}
+                  </a>
                 </div>
               </div>
             </div>
@@ -1078,11 +1067,21 @@
               <div>
                 <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-4">Media Sosial & Informasi</h4>
                 <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
-                  <li>TikTok: <strong className="text-slate-800">{settings.tiktok}</strong></li>
-                  <li>Instagram: <strong className="text-slate-800">{settings.instagram}</strong></li>
-                  <li>Facebook: <strong className="text-slate-800">{settings.facebook}</strong></li>
-                  <li>Email: <strong className="text-slate-800">{settings.email}</strong></li>
-                  <li>WhatsApp: <strong className="text-[#1F5946]">{settings.whatsapp}</strong></li>
+                  <li>
+                    TikTok: <a href={`https://www.tiktok.com/search?q=${encodeURIComponent(settings.tiktok)}`} target="_blank" rel="noopener noreferrer" className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.tiktok}</a>
+                  </li>
+                  <li>
+                    Instagram: <a href={`https://www.instagram.com/`} target="_blank" rel="noopener noreferrer" className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.instagram}</a>
+                  </li>
+                  <li>
+                    Facebook: <a href={`https://www.facebook.com/`} target="_blank" rel="noopener noreferrer" className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.facebook}</a>
+                  </li>
+                  <li>
+                    Email: <a href={`mailto:${settings.email}`} className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.email}</a>
+                  </li>
+                  <li>
+                    WhatsApp: <a href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#1F5946] hover:underline">{settings.whatsapp}</a>
+                  </li>
                 </ul>
               </div>
             </div>
