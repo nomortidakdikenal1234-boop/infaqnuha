@@ -17,7 +17,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Firebase Auth Module untuk Google OAuth Sign-In Resmi -->
+  <!-- Firebase Auth Module -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
     import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -81,84 +81,12 @@
       logoUrl: "https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg"
     };
 
-    const INITIAL_PROGRAMS = [
-      {
-        id: "PROG-101",
-        title: "Beasiswa Santri & Pelajar Dhuafa",
-        category: "Pendidikan",
-        description: "Mendukung biaya pendidikan anak yatim dan dhuafa agar tetap dapat bersekolah dengan layak.",
-        fullContent: "Program beasiswa ini disalurkan setiap bulan untuk membayar SPP dan perlengkapan sekolah santri di wilayah Brebes dan sekitarnya.",
-        targetAmount: 50000000,
-        currentAmount: 18500000,
-        beneficiaries: 75,
-        imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80",
-        status: "Aktif"
-      },
-      {
-        id: "PROG-102",
-        title: "Santunan Lansia & Janda Dhuafa",
-        category: "Santunan",
-        description: "Pemberian bantuan sembako dan kebutuhan harian untuk lansia dhuafa terlantar.",
-        fullContent: "Bantuan langsung ke rumah-rumah lansia dan janda dhuafa guna meringankan beban hidup sehari-hari.",
-        targetAmount: 30000000,
-        currentAmount: 14200000,
-        beneficiaries: 50,
-        imageUrl: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=800&q=80",
-        status: "Aktif"
-      },
-      {
-        id: "PROG-103",
-        title: "Wakaf & Pembangunan Gedung Tahfidz",
-        category: "Wakaf & Pembangunan",
-        description: "Pembangunan sarana belajar hafiz Al-Qur'an bagi santri tidak mampu.",
-        fullContent: "Wakaf produktif pembangunan lokal kelas dan asrama santri hafiz Al-Qur'an agar proses belajar mengajar berjalan kondusif.",
-        targetAmount: 120000000,
-        currentAmount: 45000000,
-        beneficiaries: 120,
-        imageUrl: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=800&q=80",
-        status: "Aktif"
-      }
-    ];
+    // Seluruh data awal program, donasi, dan galeri telah dikosongkan
+    const INITIAL_PROGRAMS = [];
 
-    const INITIAL_DONATIONS = [
-      {
-        id: "TRX-1001",
-        donorName: "Hamba Allah",
-        amount: 250000,
-        programTitle: "Beasiswa Santri & Pelajar Dhuafa",
-        paymentMethod: "WhatsApp Transfer",
-        status: "Terverifikasi",
-        date: "2026-08-30 14:20",
-        notes: "Semoga berkah untuk para santri"
-      },
-      {
-        id: "TRX-1002",
-        donorName: "Syahrul Ramadhan",
-        amount: 500000,
-        programTitle: "Santunan Lansia & Janda Dhuafa",
-        paymentMethod: "WhatsApp Transfer",
-        status: "Terverifikasi",
-        date: "2026-08-31 09:15",
-        notes: "Bismillah niat untuk almarhumah ibu"
-      }
-    ];
+    const INITIAL_DONATIONS = [];
 
-    const INITIAL_GALLERY = [
-      {
-        id: "GAL-1",
-        title: "Penyaluran Beasiswa Pendidikan",
-        category: "Pendidikan",
-        description: "Penyerahan santunan alat tulis dan perlengkapan sekolah kepada pelajar dhuafa.",
-        imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=700&q=80"
-      },
-      {
-        id: "GAL-2",
-        title: "Paket Sembako Lansia Bulakelor",
-        category: "Santunan",
-        description: "Penyaluran paket bahan pokok untuk nenek lansia hidup sebatang kara.",
-        imageUrl: "https://images.unsplash.com/photo-1532629345422-7515f3d16bb9?auto=format&fit=crop&w=700&q=80"
-      }
-    ];
+    const INITIAL_GALLERY = [];
 
     const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
     const formatNumber = (num) => new Intl.NumberFormat('id-ID').format(num || 0);
@@ -517,292 +445,6 @@
       );
     }
 
-    function AuthModal({ mode, setMode, onClose, onLoginSuccess, showToast }) {
-      const [isLogin, setIsLogin] = useState(mode === 'login');
-      const [email, setEmail] = useState('');
-      const [password, setPassword] = useState('');
-      const [name, setName] = useState('');
-
-      const [showGoogleSSO, setShowGoogleSSO] = useState(false);
-      const [customGoogleEmail, setCustomGoogleEmail] = useState('');
-      const [customGoogleName, setCustomGoogleName] = useState('');
-      const [isCustomEntry, setIsCustomEntry] = useState(false);
-
-      useEffect(() => {
-        setIsLogin(mode === 'login');
-      }, [mode]);
-
-      const handleSubmit = (e) => {
-        e.preventDefault();
-        if (!email || !password || (!isLogin && !name)) {
-          showToast("Silakan lengkapi seluruh formulir.");
-          return;
-        }
-
-        const userName = isLogin ? (email.split('@')[0] || 'Donatur') : name;
-        onLoginSuccess({
-          name: userName,
-          email: email,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userName)}`
-        });
-      };
-
-      const handleGoogleAuthClick = async () => {
-        if (window.firebaseAuth && window.GoogleAuthProvider && window.signInWithPopup) {
-          try {
-            const provider = new window.GoogleAuthProvider();
-            const result = await window.signInWithPopup(window.firebaseAuth, provider);
-            if (result && result.user) {
-              const u = result.user;
-              onLoginSuccess({
-                name: u.displayName || u.email.split('@')[0],
-                email: u.email,
-                avatar: u.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(u.email)}`
-              });
-              return;
-            }
-          } catch (err) {
-            console.log("Firebase popup fallback:", err.message);
-          }
-        }
-        setShowGoogleSSO(true);
-      };
-
-      const handleSelectPresetAccount = (accountEmail, accountName) => {
-        onLoginSuccess({
-          name: accountName,
-          email: accountEmail,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(accountEmail)}`
-        });
-      };
-
-      const handleCustomGoogleSubmit = (e) => {
-        e.preventDefault();
-        if (!customGoogleEmail || !customGoogleEmail.includes('@')) {
-          showToast("Silakan masukkan alamat email Google yang valid.");
-          return;
-        }
-        const nameToUse = customGoogleName.trim() || customGoogleEmail.split('@')[0];
-        onLoginSuccess({
-          name: nameToUse,
-          email: customGoogleEmail,
-          avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(customGoogleEmail)}`
-        });
-      };
-
-      return (
-        <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 sm:p-8 shadow-2xl border border-slate-100 relative overflow-hidden">
-            
-            <button
-              onClick={onClose}
-              className="absolute top-5 right-5 text-slate-400 hover:text-slate-700 p-1.5 rounded-full hover:bg-slate-100 transition z-10"
-            >
-              <Icons.X />
-            </button>
-
-            {showGoogleSSO ? (
-              <div className="space-y-5 animate-fade-in">
-                <div className="text-center pb-2 border-b border-slate-100">
-                  <div className="w-10 h-10 mx-auto mb-2 flex items-center justify-center bg-white rounded-full border border-slate-200 shadow-sm">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                    </svg>
-                  </div>
-                  <h3 className="text-base font-bold text-slate-900">Masuk dengan Google</h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Pilih akun untuk melanjutkan ke <strong>Lembaga Infaq Nurul Hayah</strong></p>
-                </div>
-
-                {!isCustomEntry ? (
-                  <div className="space-y-2.5">
-                    {[
-                      { name: "Syahrul Ramadhan", email: "syahrul059@gmail.com" },
-                      { name: "Donatur Nurul Hayah", email: "paraind555@gmail.com" },
-                      { name: "Official Infaq Nuha", email: "infaqnurulhayah@gmail.com" }
-                    ].map((acc, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => handleSelectPresetAccount(acc.email, acc.name)}
-                        className="w-full p-3 bg-slate-50 hover:bg-emerald-50/80 border border-slate-200 hover:border-[#1F5946] rounded-2xl flex items-center space-x-3.5 transition text-left group"
-                      >
-                        <div className="w-9 h-9 rounded-full bg-[#1F5946] text-white flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-sm group-hover:bg-[#174435]">
-                          {acc.name.charAt(0)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-xs font-bold text-slate-800 truncate">{acc.name}</div>
-                          <div className="text-[11px] text-slate-500 truncate">{acc.email}</div>
-                        </div>
-                        <span className="text-[#1F5946] text-xs font-bold opacity-0 group-hover:opacity-100 transition">Pilih →</span>
-                      </button>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={() => setIsCustomEntry(true)}
-                      className="w-full py-2.5 px-3 border border-dashed border-slate-300 hover:border-[#1F5946] rounded-2xl text-xs font-bold text-slate-600 hover:text-[#1F5946] flex items-center justify-center space-x-2 transition mt-3"
-                    >
-                      <Icons.Plus />
-                      <span>Gunakan Akun Google Lainnya</span>
-                    </button>
-                  </div>
-                ) : (
-                  <form onSubmit={handleCustomGoogleSubmit} className="space-y-3 pt-1">
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Email Google / Gmail
-                      </label>
-                      <input
-                        type="email"
-                        required
-                        autoFocus
-                        placeholder="contoh: nama.anda@gmail.com"
-                        value={customGoogleEmail}
-                        onChange={(e) => setCustomGoogleEmail(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1">
-                        Nama Akun (Opsional)
-                      </label>
-                      <input
-                        type="text"
-                        placeholder="Nama Lengkap"
-                        value={customGoogleName}
-                        onChange={(e) => setCustomGoogleName(e.target.value)}
-                        className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
-                      />
-                    </div>
-
-                    <div className="flex space-x-2 pt-2">
-                      <button
-                        type="button"
-                        onClick={() => setIsCustomEntry(false)}
-                        className="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs transition"
-                      >
-                        Kembali
-                      </button>
-                      <button
-                        type="submit"
-                        className="flex-1 py-2.5 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-xl text-xs transition shadow-sm"
-                      >
-                        Lanjutkan
-                      </button>
-                    </div>
-                  </form>
-                )}
-
-                <div className="pt-2 text-center border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setShowGoogleSSO(false)}
-                    className="text-xs text-slate-500 hover:text-slate-800 font-semibold transition"
-                  >
-                    ← Kembali ke Formulir Biasa
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <>
-                <div className="text-center mb-6">
-                  <NurulHayahLogo size="small" className="justify-center mb-3" />
-                  <h3 className="text-xl font-black text-slate-900">
-                    {isLogin ? "Masuk ke Akun Anda" : "Pendaftaran Akun Baru"}
-                  </h3>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {isLogin ? "Salurkan kebaikan dan pantau riwayat infaq Anda" : "Bergabung bersama Lembaga Infaq Nurul Hayah"}
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={handleGoogleAuthClick}
-                  className="w-full py-3 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-2xl text-xs font-bold text-slate-700 flex items-center justify-center space-x-3 transition shadow-sm mb-5"
-                >
-                  <svg className="w-4 h-4" viewBox="0 0 24 24">
-                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                  </svg>
-                  <span>{isLogin ? "Masuk dengan Google" : "Daftar dengan Google"}</span>
-                </button>
-
-                <div className="relative flex py-2 items-center mb-5">
-                  <div className="flex-grow border-t border-slate-200"></div>
-                  <span className="flex-shrink mx-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">atau dengan email</span>
-                  <div className="flex-grow border-t border-slate-200"></div>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  {!isLogin && (
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Nama Lengkap</label>
-                      <input
-                        type="text"
-                        required
-                        placeholder="Nama Anda"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
-                      />
-                    </div>
-                  )}
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Email</label>
-                    <input
-                      type="email"
-                      required
-                      placeholder="email@domain.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Password</label>
-                    <input
-                      type="password"
-                      required
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full px-4 py-2.5 bg-white border border-slate-300 rounded-xl text-xs text-slate-800 focus:ring-2 focus:ring-[#1F5946] outline-none"
-                    />
-                  </div>
-
-                  <button
-                    type="submit"
-                    className="w-full py-3 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-2xl text-xs shadow-md transition"
-                  >
-                    {isLogin ? "Masuk Akun" : "Daftar Akun"}
-                  </button>
-                </form>
-
-                <div className="mt-5 text-center text-xs text-slate-500">
-                  {isLogin ? "Belum punya akun?" : "Sudah punya akun?"}{" "}
-                  <button
-                    onClick={() => setIsLogin(!isLogin)}
-                    className="font-bold text-[#1F5946] hover:underline"
-                  >
-                    {isLogin ? "Daftar Sekarang" : "Masuk di Sini"}
-                  </button>
-                </div>
-              </>
-            )}
-
-          </div>
-        </div>
-      );
-    }
-
     function HeroSection({ onOpenInfaq }) {
       return (
         <section id="beranda" className="relative min-h-[70vh] flex items-center justify-center bg-white text-slate-900 pt-16 pb-16 overflow-hidden border-b border-slate-100">
@@ -833,13 +475,13 @@
                 <span>Kontak Layanan</span>
               </a>
               
-              <a
-                href="#program"
+              <button
+                onClick={onOpenInfaq}
                 className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-[#1F5946] font-bold text-base rounded-2xl border-2 border-[#1F5946]/30 hover:border-[#1F5946] transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm"
               >
-                <span>Lihat Program</span>
-                <Icons.ArrowRight />
-              </a>
+                <Icons.Heart />
+                <span>Salurkan Infaq</span>
+              </button>
             </div>
           </div>
         </section>
@@ -989,6 +631,7 @@
                 src={program.imageUrl} 
                 alt={program.title}
                 className="w-full h-full object-cover" 
+                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"; }}
               />
               <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent"></div>
               <div className="absolute bottom-6 left-6 right-6 text-white">
