@@ -229,10 +229,6 @@
       const [selectedProgram, setSelectedProgram] = useState(null);
       const [infaqSuccessData, setInfaqSuccessData] = useState(null);
 
-      const [currentUser, setCurrentUser] = useState(null);
-      const [authModalOpen, setAuthModalOpen] = useState(false);
-      const [authMode, setAuthMode] = useState('login');
-
       const [isAdminAuthenticated, setIsAdminAuthenticated] = useState(false);
       const [adminUser, setAdminUser] = useState(null);
       const [adminLoginInput, setAdminLoginInput] = useState({ username: '', password: '' });
@@ -270,17 +266,6 @@
       const showToast = (msg) => {
         setToastMessage(msg);
         setTimeout(() => setToastMessage(null), 3500);
-      };
-
-      const handleUserLogin = (userData) => {
-        setCurrentUser(userData);
-        setAuthModalOpen(false);
-        showToast(`Selamat datang kembali, ${userData.name}!`);
-      };
-
-      const handleUserLogout = () => {
-        setCurrentUser(null);
-        showToast("Anda telah keluar akun.");
       };
 
       const stats = useMemo(() => {
@@ -390,9 +375,7 @@
                 mobileMenuOpen={mobileMenuOpen}
                 setMobileMenuOpen={setMobileMenuOpen}
                 setCurrentRoute={setCurrentRoute}
-                currentUser={currentUser}
-                onOpenAuth={(mode) => { setAuthMode(mode || 'login'); setAuthModalOpen(true); }}
-                onLogout={handleUserLogout}
+                onInfaqClick={() => { setSelectedProgram(null); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
               />
 
               <main className="flex-grow bg-white">
@@ -437,25 +420,14 @@
               </main>
 
               <PublicFooter settings={settings} />
-
-              {authModalOpen && (
-                <AuthModal 
-                  mode={authMode}
-                  setMode={setAuthMode}
-                  onClose={() => setAuthModalOpen(false)}
-                  onLoginSuccess={handleUserLogin}
-                  showToast={showToast}
-                />
-              )}
             </>
           )}
         </div>
       );
     }
 
-    function PublicNavbar({ mobileMenuOpen, setMobileMenuOpen, setCurrentRoute, currentUser, onOpenAuth, onLogout }) {
+    function PublicNavbar({ mobileMenuOpen, setMobileMenuOpen, setCurrentRoute, onInfaqClick }) {
       const [isScrolled, setIsScrolled] = useState(false);
-      const [userDropdownOpen, setUserDropdownOpen] = useState(false);
 
       useEffect(() => {
         const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -497,46 +469,13 @@
             </div>
 
             <div className="hidden sm:flex items-center space-x-3">
-              {currentUser ? (
-                <div className="relative">
-                  <button
-                    onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                    className="flex items-center space-x-2.5 py-1.5 px-3 rounded-full bg-slate-50 border border-slate-200 hover:bg-slate-100 transition focus:outline-none"
-                  >
-                    <img 
-                      src={currentUser.avatar} 
-                      alt={currentUser.name} 
-                      className="w-7 h-7 rounded-full object-cover border border-[#1F5946]"
-                    />
-                    <span className="text-xs font-bold text-slate-800">{currentUser.name.split(' ')[0]}</span>
-                    <svg className="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"/></svg>
-                  </button>
-
-                  {userDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50 text-xs">
-                      <div className="px-4 py-2 border-b border-slate-100">
-                        <div className="font-bold text-slate-800">{currentUser.name}</div>
-                        <div className="text-[10px] text-slate-400 truncate">{currentUser.email}</div>
-                      </div>
-                      <button
-                        onClick={() => { onLogout(); setUserDropdownOpen(false); }}
-                        className="w-full text-left px-4 py-2 text-red-600 font-semibold hover:bg-red-50 transition flex items-center space-x-2"
-                      >
-                        <Icons.LogOut />
-                        <span>Keluar Akun</span>
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <button
-                  onClick={() => onOpenAuth('login')}
-                  className="px-5 py-2.5 rounded-2xl bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-xs shadow-sm transition flex items-center space-x-2 border border-[#1F5946]"
-                >
-                  <Icons.Users />
-                  <span>Masuk / Daftar</span>
-                </button>
-              )}
+              <button
+                onClick={onInfaqClick}
+                className="px-5 py-2.5 rounded-2xl bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-xs shadow-sm transition flex items-center space-x-2 border border-[#1F5946]"
+              >
+                <Icons.Heart />
+                <span>Salurkan Infaq</span>
+              </button>
             </div>
 
             <div className="flex lg:hidden items-center space-x-2">
@@ -564,25 +503,13 @@
               ))}
               
               <div className="pt-2">
-                {currentUser ? (
-                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 flex items-center justify-between">
-                    <div className="flex items-center space-x-2.5">
-                      <img src={currentUser.avatar} alt="" className="w-8 h-8 rounded-full border border-[#1F5946]" />
-                      <div>
-                        <div className="font-bold text-xs text-slate-800">{currentUser.name}</div>
-                        <div className="text-[10px] text-slate-400">{currentUser.email}</div>
-                      </div>
-                    </div>
-                    <button onClick={onLogout} className="text-xs text-red-600 font-bold px-2 py-1 bg-red-50 rounded-lg">Keluar</button>
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => { onOpenAuth('login'); setMobileMenuOpen(false); }}
-                    className="w-full py-3 bg-[#1F5946] text-white font-bold rounded-2xl text-xs shadow-md"
-                  >
-                    Masuk / Daftar Akun
-                  </button>
-                )}
+                <button
+                  onClick={() => { onInfaqClick(); setMobileMenuOpen(false); }}
+                  className="w-full py-3 bg-[#1F5946] text-white font-bold rounded-2xl text-xs shadow-md flex items-center justify-center space-x-2"
+                >
+                  <Icons.Heart />
+                  <span>Salurkan Infaq Sekarang</span>
+                </button>
               </div>
             </div>
           )}
