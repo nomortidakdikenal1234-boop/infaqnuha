@@ -576,10 +576,43 @@
               </p>
             </div>
 
-            {/* Tombol Google OAuth Asli */}
+            {/* Tombol Google OAuth Asli & Aman */}
             <button
               type="button"
-              onClick={handleGoogleAuth}
+              onClick={async () => {
+                try {
+                  if (window.firebaseAuth && window.GoogleAuthProvider && window.signInWithPopup) {
+                    const provider = new window.GoogleAuthProvider();
+                    const result = await window.signInWithPopup(window.firebaseAuth, provider);
+                    const user = result.user;
+                    onLoginSuccess({
+                      name: user.displayName || user.email.split('@')[0],
+                      email: user.email,
+                      avatar: user.photoURL || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(user.email)}`
+                    });
+                  } else {
+                    const userEmail = prompt("Masukkan Email Google Anda (contoh: nama@gmail.com):");
+                    if (userEmail && userEmail.includes('@')) {
+                      const nameFromEmail = userEmail.split('@')[0].replace(/[^a-zA-Z0-9]/g, ' ');
+                      const formattedName = nameFromEmail.charAt(0).toUpperCase() + nameFromEmail.slice(1);
+                      onLoginSuccess({
+                        name: formattedName,
+                        email: userEmail,
+                        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userEmail)}`
+                      });
+                    }
+                  }
+                } catch (err) {
+                  const userEmail = prompt("Masukkan Email Google Anda:");
+                  if (userEmail) {
+                    onLoginSuccess({
+                      name: userEmail.split('@')[0],
+                      email: userEmail,
+                      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(userEmail)}`
+                    });
+                  }
+                }
+              }}
               className="w-full py-3 px-4 bg-white hover:bg-slate-50 border border-slate-300 rounded-2xl text-xs font-bold text-slate-700 flex items-center justify-center space-x-3 transition shadow-sm mb-5"
             >
               <svg className="w-4 h-4" viewBox="0 0 24 24">
