@@ -71,7 +71,7 @@
       orgName: "Lembaga Infaq Nurul Hayah",
       tagline: "Amanah Bersama, Sejahtera dan Berdaya",
       subTagline: "Berbagi Kebaikan, Menebar Kebermanfaatan",
-      description: "Lembaga filantropi Islam terpercaya yang berfokus pada penghimpunan dan penyaluran dana infaq secara amanah, transparan, dan profesional demi kesejahteraan serta kemandirian umat.",
+      description: "Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa di seluruh Indonesia.",
       address: "Jl. Lingkar Provinsi No.07, Sawah, Bulakelor, Ketanggungan, Brebes Regency",
       whatsapp: "+62 823-3336-2299",
       email: "infaqnuha@gmail.com",
@@ -293,25 +293,25 @@
               gallery={gallery}
               setGallery={setGallery}
               settings={settings}
-              setSettings={setSettings}
-              adminLogs={adminLogs}
-              showToast={showToast}
-            />
-          ) : (
-            <>
-              <PublicNavbar 
-                mobileMenuOpen={mobileMenuOpen}
-                setMobileMenuOpen={setMobileMenuOpen}
-                setCurrentRoute={setCurrentRoute}
-                onInfaqClick={() => { setSelectedProgram(null); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-              />
+      CheckCircle: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
+      AcademicCap: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l9-5-9-5-9 5 9 5z"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/><path strokeLinecap="round" strokeLinejoin="round" d="M12 14v6.5"/></svg>,
+      Building: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m0 0v-5a2 2 0 012-2h2a2 2 0 012 2v5m-6 0h6"/></svg>,
+      ShieldCheck: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>,
+      Target: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/></svg>,
+      BookOpen: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>,
+      LightBulb: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+    };
 
+    function App() {
+<!-- ... existing code ... md:flex-row -->
               <main className="flex-grow bg-white">
                 {currentRoute === 'home' && (
                   <>
                     <HeroSection 
                       onOpenInfaq={() => { setSelectedProgram(null); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
                     />
+                    <WhyChooseUsSection />
+                    <AboutUsSection />
                     <ProgramsSection 
                       programs={programs}
                       selectedCategory={selectedCategory}
@@ -365,6 +365,7 @@
 
       const navLinks = [
         { label: "Beranda", href: "#beranda" },
+        { label: "Tentang Kami", href: "#tentang" },
         { label: "Program Infaq", href: "#program" },
         { label: "Galeri Dokumentasi", href: "#galeri" },
         { label: "Kontak Layanan", href: "#kontak" }
@@ -447,41 +448,217 @@
 
     function HeroSection({ onOpenInfaq }) {
       return (
-        <section id="beranda" className="relative min-h-[70vh] flex items-center justify-center bg-white text-slate-900 pt-16 pb-16 overflow-hidden border-b border-slate-100">
+        <section id="beranda" className="relative min-h-[75vh] flex items-center justify-center bg-white text-slate-900 pt-20 pb-20 overflow-hidden border-b border-slate-100">
           <div className="absolute inset-0 opacity-[0.03] bg-[radial-gradient(#1F5946_1px,transparent_1px)] [background-size:20px_20px]"></div>
           <div className="absolute top-10 right-10 w-96 h-96 bg-[#B89355]/5 rounded-full blur-3xl pointer-events-none"></div>
           <div className="absolute bottom-10 left-10 w-96 h-96 bg-[#1F5946]/5 rounded-full blur-3xl pointer-events-none"></div>
 
           <div className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center z-10">
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6 leading-[1.15] text-[#1F5946]">
-              Berbagi Kebaikan,<br />
+            <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-50 text-[#1F5946] border border-emerald-200/80 font-bold text-xs uppercase tracking-widest mb-6">
+              Lembaga Infaq Nurul Hayah
+            </span>
+
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight mb-6 leading-[1.18] text-[#1F5946]">
+              Membangun Masa Depan Umat<br />
               <span className="text-[#B89355]">
-                Menebar Kebermanfaatan
+                Melalui Infaq & Pendidikan
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-10 max-w-2xl mx-auto leading-relaxed font-normal">
-              Bersama <strong className="text-[#1F5946]">Lembaga Infaq Nurul Hayah</strong>, mari wujudkan infaq yang amanah untuk membantu sesama dan memberikan manfaat bagi umat.
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 mb-10 max-w-3xl mx-auto leading-relaxed font-normal">
+              Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa di seluruh Indonesia.
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-              <a
-                href={`https://wa.me/${INITIAL_SETTINGS.whatsapp.replace(/\D/g, '')}?text=Assalamualaikum%20Lembaga%20Infaq%20Nurul%20Hayah,%20saya%20ingin%20menghubungi%20layanan.`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full sm:w-auto px-8 py-4 bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 border border-[#1F5946]"
-              >
-                <Icons.WhatsApp />
-                <span>Kontak Layanan</span>
-              </a>
-              
               <button
                 onClick={onOpenInfaq}
-                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-[#1F5946] font-bold text-base rounded-2xl border-2 border-[#1F5946]/30 hover:border-[#1F5946] transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm"
+                className="w-full sm:w-auto px-8 py-4 bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-base rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 flex items-center justify-center space-x-2 border border-[#1F5946]"
               >
                 <Icons.Heart />
-                <span>Salurkan Infaq</span>
+                <span>Salurkan Infaq Sekarang</span>
               </button>
+
+              <a
+                href="#tentang"
+                className="w-full sm:w-auto px-8 py-4 bg-white hover:bg-slate-50 text-[#1F5946] font-bold text-base rounded-2xl border-2 border-[#1F5946]/30 hover:border-[#1F5946] transition-all duration-300 flex items-center justify-center space-x-2 shadow-sm"
+              >
+                <span>Pelajari Tentang Kami</span>
+                <Icons.ArrowRight />
+              </a>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function WhyChooseUsSection() {
+      const features = [
+        {
+          icon: Icons.Building,
+          title: "Pembangunan Infrastruktur",
+          desc: "Membangun sekolah, perpustakaan, dan asrama yang layak bagi santri dan masyarakat yang membutuhkan."
+        },
+        {
+          icon: Icons.AcademicCap,
+          title: "Pendidikan Inklusif",
+          desc: "Menyediakan beasiswa, seragam, hingga fasilitas digital gratis untuk yatim & dhuafa."
+        },
+        {
+          icon: Icons.ShieldCheck,
+          title: "Amanah & Transparan",
+          desc: "Diampu oleh para ulama dengan sistem pelaporan dana yang jelas dan terpercaya."
+        }
+      ];
+
+      return (
+        <section className="py-20 bg-slate-50 border-b border-slate-200/80">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center max-w-3xl mx-auto mb-16">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#1F5946] bg-white px-3.5 py-1 rounded-full border border-slate-200 shadow-sm">
+                Keunggulan Lembaga
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 leading-snug">
+                Kenapa Berbagi Bersama Lembaga Infaq Nurul Hayah?
+              </h2>
+              <p className="text-slate-600 text-sm mt-3">
+                Komitmen kami dalam menjaga amanah dan memberikan dampak nyata yang berkelanjutan bagi kemajuan umat.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-8">
+              {features.map((item, idx) => {
+                const IconComp = item.icon;
+                return (
+                  <div key={idx} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start group">
+                    <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-[#1F5946] border border-emerald-100 flex items-center justify-center mb-6 group-hover:bg-[#1F5946] group-hover:text-white transition-colors duration-300">
+                      <IconComp />
+                    </div>
+                    <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-[#1F5946] transition">
+                      {item.title}
+                    </h3>
+                    <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                      {item.desc}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function AboutUsSection() {
+      const missions = [
+        {
+          title: "Akses Pendidikan Layak",
+          desc: "Menjamin anak-anak yatim dan dhuafa mendapatkan fasilitas belajar, buku, dan seragam gratis.",
+          icon: Icons.BookOpen
+        },
+        {
+          title: "Pengembangan Fasilitas",
+          desc: "Membangun dan merenovasi sekolah, asrama, serta fasilitas pendukung pembelajaran.",
+          icon: Icons.Building
+        },
+        {
+          title: "Inovasi & Keterampilan",
+          desc: "Mengembangkan akses teknologi digital dan pelatihan kerja bagi generasi muda.",
+          icon: Icons.LightBulb
+        },
+        {
+          title: "Pengelolaan Akuntabel",
+          desc: "Menjaga kepercayaan donatur melalui tata kelola dana yang transparan dan profesional.",
+          icon: Icons.ShieldCheck
+        }
+      ];
+
+      return (
+        <section id="tentang" className="py-24 bg-white border-b border-slate-100">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
+            {/* Profil Lembaga & Bimbingan Pengasuh */}
+            <div className="grid lg:grid-cols-12 gap-12 items-center">
+              <div className="lg:col-span-7 space-y-6">
+                <span className="text-xs font-bold uppercase tracking-widest text-[#1F5946] bg-emerald-50 px-3.5 py-1 rounded-full border border-emerald-100">
+                  Tentang Kami
+                </span>
+                <h2 className="text-3xl sm:text-4xl font-black text-slate-900 leading-tight">
+                  Penggerak Sosial Skala Nasional Berlandaskan Nilai-Nilai Islam
+                </h2>
+                
+                <div className="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed">
+                  <p className="p-4 bg-emerald-50/60 border-l-4 border-[#1F5946] rounded-r-2xl font-medium text-slate-800">
+                    Lembaga Infaq Nurul Hayah berdiri atas arahan dan bimbingan pengasuh Pondok Pesantren Nurul Hayah, <strong className="text-[#1F5946]">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</strong>
+                  </p>
+                  <p>
+                    Kami hadir sebagai penggerak sosial skala nasional yang berfokus pada penghimpunan dan penyaluran infaq untuk pembangunan infrastruktur pendidikan Islam serta pemberdayaan kesejahteraan umat.
+                  </p>
+                  <p className="italic font-semibold text-slate-700">
+                    "Kami percaya bahwa pendidikan adalah kunci utama untuk mencetak generasi muslim yang mandiri, berdaya saing, dan berakhlak mulia."
+                  </p>
+                </div>
+              </div>
+
+              <div className="lg:col-span-5 bg-gradient-to-br from-[#1F5946] to-[#174435] text-white p-8 sm:p-10 rounded-3xl shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-48 h-48 bg-[#B89355]/20 rounded-full blur-2xl pointer-events-none"></div>
+                
+                <div className="relative z-10 space-y-6">
+                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
+                    <Icons.Target />
+                  </div>
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-[#B89355] mb-1">Visi Kami</h3>
+                    <p className="text-lg sm:text-xl font-bold leading-snug">
+                      Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.
+                    </p>
+                  </div>
+
+                  <div className="pt-6 border-t border-white/15 space-y-3">
+                    <div className="text-xs font-bold uppercase tracking-wider text-[#B89355]">Nilai Utama Kami</div>
+                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
+                      <div className="text-xs text-emerald-200 font-semibold mb-1">Slogan Resmi:</div>
+                      <div className="font-extrabold text-sm sm:text-base text-white">Amanah Bersama, Sejahtera, dan Berdaya</div>
+                    </div>
+                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
+                      <div className="text-xs text-emerald-200 font-semibold mb-1">Motto Gerakan:</div>
+                      <div className="font-medium text-xs sm:text-sm text-slate-100 italic leading-relaxed">
+                        "Mewujudkan kesejahteraan merata, mencetak generasi muslim mandiri, dan membangun masa depan berakhlak mulia."
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Misi & Fokus Gerakan */}
+            <div className="space-y-8">
+              <div className="text-center max-w-2xl mx-auto">
+                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
+                  Misi & Fokus Gerakan
+                </h3>
+                <p className="text-slate-500 text-xs sm:text-sm mt-2">
+                  Langkah taktis dan terencana Lembaga Infaq Nurul Hayah dalam menyalurkan amanah donatur.
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                {missions.map((m, idx) => {
+                  const IconComponent = m.icon;
+                  return (
+                    <div key={idx} className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
+                      <div>
+                        <div className="w-10 h-10 rounded-xl bg-white text-[#1F5946] border border-slate-200 flex items-center justify-center font-bold mb-4 shadow-sm">
+                          <IconComponent />
+                        </div>
+                        <h4 className="font-bold text-slate-900 text-base mb-2">{m.title}</h4>
+                        <p className="text-slate-600 text-xs leading-relaxed">{m.desc}</p>
+                      </div>
+                      <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-bold text-[#B89355]">
+                        Pilar 0{idx + 1}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           </div>
         </section>
