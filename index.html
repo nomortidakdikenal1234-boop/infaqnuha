@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="scroll-smooth">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,30 +17,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Firebase Auth Module -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-    const firebaseConfig = typeof __firebase_config !== 'undefined' 
-      ? JSON.parse(__firebase_config) 
-      : {
-          apiKey: "AIzaSyDemoKeyForGoogleAuthInfaqNuha",
-          authDomain: "infaq-nurul-hayah.firebaseapp.com",
-          projectId: "infaq-nurul-hayah",
-        };
-
-    try {
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      window.firebaseAuth = auth;
-      window.GoogleAuthProvider = GoogleAuthProvider;
-      window.signInWithPopup = signInWithPopup;
-    } catch (e) {
-      console.log("Firebase Auth init:", e);
-    }
-  </script>
-
   <!-- React 18 & ReactDOM 18 & Babel Standalone via CDN -->
   <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
@@ -56,6 +32,21 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: scale(0.98); }
       to { opacity: 1; transform: scale(1); }
+    }
+    /* Custom scrollbar for admin tables & sidebars */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
     }
   </style>
 </head>
@@ -81,10 +72,91 @@
       logoUrl: "https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg"
     };
 
-    // Program dan Galeri dikosongkan sesuai instruksi
-    const INITIAL_PROGRAMS = [];
-    const INITIAL_DONATIONS = [];
-    const INITIAL_GALLERY = [];
+    const INITIAL_PROGRAMS = [
+      {
+        id: "PROG-001",
+        title: "Beasiswa Santri Tahfizh & Yatim Dhuafa",
+        category: "Pendidikan",
+        description: "Bantuan perlengkapan sekolah, kitab, serta fasilitas belajar bagi santri hafidz Al-Qur'an dan anak-anak yatim.",
+        fullContent: "Program Beasiswa Santri Tahfizh dan Yatim Dhuafa berfokus pada penyediaan fasilitas belajar gratis, kebutuhan perlengkapan sekolah, kitab-kitab pembelajaran, hingga dukungan living cost bulanan. Melalui infaq Anda, generasi muda muslim di pelosok dapat menuntut ilmu agama dan umum secara berkelanjutan tanpa terkendala beban finansial.",
+        targetAmount: 75000000,
+        currentAmount: 32500000,
+        beneficiaries: 120,
+        imageUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80",
+        status: "Aktif"
+      },
+      {
+        id: "PROG-002",
+        title: "Pembangunan & Renovasi Ruang Kelas Santri",
+        category: "Wakaf & Pembangunan",
+        description: "Pembangunan gedung sarana belajar dan asrama layak santri di lingkungan Ponpes Nurul Hayah.",
+        fullContent: "Menyediakan sarana fisik tempat belajar dan tinggal yang aman dan nyaman sangat penting bagi proses thalabul 'ilmi. Penyaluran dana difokuskan untuk renovasi atap, pengecatan, penyediaan bangku/meja belajar, serta pembuatan sanitasi yang higienis.",
+        targetAmount: 150000000,
+        currentAmount: 89000000,
+        beneficiaries: 350,
+        imageUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
+        status: "Aktif"
+      },
+      {
+        id: "PROG-003",
+        title: "Paket Sembako & Kesejahteraan Dhuafa Pelosok",
+        category: "Paket Sembako",
+        description: "Penyaluran bantuan beras, minyak, dan kebutuhan pokok rutin untuk keluarga prasejahtera.",
+        fullContent: "Program ketahanan pangan keluarga dhuafa memberikan paket sembako harian berisi beras, minyak goreng, gula, dan bahan pangan bernutrisi tinggi. Penyaluran diarahkan langsung ke desa-desa binaan secara tepat sasaran.",
+        targetAmount: 40000000,
+        currentAmount: 18500000,
+        beneficiaries: 200,
+        imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80",
+        status: "Aktif"
+      }
+    ];
+
+    const INITIAL_DONATIONS = [
+      {
+        id: "TRX-1024",
+        donorName: "Hamba Allah",
+        amount: 250000,
+        programTitle: "Beasiswa Santri Tahfizh & Yatim Dhuafa",
+        paymentMethod: "WhatsApp Transfer",
+        status: "Terverifikasi",
+        date: "2026-08-30 14:20",
+        notes: "Semoga berkah dan bermanfaat bagi para santri."
+      },
+      {
+        id: "TRX-1025",
+        donorName: "Ahmad Fauzi",
+        amount: 500000,
+        programTitle: "Pembangunan & Renovasi Ruang Kelas Santri",
+        paymentMethod: "WhatsApp Transfer",
+        status: "Terverifikasi",
+        date: "2026-08-31 09:15",
+        notes: "Niat jariyah untuk almarhumah ibu."
+      }
+    ];
+
+    const INITIAL_GALLERY = [
+      {
+        id: "GAL-1",
+        title: "Penyaluran Beasiswa Kitab & Alat Tulis Santri",
+        category: "Pendidikan",
+        description: "Penyerahan dukungan perlengkapan belajar secara simbolis bagi santri penghafal Al-Qur'an.",
+        imageUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "GAL-2",
+        title: "Kegiatan Belajar Mengajar & Kajian Santri",
+        category: "Pendidikan",
+        description: "Suasana para santri tekun mengikuti pembelajaran kitab kuning di asrama.",
+        imageUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80"
+      },
+      {
+        id: "GAL-3",
+        title: "Penyaluran Paket Pangan Masyarakat Less Fortunate",
+        category: "Santunan",
+        description: "Aksi tim amil membawa dan membagikan sembako ke rumah warga prasejahtera.",
+        imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"
+      }
+    ];
 
     const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
     const formatNumber = (num) => new Intl.NumberFormat('id-ID').format(num || 0);
@@ -130,6 +202,13 @@
       X: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>,
       Lock: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>,
       WhatsApp: () => <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>,
+      Instagram: () => <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>,
+      TikTok: () => <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 3 15.68a6.34 6.34 0 0 0 10.86 4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.04z"/></svg>,
+      YouTube: () => <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>,
+      Facebook: () => <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>,
+      XTwitter: () => <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>,
+      ChevronLeft: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7"/></svg>,
+      ChevronRight: () => <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/></svg>,
       Layers: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>,
       Chart: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>,
       Plus: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>,
@@ -313,6 +392,7 @@
                       selectedCategory={selectedCategory}
                       setSelectedCategory={setSelectedCategory}
                       onSelectProgram={(prog) => { setSelectedProgram(prog); setCurrentRoute('program-detail'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
+                      onInfaqNow={(prog) => { setSelectedProgram(prog); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
                     />
                     <GallerySection gallery={gallery} galleryCategory={galleryCategory} setGalleryCategory={setGalleryCategory} />
                     <ContactSection settings={settings} />
@@ -422,40 +502,140 @@
     }
 
     function HeroSection() {
-      return (
-        <section id="beranda" className="relative flex items-center justify-center bg-white text-slate-900 pt-20 pb-20 border-b border-slate-100">
-          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-6 leading-tight text-[#1F5946]">
-              Membangun Masa Depan Umat<br />
-              <span className="text-[#B89355]">
-                Melalui Infaq & Pendidikan
-              </span>
-            </h1>
+      const slides = [
+        {
+          title: "Membangun Masa Depan Umat Melalui Infaq & Pendidikan",
+          subtitle: "Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa.",
+          image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80"
+        },
+        {
+          title: "Amanah Bersama, Sejahtera & Berdaya",
+          subtitle: "Menyalurkan kepedulian Anda tepat sasaran kepada para santri, anak yatim, dan keluarga prasejahtera di seluruh penjuru pelosok.",
+          image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1600&q=80"
+        },
+        {
+          title: "Pemberdayaan Santri & Fasilitas Pendidikan Islam",
+          subtitle: "Mari bergotong-royong membangun sarana prasarana belajar yang layak untuk generasi penerus bangsa yang berakhlak mulia.",
+          image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80"
+        }
+      ];
 
-            <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
-              Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa di seluruh Indonesia.
-            </p>
+      const [currentSlide, setCurrentSlide] = useState(0);
+
+      useEffect(() => {
+        const timer = setInterval(() => {
+          setCurrentSlide((prev) => (prev + 1) % slides.length);
+        }, 6000);
+        return () => clearInterval(timer);
+      }, [slides.length]);
+
+      const prevSlide = () => setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
+      const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
+
+      return (
+        <section id="beranda" className="relative bg-slate-900 text-white overflow-hidden">
+          <div className="relative min-h-[520px] sm:min-h-[580px] flex items-center justify-center">
+            {slides.map((slide, idx) => (
+              <div
+                key={idx}
+                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
+                  idx === currentSlide ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
+                }`}
+              >
+                <div className="absolute inset-0 bg-slate-950/75 z-10"></div>
+                <img
+                  src={slide.image}
+                  alt={slide.title}
+                  className="w-full h-full object-cover object-center transform scale-105"
+                />
+
+                <div className="absolute inset-0 z-20 flex items-center justify-center">
+                  <div className="max-w-4xl mx-auto px-6 sm:px-8 text-center space-y-6">
+                    <span className="inline-block text-xs font-bold uppercase tracking-widest text-[#B89355] bg-[#1F5946]/90 border border-[#B89355]/40 px-4 py-1.5 rounded-full shadow-lg">
+                      Lembaga Infaq Nurul Hayah
+                    </span>
+
+                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white drop-shadow-md">
+                      {slide.title}
+                    </h1>
+
+                    <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed font-normal drop-shadow">
+                      {slide.subtitle}
+                    </p>
+
+                    <div className="pt-2 flex justify-center gap-4">
+                      <a
+                        href="#program"
+                        className="px-6 py-3 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-2xl text-xs sm:text-sm shadow-xl border border-[#B89355]/30 transition transform hover:-translate-y-0.5"
+                      >
+                        Lihat Program Infaq
+                      </a>
+                      <a
+                        href="#kontak"
+                        className="px-6 py-3 bg-white/10 hover:bg-white/20 backdrop-blur-md text-white font-bold rounded-2xl text-xs sm:text-sm border border-white/20 transition"
+                      >
+                        Hubungi Layanan
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+
+            <button
+              onClick={prevSlide}
+              aria-label="Slide Sebelumnya"
+              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/60 hover:bg-[#1F5946] text-white transition backdrop-blur-md border border-white/10"
+            >
+              <Icons.ChevronLeft />
+            </button>
+            <button
+              onClick={nextSlide}
+              aria-label="Slide Selanjutnya"
+              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/60 hover:bg-[#1F5946] text-white transition backdrop-blur-md border border-white/10"
+            >
+              <Icons.ChevronRight />
+            </button>
+
+            <div className="absolute bottom-6 left-0 right-0 z-30 flex justify-center space-x-2">
+              {slides.map((_, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setCurrentSlide(idx)}
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
+                    idx === currentSlide ? 'w-8 bg-[#B89355]' : 'w-2.5 bg-white/40 hover:bg-white/70'
+                  }`}
+                  aria-label={`Ke slide ${idx + 1}`}
+                />
+              ))}
+            </div>
           </div>
+
+          <div className="w-full h-3 bg-gradient-to-r from-[#1F5946] via-[#B89355] to-[#1F5946]"></div>
         </section>
       );
     }
 
     function AboutUsSection() {
       return (
-        <section id="tentang" className="py-16 bg-white border-b border-slate-100">
+        <section id="tentang" className="py-20 bg-white border-b-8 border-slate-100">
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-            <div>
-              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1F5946] mb-4">
+            <div className="text-center max-w-2xl mx-auto mb-8">
+              <span className="text-xs font-bold uppercase tracking-widest text-[#1F5946] bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-100">
+                Profil & Legalitas
+              </span>
+              <h2 className="text-3xl sm:text-4xl font-black text-[#1F5946] mt-3">
                 Tentang Lembaga Infaq Nurul Hayah
               </h2>
-              <div className="space-y-4 text-slate-700 leading-relaxed text-sm sm:text-base">
-                <p>
-                  Lembaga Infaq Nurul Hayah berdiri atas arahan dan bimbingan pengasuh Pondok Pesantren Nurul Hayah, <strong className="text-slate-900">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</strong> Kami hadir sebagai penggerak sosial skala nasional yang berfokus pada penghimpunan dan penyaluran infaq untuk pembangunan infrastruktur pendidikan Islam serta pemberdayaan kesejahteraan umat.
-                </p>
-                <p className="italic text-slate-600">
-                  "Kami percaya bahwa pendidikan adalah kunci utama untuk mencetak generasi muslim yang mandiri, berdaya saing, dan berakhlak mulia."
-                </p>
-              </div>
+            </div>
+
+            <div className="space-y-4 text-slate-700 leading-relaxed text-sm sm:text-base">
+              <p>
+                Lembaga Infaq Nurul Hayah berdiri atas arahan dan bimbingan pengasuh Pondok Pesantren Nurul Hayah, <strong className="text-slate-900">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</strong> Kami hadir sebagai penggerak sosial skala nasional yang berfokus pada penghimpunan dan penyaluran infaq untuk pembangunan infrastruktur pendidikan Islam serta pemberdayaan kesejahteraan umat.
+              </p>
+              <p className="italic text-slate-600 bg-emerald-50/60 p-4 rounded-2xl border-l-4 border-[#1F5946]">
+                "Kami percaya bahwa pendidikan adalah kunci utama untuk mencetak generasi muslim yang mandiri, berdaya saing, dan berakhlak mulia."
+              </p>
             </div>
 
             <div className="space-y-3 pt-6 border-t border-slate-100">
@@ -487,7 +667,7 @@
       );
     }
 
-    function ProgramsSection({ programs, selectedCategory, setSelectedCategory, onSelectProgram }) {
+    function ProgramsSection({ programs, selectedCategory, setSelectedCategory, onSelectProgram, onInfaqNow }) {
       const categories = ["Semua", "Pendidikan", "Santunan", "Wakaf & Pembangunan", "Paket Sembako", "Ramadhan"];
 
       const filteredPrograms = useMemo(() => {
@@ -586,12 +766,18 @@
                             </div>
                           </div>
 
-                          <div className="pt-2 border-t border-slate-100">
+                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
                             <button
                               onClick={() => onSelectProgram(prog)}
-                              className="w-full py-2.5 text-xs font-bold text-[#1F5946] bg-emerald-50 hover:bg-emerald-100 rounded-xl transition text-center"
+                              className="py-2.5 text-xs font-bold text-[#1F5946] bg-emerald-50 hover:bg-emerald-100 rounded-xl transition text-center"
                             >
-                              Lihat Detail Program
+                              Detail Program
+                            </button>
+                            <button
+                              onClick={() => onInfaqNow(prog)}
+                              className="py-2.5 text-xs font-bold text-white bg-[#1F5946] hover:bg-[#174435] rounded-xl shadow-sm transition text-center"
+                            >
+                              Infaq Sekarang
                             </button>
                           </div>
                         </div>
@@ -1096,53 +1282,124 @@
     }
 
     function PublicFooter({ settings }) {
+      const cleanWA = settings.whatsapp ? settings.whatsapp.replace(/\D/g, '') : '6282333362299';
+
       return (
-        <footer className="bg-white border-t border-slate-200 pt-16 pb-10 text-slate-600">
+        <footer className="bg-white border-t border-slate-200 pt-16 pb-8 text-slate-600">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10 pb-12 border-b border-slate-100">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-slate-200">
+              
               <div className="space-y-4">
                 <NurulHayahLogo />
-                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed max-w-sm pt-2">
-                  Lembaga pengelola infaq profesional dan amanah yang berfokus pada penghimpunan dan penyaluran dana untuk bidang sosial, pendidikan Islam, dan kemanusiaan.
+                <p className="text-xs sm:text-sm text-slate-500 leading-relaxed pt-2">
+                  Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa di seluruh Indonesia.
                 </p>
               </div>
 
-              <div>
-                <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-4">Navigasi Utama</h4>
-                <ul className="space-y-2.5 text-xs text-slate-600 font-semibold">
+              <div className="space-y-4">
+                <h4 className="font-bold text-slate-900 text-base">Alamat</h4>
+                <div className="space-y-3 text-xs text-slate-600">
+                  <div className="flex items-start space-x-3">
+                    <span className="text-[#B89355] mt-0.5 flex-shrink-0"><Icons.MapPin /></span>
+                    <span className="leading-relaxed">{settings.address}</span>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-[#B89355] flex-shrink-0"><Icons.Mail /></span>
+                    <a href={`mailto:${settings.email}`} className="hover:text-[#1F5946] hover:underline truncate font-medium">
+                      {settings.email}
+                    </a>
+                  </div>
+                  <div className="flex items-center space-x-3">
+                    <span className="text-[#B89355] flex-shrink-0"><Icons.Phone /></span>
+                    <a href={`https://wa.me/${cleanWA}`} target="_blank" rel="noopener noreferrer" className="hover:text-[#1F5946] hover:underline font-bold text-slate-800">
+                      {settings.whatsapp}
+                    </a>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h4 className="font-bold text-slate-900 text-base">Selengkapnya</h4>
+                <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
                   <li><a href="#beranda" className="hover:text-[#1F5946] transition">Beranda</a></li>
                   <li><a href="#tentang" className="hover:text-[#1F5946] transition">Tentang Kami</a></li>
                   <li><a href="#program" className="hover:text-[#1F5946] transition">Program Infaq</a></li>
                   <li><a href="#galeri" className="hover:text-[#1F5946] transition">Galeri Kegiatan</a></li>
                   <li><a href="#kontak" className="hover:text-[#1F5946] transition">Kontak Layanan</a></li>
+                  <li><a href="#INFAQNUHA" className="hover:text-[#1F5946] transition">Laman Akses Amil</a></li>
                 </ul>
               </div>
 
-              <div>
-                <h4 className="font-bold text-slate-900 text-sm uppercase tracking-wider mb-4">Media Sosial & Informasi</h4>
-                <ul className="space-y-2.5 text-xs text-slate-600 font-medium">
-                  <li>
-                    TikTok: <a href={`https://www.tiktok.com/search?q=${encodeURIComponent(settings.tiktok)}`} target="_blank" rel="noopener noreferrer" className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.tiktok}</a>
-                  </li>
-                  <li>
-                    Instagram: <a href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.instagram}</a>
-                  </li>
-                  <li>
-                    Facebook: <a href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.facebook}</a>
-                  </li>
-                  <li>
-                    Email: <a href={`mailto:${settings.email}`} className="font-bold text-slate-800 hover:text-[#1F5946] hover:underline">{settings.email}</a>
-                  </li>
-                  <li>
-                    WhatsApp: <a href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`} target="_blank" rel="noopener noreferrer" className="font-bold text-[#1F5946] hover:underline">{settings.whatsapp}</a>
-                  </li>
-                </ul>
+              <div className="space-y-4">
+                <h4 className="font-bold text-slate-900 text-base">Media Sosial</h4>
+                <div className="grid grid-cols-3 gap-3 w-max">
+                  <a
+                    href="https://www.instagram.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Instagram Lembaga Infaq Nurul Hayah"
+                    className="w-12 h-12 rounded-xl bg-[#E4405F] hover:bg-[#d62e4c] text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200"
+                  >
+                    <Icons.Instagram />
+                  </a>
+
+                  <a
+                    href={`https://www.tiktok.com/search?q=${encodeURIComponent(settings.tiktok)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="TikTok Lembaga Infaq Nurul Hayah"
+                    className="w-12 h-12 rounded-xl bg-[#010101] hover:bg-black text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200"
+                  >
+                    <Icons.TikTok />
+                  </a>
+
+                  <a
+                    href="https://www.youtube.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="YouTube Lembaga Infaq Nurul Hayah"
+                    className="w-12 h-12 rounded-xl bg-[#FF0000] hover:bg-[#e60000] text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200"
+                  >
+                    <Icons.YouTube />
+                  </a>
+
+                  <a
+                    href="https://www.facebook.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Facebook Lembaga Infaq Nurul Hayah"
+                    className="w-12 h-12 rounded-xl bg-[#1877F2] hover:bg-[#0d65d9] text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200"
+                  >
+                    <Icons.Facebook />
+                  </a>
+
+                  <a
+                    href="https://x.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="X Twitter Lembaga Infaq Nurul Hayah"
+                    className="w-12 h-12 rounded-xl bg-[#14171A] hover:bg-black text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200"
+                  >
+                    <Icons.XTwitter />
+                  </a>
+
+                  <a
+                    href={`https://wa.me/${cleanWA}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="WhatsApp Layanan Nurul Hayah"
+                    className="w-12 h-12 rounded-xl bg-[#25D366] hover:bg-[#1fbe5a] text-white flex items-center justify-center shadow-sm hover:scale-105 transition-all duration-200"
+                  >
+                    <Icons.WhatsApp />
+                  </a>
+                </div>
               </div>
+
             </div>
 
-            <div className="pt-8 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 gap-3 font-medium">
-              <p>© 2026 Lembaga Infaq Nurul Hayah. All Rights Reserved.</p>
-              <p>Amanah Bersama, Sejahtera dan Berdaya</p>
+            <div className="pt-8 text-center text-xs text-slate-500 font-medium space-y-1">
+              <p>Copyright © 2026 Lembaga Infaq Nurul Hayah. All Rights Reserved.</p>
+              <p className="text-[11px] text-slate-400">Amanah Bersama, Sejahtera dan Berdaya</p>
             </div>
           </div>
         </footer>
