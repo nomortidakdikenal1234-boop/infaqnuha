@@ -312,17 +312,14 @@
               <main className="flex-grow bg-white">
                 {currentRoute === 'home' && (
                   <>
-                    <HeroSection 
-                      onOpenInfaq={() => { setSelectedProgram(null); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                    />
-                    <WhyChooseUsSection />
+                    {}
+                    <HeroSection />
                     <AboutUsSection />
                     <ProgramsSection 
                       programs={programs}
                       selectedCategory={selectedCategory}
                       setSelectedCategory={setSelectedCategory}
                       onSelectProgram={(prog) => { setSelectedProgram(prog); setCurrentRoute('program-detail'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
-                      onInfaqNow={(prog) => { setSelectedProgram(prog); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
                     />
                     <GallerySection gallery={gallery} galleryCategory={galleryCategory} setGalleryCategory={setGalleryCategory} />
                     <ContactSection settings={settings} />
@@ -522,31 +519,105 @@
               <span className="text-xs font-bold uppercase tracking-widest text-[#1F5946] bg-white px-3.5 py-1 rounded-full border border-slate-200 shadow-sm">
                 Keunggulan Lembaga
               </span>
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900 mt-3 leading-snug">
-                Kenapa Berbagi Bersama Lembaga Infaq Nurul Hayah?
-              </h2>
-              <p className="text-slate-600 text-sm mt-3">
-                Komitmen kami dalam menjaga amanah dan memberikan dampak nyata yang berkelanjutan bagi kemajuan umat.
-              </p>
+    function PublicNavbar({ mobileMenuOpen, setMobileMenuOpen, setCurrentRoute }) {
+      const [isScrolled, setIsScrolled] = useState(false);
+
+      useEffect(() => {
+        const handleScroll = () => setIsScrolled(window.scrollY > 20);
+        window.addEventListener('scroll', handleScroll);
+        return () => window.removeEventListener('scroll', handleScroll);
+      }, []);
+
+      const navLinks = [
+        { label: "Beranda", href: "#beranda" },
+        { label: "Tentang Kami", href: "#tentang" },
+        { label: "Program Infaq", href: "#program" },
+        { label: "Galeri Dokumentasi", href: "#galeri" },
+        { label: "Kontak Layanan", href: "#kontak" }
+      ];
+
+      return (
+        <nav className={`sticky top-0 z-50 transition-all duration-300 ${
+          isScrolled ? 'bg-white/95 backdrop-blur-md shadow-sm py-3 border-b border-slate-100' : 'bg-white py-4 border-b border-slate-100/70'
+        }`}>
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+            <button 
+              onClick={() => { setCurrentRoute('home'); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+              className="focus:outline-none"
+            >
+              <NurulHayahLogo />
+            </button>
+
+            <div className="hidden lg:flex items-center space-x-7 font-medium text-sm text-slate-700">
+              {navLinks.map((link, idx) => (
+                <a
+                  key={idx}
+                  href={link.href}
+                  onClick={() => setCurrentRoute('home')}
+                  className="hover:text-[#1F5946] transition-colors py-1 relative group font-semibold"
+                >
+                  {link.label}
+                  <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-[#B89355] transition-all duration-300 group-hover:w-full"></span>
+                </a>
+              ))}
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8">
-              {features.map((item, idx) => {
-                const IconComp = item.icon;
-                return (
-                  <div key={idx} className="bg-white rounded-3xl p-8 border border-slate-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col items-start group">
-                    <div className="w-14 h-14 rounded-2xl bg-emerald-50 text-[#1F5946] border border-emerald-100 flex items-center justify-center mb-6 group-hover:bg-[#1F5946] group-hover:text-white transition-colors duration-300">
-                      <IconComp />
-                    </div>
-                    <h3 className="text-lg font-bold text-slate-900 mb-3 group-hover:text-[#1F5946] transition">
-                      {item.title}
-                    </h3>
-                    <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
-                      {item.desc}
-                    </p>
-                  </div>
-                );
-              })}
+            <div className="flex lg:hidden items-center space-x-2">
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className="p-2 text-slate-700 focus:outline-none rounded-lg hover:bg-slate-50"
+                aria-label="Menu"
+              >
+                {mobileMenuOpen ? <Icons.X /> : <Icons.Menu />}
+              </button>
+            </div>
+          </div>
+
+          {mobileMenuOpen && (
+            <div className="lg:hidden bg-white border-b border-slate-200 px-6 py-5 space-y-3 shadow-xl">
+              {navLinks.map((link, idx) => (
+                <a
+                  key={idx}
+                  href={link.href}
+                  onClick={() => { setCurrentRoute('home'); setMobileMenuOpen(false); }}
+                  className="block font-semibold text-slate-700 hover:text-[#1F5946] py-1 text-base border-b border-slate-50"
+                >
+                  {link.label}
+                </a>
+              ))}
+            </div>
+          )}
+        </nav>
+      );
+    }
+
+    function HeroSection() {
+      return (
+        <section id="beranda" className="relative flex items-center justify-center bg-white text-slate-900 pt-16 pb-16 border-b border-slate-100">
+          <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <span className="inline-block px-4 py-1.5 rounded-full bg-emerald-50 text-[#1F5946] border border-emerald-200/80 font-bold text-xs uppercase tracking-widest mb-6">
+              Lembaga Infaq Nurul Hayah
+            </span>
+
+            <h1 className="text-3xl sm:text-5xl font-black tracking-tight mb-6 leading-tight text-[#1F5946]">
+              Membangun Masa Depan Umat<br />
+              <span className="text-[#B89355]">
+                Melalui Infaq & Pendidikan
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg text-slate-600 mb-8 max-w-2xl mx-auto leading-relaxed">
+              Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa di seluruh Indonesia.
+            </p>
+
+            <div className="flex justify-center items-center">
+              <a
+                href="#tentang"
+                className="px-8 py-3.5 bg-[#1F5946] hover:bg-[#174435] text-white font-bold text-sm rounded-xl transition-all shadow-sm flex items-center space-x-2"
+              >
+                <span>Pelajari Tentang Kami</span>
+                <Icons.ArrowRight />
+              </a>
             </div>
           </div>
         </section>
@@ -554,121 +625,53 @@
     }
 
     function AboutUsSection() {
-      const missions = [
-        {
-          title: "Akses Pendidikan Layak",
-          desc: "Menjamin anak-anak yatim dan dhuafa mendapatkan fasilitas belajar, buku, dan seragam gratis.",
-          icon: Icons.BookOpen
-        },
-        {
-          title: "Pengembangan Fasilitas",
-          desc: "Membangun dan merenovasi sekolah, asrama, serta fasilitas pendukung pembelajaran.",
-          icon: Icons.Building
-        },
-        {
-          title: "Inovasi & Keterampilan",
-          desc: "Mengembangkan akses teknologi digital dan pelatihan kerja bagi generasi muda.",
-          icon: Icons.LightBulb
-        },
-        {
-          title: "Pengelolaan Akuntabel",
-          desc: "Menjaga kepercayaan donatur melalui tata kelola dana yang transparan dan profesional.",
-          icon: Icons.ShieldCheck
-        }
-      ];
-
       return (
-        <section id="tentang" className="py-24 bg-white border-b border-slate-100">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-            <div className="grid lg:grid-cols-12 gap-12 items-center">
-              <div className="lg:col-span-7 space-y-6">
-                <span className="text-xs font-bold uppercase tracking-widest text-[#1F5946] bg-emerald-50 px-3.5 py-1 rounded-full border border-emerald-100">
-                  Tentang Kami
-                </span>
-                <h2 className="text-3xl sm:text-4xl font-black text-slate-900 leading-tight">
-                  Penggerak Sosial Skala Nasional Berlandaskan Nilai-Nilai Islam
-                </h2>
-                
-                <div className="space-y-4 text-slate-600 text-sm sm:text-base leading-relaxed">
-                  <p className="p-4 bg-emerald-50/60 border-l-4 border-[#1F5946] rounded-r-2xl font-medium text-slate-800">
-                    Lembaga Infaq Nurul Hayah berdiri atas arahan dan bimbingan pengasuh Pondok Pesantren Nurul Hayah, <strong className="text-[#1F5946]">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</strong>
-                  </p>
-                  <p>
-                    Kami hadir sebagai penggerak sosial skala nasional yang berfokus pada penghimpunan dan penyaluran infaq untuk pembangunan infrastruktur pendidikan Islam serta pemberdayaan kesejahteraan umat.
-                  </p>
-                  <p className="italic font-semibold text-slate-700">
-                    "Kami percaya bahwa pendidikan adalah kunci utama untuk mencetak generasi muslim yang mandiri, berdaya saing, dan berakhlak mulia."
-                  </p>
-                </div>
-              </div>
-
-              <div className="lg:col-span-5 bg-gradient-to-br from-[#1F5946] to-[#174435] text-white p-8 sm:p-10 rounded-3xl shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-48 h-48 bg-[#B89355]/20 rounded-full blur-2xl pointer-events-none"></div>
-                
-                <div className="relative z-10 space-y-6">
-                  <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20">
-                    <Icons.Target />
-                  </div>
-                  <div>
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-[#B89355] mb-1">Visi Kami</h3>
-                    <p className="text-lg sm:text-xl font-bold leading-snug">
-                      Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.
-                    </p>
-                  </div>
-
-                  <div className="pt-6 border-t border-white/15 space-y-3">
-                    <div className="text-xs font-bold uppercase tracking-wider text-[#B89355]">Nilai Utama Kami</div>
-                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
-                      <div className="text-xs text-emerald-200 font-semibold mb-1">Slogan Resmi:</div>
-                      <div className="font-extrabold text-sm sm:text-base text-white">Amanah Bersama, Sejahtera, dan Berdaya</div>
-                    </div>
-                    <div className="bg-white/10 p-4 rounded-2xl border border-white/10">
-                      <div className="text-xs text-emerald-200 font-semibold mb-1">Motto Gerakan:</div>
-                      <div className="font-medium text-xs sm:text-sm text-slate-100 italic leading-relaxed">
-                        "Mewujudkan kesejahteraan merata, mencetak generasi muslim mandiri, dan membangun masa depan berakhlak mulia."
-                      </div>
-                    </div>
-                  </div>
-                </div>
+        <section id="tentang" className="py-16 bg-white border-b border-slate-100">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+            <div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold text-[#1F5946] mb-4">
+                Tentang Lembaga Infaq Nurul Hayah
+              </h2>
+              <div className="space-y-4 text-slate-700 leading-relaxed text-sm sm:text-base">
+                <p>
+                  Lembaga Infaq Nurul Hayah berdiri atas arahan dan bimbingan pengasuh Pondok Pesantren Nurul Hayah, <strong className="text-slate-900">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</strong> Kami hadir sebagai penggerak sosial skala nasional yang berfokus pada penghimpunan dan penyaluran infaq untuk pembangunan infrastruktur pendidikan Islam serta pemberdayaan kesejahteraan umat.
+                </p>
+                <p className="italic text-slate-600">
+                  "Kami percaya bahwa pendidikan adalah kunci utama untuk mencetak generasi muslim yang mandiri, berdaya saing, dan berakhlak mulia."
+                </p>
               </div>
             </div>
 
-            <div className="space-y-8">
-              <div className="text-center max-w-2xl mx-auto">
-                <h3 className="text-2xl sm:text-3xl font-black text-slate-900">
-                  Misi & Fokus Gerakan
-                </h3>
-                <p className="text-slate-500 text-xs sm:text-sm mt-2">
-                  Langkah taktis dan terencana Lembaga Infaq Nurul Hayah dalam menyalurkan amanah donatur.
-                </p>
-              </div>
+            <div className="space-y-3 pt-6 border-t border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900">Visi Kami</h3>
+              <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
+                Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.
+              </p>
+            </div>
 
-              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {missions.map((m, idx) => {
-                  const IconComponent = m.icon;
-                  return (
-                    <div key={idx} className="bg-slate-50 p-6 rounded-3xl border border-slate-200/80 hover:bg-white hover:shadow-xl transition-all duration-300 flex flex-col justify-between">
-                      <div>
-                        <div className="w-10 h-10 rounded-xl bg-white text-[#1F5946] border border-slate-200 flex items-center justify-center font-bold mb-4 shadow-sm">
-                          <IconComponent />
-                        </div>
-                        <h4 className="font-bold text-slate-900 text-base mb-2">{m.title}</h4>
-                        <p className="text-slate-600 text-xs leading-relaxed">{m.desc}</p>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-slate-200/60 text-[11px] font-bold text-[#B89355]">
-                        Pilar 0{idx + 1}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className="space-y-4 pt-6 border-t border-slate-100">
+              <h3 className="text-xl font-bold text-slate-900">Misi & Fokus Gerakan</h3>
+              <ul className="space-y-3 text-slate-700 text-sm sm:text-base list-disc list-inside leading-relaxed">
+                <li>
+                  <strong>Akses Pendidikan Layak:</strong> Menjamin anak-anak yatim dan dhuafa mendapatkan fasilitas belajar, buku, dan seragam gratis.
+                </li>
+                <li>
+                  <strong>Pengembangan Fasilitas:</strong> Membangun dan merenovasi sekolah, asrama, serta fasilitas pendukung pembelajaran.
+                </li>
+                <li>
+                  <strong>Inovasi & Keterampilan:</strong> Mengembangkan akses teknologi digital dan pelatihan kerja bagi generasi muda.
+                </li>
+                <li>
+                  <strong>Pengelolaan Akuntabel:</strong> Menjaga kepercayaan donatur melalui tata kelola dana yang transparan dan profesional.
+                </li>
+              </ul>
             </div>
           </div>
         </section>
       );
     }
 
-    function ProgramsSection({ programs, selectedCategory, setSelectedCategory, onSelectProgram, onInfaqNow }) {
+    function ProgramsSection({ programs, selectedCategory, setSelectedCategory, onSelectProgram }) {
       const categories = ["Semua", "Pendidikan", "Santunan", "Wakaf & Pembangunan", "Paket Sembako", "Ramadhan"];
 
       const filteredPrograms = useMemo(() => {
@@ -677,7 +680,7 @@
       }, [programs, selectedCategory]);
 
       return (
-        <section id="program" className="py-24 bg-white border-b border-slate-100">
+        <section id="program" className="py-20 bg-white border-b border-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex flex-col md:flex-row md:items-end justify-between mb-12">
               <div>
@@ -767,18 +770,12 @@
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
+                          <div className="pt-2 border-t border-slate-100">
                             <button
                               onClick={() => onSelectProgram(prog)}
-                              className="py-2.5 text-xs font-bold text-[#1F5946] bg-emerald-50 hover:bg-emerald-100 rounded-xl transition text-center"
+                              className="w-full py-2.5 text-xs font-bold text-[#1F5946] bg-emerald-50 hover:bg-emerald-100 rounded-xl transition text-center"
                             >
-                              Selengkapnya
-                            </button>
-                            <button
-                              onClick={() => onInfaqNow(prog)}
-                              className="py-2.5 text-xs font-bold text-white bg-[#1F5946] hover:bg-[#174435] rounded-xl shadow-sm transition text-center"
-                            >
-                              Infaq Sekarang
+                              Lihat Detail Program
                             </button>
                           </div>
                         </div>
