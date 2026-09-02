@@ -22,6 +22,9 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
+  <!-- Supabase JS CDN Integration -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -57,6 +60,14 @@
 
   <script type="text/babel">
     const { useState, useEffect, useMemo } = React;
+
+    // Kredensial Supabase Database
+    const SUPABASE_URL = "https://dxtuadkxzzcwyhwnatdt.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpjd3lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNTA0ODMsImV4cCI6MjEwMzkyNjQ4M30.XNxdbrFNcjDht97OAR3Mj4q2_AACjTvbHDCyIW8a7_0";
+    
+    const supabaseClient = window.supabase 
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
+      : null;
 
     const INITIAL_SETTINGS = {
       orgName: "Lembaga Infaq Nurul Hayah",
@@ -228,6 +239,7 @@
       const [adminLogs, setAdminLogs] = useState([
         { id: "LOG-1", action: "Sistem inisialisasi berhasil", time: "2026-08-31 08:00", ip: "127.0.0.1" }
       ]);
+      const [dbConnected, setDbConnected] = useState(false);
 
       const [currentRoute, setCurrentRoute] = useState('home');
       const [selectedProgram, setSelectedProgram] = useState(null);
@@ -244,6 +256,103 @@
       const [galleryCategory, setGalleryCategory] = useState("Semua");
       const [toastMessage, setToastMessage] = useState(null);
 
+      // Fetch Data dari Supabase Database saat pertama kali aplikasi di-load
+      useEffect(() => {
+        async function fetchSupabaseData() {
+          if (!supabaseClient) return;
+
+          try {
+            // 1. Fetch Program Infaq
+            const { data: progData, error: progErr } = await supabaseClient
+              .from('programs')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!progErr && progData && progData.length > 0) {
+              setPrograms(progData.map(p => ({
+                id: p.id,
+                title: p.title,
+                category: p.category || "Pendidikan",
+                description: p.description,
+                fullContent: p.full_content,
+                targetAmount: Number(p.target_amount || 0),
+                currentAmount: Number(p.current_amount || 0),
+                beneficiaries: Number(p.beneficiaries || 0),
+                imageUrl: p.image_url,
+                status: p.status || "Aktif"
+              })));
+            }
+
+            // 2. Fetch Data Infaq & Transaksi
+            const { data: donData, error: donErr } = await supabaseClient
+              .from('donations')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!donErr && donData && donData.length > 0) {
+              setDonations(donData.map(d => ({
+                id: d.id,
+                donorName: d.donor_name,
+                donorPhone: d.donor_phone,
+                donorEmail: d.donor_email,
+                amount: Number(d.amount),
+                programTitle: d.program_title,
+                paymentMethod: d.payment_method,
+                status: d.status,
+                date: new Date(d.created_at).toLocaleString('id-ID'),
+                notes: d.notes
+              })));
+            }
+
+            // 3. Fetch Settings / Identitas Lembaga
+            const { data: setDbData, error: setErr } = await supabaseClient
+              .from('settings')
+              .select('*')
+              .eq('id', 'main_settings')
+              .single();
+
+            if (!setErr && setDbData) {
+              setSettings({
+                orgName: setDbData.org_name || INITIAL_SETTINGS.orgName,
+                tagline: setDbData.tagline || INITIAL_SETTINGS.tagline,
+                subTagline: setDbData.sub_tagline || INITIAL_SETTINGS.subTagline,
+                description: setDbData.description || INITIAL_SETTINGS.description,
+                address: setDbData.address || INITIAL_SETTINGS.address,
+                whatsapp: setDbData.whatsapp || INITIAL_SETTINGS.whatsapp,
+                email: setDbData.email || INITIAL_SETTINGS.email,
+                tiktok: setDbData.tiktok || INITIAL_SETTINGS.tiktok,
+                instagram: setDbData.instagram || INITIAL_SETTINGS.instagram,
+                facebook: setDbData.facebook || INITIAL_SETTINGS.facebook,
+                logoUrl: setDbData.logo_url || INITIAL_SETTINGS.logoUrl
+              });
+            }
+
+            // 4. Fetch Galeri & Foto
+            const { data: galData, error: galErr } = await supabaseClient
+              .from('gallery')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!galErr && galData && galData.length > 0) {
+              setGallery(galData.map(g => ({
+                id: g.id,
+                title: g.title,
+                category: g.category || "Dokumentasi",
+                description: g.description,
+                imageUrl: g.image_url
+              })));
+            }
+
+            setDbConnected(true);
+          } catch (err) {
+            console.error("Gagal terhubung ke Supabase:", err);
+          }
+        }
+
+        fetchSupabaseData();
+      }, []);
+
+      // Navigation & Hash Route listener (#INFAQNUHA)
       useEffect(() => {
         const handleLocation = () => {
           const hash = window.location.hash;
@@ -321,10 +430,14 @@
         showToast("Sesi Admin telah berakhir.");
       };
 
-      const handlePublicInfaqSubmit = (formData) => {
+      // Handler Pengiriman Infaq Publik + Sync Database Supabase
+      const handlePublicInfaqSubmit = async (formData) => {
+        const generatedId = `TRX-${Math.floor(10000 + Math.random() * 90000)}`;
         const newTrx = {
-          id: `TRX-${Math.floor(1000 + Math.random() * 9000)}`,
+          id: generatedId,
           donorName: formData.isAnon ? "Hamba Allah" : (formData.name || "Hamba Allah"),
+          donorPhone: formData.phone || null,
+          donorEmail: formData.email || null,
           amount: Number(formData.amount),
           programTitle: formData.programTitle,
           paymentMethod: formData.paymentMethod,
@@ -333,8 +446,30 @@
           notes: formData.notes || ""
         };
 
+        // Local state update
         setDonations([newTrx, ...donations]);
         setInfaqSuccessData({ ...newTrx, actualName: formData.name });
+
+        // Supabase Async Insertion
+        if (supabaseClient) {
+          try {
+            await supabaseClient.from('donations').insert([{
+              id: generatedId,
+              donor_name: newTrx.donorName,
+              donor_phone: newTrx.donorPhone,
+              donor_email: newTrx.donorEmail,
+              is_anonymous: formData.isAnon,
+              amount: newTrx.amount,
+              program_title: newTrx.programTitle,
+              payment_method: newTrx.paymentMethod,
+              status: "Pending",
+              notes: newTrx.notes
+            }]);
+          } catch (e) {
+            console.error("Gagal menyimpan transaksi ke Supabase:", e);
+          }
+        }
+
         showToast("Permohonan infaq berhasil dibuat!");
       };
 
@@ -372,6 +507,7 @@
               setSettings={setSettings}
               adminLogs={adminLogs}
               showToast={showToast}
+              dbConnected={dbConnected}
             />
           ) : (
             <>
@@ -1369,7 +1505,7 @@
     function AdminDashboardView({
       adminTab, setAdminTab, adminUser, onLogout, stats,
       programs, setPrograms, donations, setDonations,
-      gallery, setGallery, settings, setSettings, adminLogs, showToast
+      gallery, setGallery, settings, setSettings, adminLogs, showToast, dbConnected
     }) {
       const [sidebarOpen, setSidebarOpen] = useState(false);
       const [editingProgram, setEditingProgram] = useState(null);
@@ -1384,27 +1520,66 @@
       const [donationSearch, setDonationSearch] = useState('');
       const [donationFilterStatus, setDonationFilterStatus] = useState('Semua');
 
-      const handleSaveProgram = (e) => {
+      const handleSaveProgram = async (e) => {
         e.preventDefault();
         if (editingProgram) {
-          setPrograms(programs.map(p => p.id === editingProgram.id ? { ...programForm, id: editingProgram.id } : p));
+          const updated = programs.map(p => p.id === editingProgram.id ? { ...programForm, id: editingProgram.id } : p);
+          setPrograms(updated);
+
+          if (supabaseClient) {
+            await supabaseClient.from('programs').update({
+              title: programForm.title,
+              category: programForm.category,
+              description: programForm.description,
+              full_content: programForm.fullContent,
+              target_amount: programForm.targetAmount,
+              current_amount: programForm.currentAmount,
+              beneficiaries: programForm.beneficiaries,
+              image_url: programForm.imageUrl,
+              status: programForm.status
+            }).eq('id', editingProgram.id);
+          }
+
           showToast("Program berhasil diperbarui!");
           setEditingProgram(null);
         } else {
           const newId = `PROG-${Math.floor(100 + Math.random() * 900)}`;
-          setPrograms([{ ...programForm, id: newId }, ...programs]);
+          const newProg = { ...programForm, id: newId };
+          setPrograms([newProg, ...programs]);
+
+          if (supabaseClient) {
+            await supabaseClient.from('programs').insert([{
+              id: newId,
+              title: programForm.title,
+              category: programForm.category,
+              description: programForm.description,
+              full_content: programForm.fullContent,
+              target_amount: programForm.targetAmount,
+              current_amount: programForm.currentAmount,
+              beneficiaries: programForm.beneficiaries,
+              image_url: programForm.imageUrl,
+              status: programForm.status
+            }]);
+          }
+
           showToast("Program baru berhasil ditambahkan!");
           setNewProgramModal(false);
         }
       };
 
-      const handleDeleteProgram = (id) => {
+      const handleDeleteProgram = async (id) => {
         setPrograms(programs.filter(p => p.id !== id));
+        if (supabaseClient) {
+          await supabaseClient.from('programs').delete().eq('id', id);
+        }
         showToast("Program berhasil dihapus.");
       };
 
-      const handleUpdateDonationStatus = (id, newStatus) => {
+      const handleUpdateDonationStatus = async (id, newStatus) => {
         setDonations(donations.map(d => d.id === id ? { ...d, status: newStatus } : d));
+        if (supabaseClient) {
+          await supabaseClient.from('donations').update({ status: newStatus }).eq('id', id);
+        }
         showToast(`Status transaksi ${id} diubah ke ${newStatus}`);
       };
 
@@ -1471,9 +1646,14 @@
                 </h1>
               </div>
 
-              <div className="flex items-center space-x-4">
-                <span className="text-xs bg-emerald-50 text-[#1F5946] font-bold px-3 py-1 rounded-full border border-emerald-200">
-                  Status Admin: {adminUser?.username}
+              <div className="flex items-center space-x-3">
+                <span className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-[#1F5946] border border-emerald-200">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  <span>{dbConnected ? "Supabase Terhubung" : "Mode Offline"}</span>
+                </span>
+
+                <span className="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200">
+                  Admin: {adminUser?.username}
                 </span>
               </div>
             </header>
@@ -1893,7 +2073,12 @@
                           <img src={g.imageUrl} alt="" className="w-full h-32 object-cover rounded-lg" />
                           <div className="font-bold text-xs truncate">{g.title}</div>
                           <button
-                            onClick={() => setGallery(gallery.filter(item => item.id !== g.id))}
+                            onClick={async () => {
+                              setGallery(gallery.filter(item => item.id !== g.id));
+                              if (supabaseClient) {
+                                await supabaseClient.from('gallery').delete().eq('id', g.id);
+                              }
+                            }}
                             className="w-full py-1 text-red-600 bg-red-50 hover:bg-red-100 rounded text-[11px] font-bold"
                           >
                             Hapus Foto
@@ -1974,7 +2159,25 @@
 
                     <button
                       type="button"
-                      onClick={() => showToast("Pengaturan berhasil disimpan!")}
+                      onClick={async () => {
+                        showToast("Pengaturan berhasil disimpan!");
+                        if (supabaseClient) {
+                          await supabaseClient.from('settings').upsert({
+                            id: 'main_settings',
+                            org_name: settings.orgName,
+                            tagline: settings.tagline,
+                            sub_tagline: settings.subTagline,
+                            description: settings.description,
+                            address: settings.address,
+                            whatsapp: settings.whatsapp,
+                            email: settings.email,
+                            tiktok: settings.tiktok,
+                            instagram: settings.instagram,
+                            facebook: settings.facebook,
+                            logo_url: settings.logoUrl
+                          });
+                        }
+                      }}
                       className="w-full py-3 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-xl transition"
                     >
                       Simpan Perubahan
