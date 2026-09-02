@@ -22,7 +22,7 @@
   <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
   <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <!-- Supabase JS CDN Integration -->
+  <!-- Supabase JS Client v2 CDN -->
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
   <style>
@@ -59,15 +59,19 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
-
-    // Kredensial Supabase Database
     const SUPABASE_URL = "https://dxtuadkxzzcwyhwnatdt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpjd3lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNTA0ODMsImV4cCI6MjEwMzkyNjQ4M30.XNxdbrFNcjDht97OAR3Mj4q2_AACjTvbHDCyIW8a7_0";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpwd2lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzODE1MjQsImV4cCI6MjA3MTk1NzUyNH0.eO3cI1555B09N5I9x92s6X1S4_H8744s1B_R8L-G00M";
     
-    const supabaseClient = window.supabase 
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) 
-      : null;
+    let supabaseClient = null;
+    try {
+      if (window.supabase) {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      }
+    } catch (e) {
+      console.warn("Supabase init error:", e);
+    }
+
+    const { useState, useEffect, useMemo } = React;
 
     const INITIAL_SETTINGS = {
       orgName: "Lembaga Infaq Nurul Hayah",
@@ -83,44 +87,9 @@
       logoUrl: "https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg"
     };
 
-    const INITIAL_PROGRAMS = [
-      {
-        id: "PROG-001",
-        title: "Beasiswa Santri Tahfizh & Yatim Dhuafa",
-        category: "Pendidikan",
-        description: "Bantuan perlengkapan sekolah, kitab, serta fasilitas belajar bagi santri hafidz Al-Qur'an dan anak-anak yatim.",
-        fullContent: "Program Beasiswa Santri Tahfizh dan Yatim Dhuafa berfokus pada penyediaan fasilitas belajar gratis, kebutuhan perlengkapan sekolah, kitab-kitab pembelajaran, hingga dukungan living cost bulanan. Melalui infaq Anda, generasi muda muslim di pelosok dapat menuntut ilmu agama dan umum secara berkelanjutan tanpa terkendala beban finansial.",
-        targetAmount: 75000000,
-        currentAmount: 32500000,
-        beneficiaries: 120,
-        imageUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80",
-        status: "Aktif"
-      },
-      {
-        id: "PROG-002",
-        title: "Pembangunan & Renovasi Ruang Kelas Santri",
-        category: "Wakaf & Pembangunan",
-        description: "Pembangunan gedung sarana belajar dan asrama layak santri di lingkungan Ponpes Nurul Hayah.",
-        fullContent: "Menyediakan sarana fisik tempat belajar dan tinggal yang aman dan nyaman sangat penting bagi proses thalabul 'ilmi. Penyaluran dana difokuskan untuk renovasi atap, pengecatan, penyediaan bangku/meja belajar, serta pembuatan sanitasi yang higienis.",
-        targetAmount: 150000000,
-        currentAmount: 89000000,
-        beneficiaries: 350,
-        imageUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80",
-        status: "Aktif"
-      },
-      {
-        id: "PROG-003",
-        title: "Paket Sembako & Kesejahteraan Dhuafa Pelosok",
-        category: "Paket Sembako",
-        description: "Penyaluran bantuan beras, minyak, dan kebutuhan pokok rutin untuk keluarga prasejahtera.",
-        fullContent: "Program ketahanan pangan keluarga dhuafa memberikan paket sembako harian berisi beras, minyak goreng, gula, dan bahan pangan bernutrisi tinggi. Penyaluran diarahkan langsung ke desa-desa binaan secara tepat sasaran.",
-        targetAmount: 40000000,
-        currentAmount: 18500000,
-        beneficiaries: 200,
-        imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80",
-        status: "Aktif"
-      }
-    ];
+    // Program & Galeri dibuat kosong agar admin dapat menambahkan sendiri dari Panel Admin
+    const INITIAL_PROGRAMS = [];
+    const INITIAL_GALLERY = [];
 
     const INITIAL_DONATIONS = [
       {
@@ -142,30 +111,6 @@
         status: "Terverifikasi",
         date: "2026-08-31 09:15",
         notes: "Niat jariyah untuk almarhumah ibu."
-      }
-    ];
-
-    const INITIAL_GALLERY = [
-      {
-        id: "GAL-1",
-        title: "Penyaluran Beasiswa Kitab & Alat Tulis Santri",
-        category: "Pendidikan",
-        description: "Penyerahan dukungan perlengkapan belajar secara simbolis bagi santri penghafal Al-Qur'an.",
-        imageUrl: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        id: "GAL-2",
-        title: "Kegiatan Belajar Mengajar & Kajian Santri",
-        category: "Pendidikan",
-        description: "Suasana para santri tekun mengikuti pembelajaran kitab kuning di asrama.",
-        imageUrl: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        id: "GAL-3",
-        title: "Penyaluran Paket Pangan Masyarakat Less Fortunate",
-        category: "Santunan",
-        description: "Aksi tim amil membawa dan membagikan sembako ke rumah warga prasejahtera.",
-        imageUrl: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"
       }
     ];
 
@@ -256,103 +201,80 @@
       const [galleryCategory, setGalleryCategory] = useState("Semua");
       const [toastMessage, setToastMessage] = useState(null);
 
-      // Fetch Data dari Supabase Database saat pertama kali aplikasi di-load
       useEffect(() => {
         async function fetchSupabaseData() {
           if (!supabaseClient) return;
-
           try {
-            // 1. Fetch Program Infaq
-            const { data: progData, error: progErr } = await supabaseClient
-              .from('programs')
-              .select('*')
-              .order('created_at', { ascending: false });
-
-            if (!progErr && progData && progData.length > 0) {
+            // Fetch Programs
+            const { data: progData, error: progErr } = await supabaseClient.from('programs').select('*').order('created_at', { ascending: false });
+            if (!progErr && progData) {
               setPrograms(progData.map(p => ({
                 id: p.id,
                 title: p.title,
-                category: p.category || "Pendidikan",
-                description: p.description,
-                fullContent: p.full_content,
+                category: p.category || 'Pendidikan',
+                description: p.description || '',
+                fullContent: p.full_content || '',
                 targetAmount: Number(p.target_amount || 0),
                 currentAmount: Number(p.current_amount || 0),
                 beneficiaries: Number(p.beneficiaries || 0),
-                imageUrl: p.image_url,
-                status: p.status || "Aktif"
+                imageUrl: p.image_url || '',
+                status: p.status || 'Aktif'
               })));
+              setDbConnected(true);
             }
 
-            // 2. Fetch Data Infaq & Transaksi
-            const { data: donData, error: donErr } = await supabaseClient
-              .from('donations')
-              .select('*')
-              .order('created_at', { ascending: false });
-
-            if (!donErr && donData && donData.length > 0) {
+            // Fetch Donations
+            const { data: donData, error: donErr } = await supabaseClient.from('donations').select('*').order('created_at', { ascending: false });
+            if (!donErr && donData) {
               setDonations(donData.map(d => ({
                 id: d.id,
-                donorName: d.donor_name,
-                donorPhone: d.donor_phone,
-                donorEmail: d.donor_email,
-                amount: Number(d.amount),
-                programTitle: d.program_title,
-                paymentMethod: d.payment_method,
-                status: d.status,
+                donorName: d.donor_name || 'Hamba Allah',
+                amount: Number(d.amount || 0),
+                programTitle: d.program_title || 'Infaq Umum',
+                paymentMethod: d.payment_method || 'WhatsApp Transfer',
+                status: d.status || 'Pending',
                 date: new Date(d.created_at).toLocaleString('id-ID'),
-                notes: d.notes
+                notes: d.notes || ''
               })));
             }
 
-            // 3. Fetch Settings / Identitas Lembaga
-            const { data: setDbData, error: setErr } = await supabaseClient
-              .from('settings')
-              .select('*')
-              .eq('id', 'main_settings')
-              .single();
-
-            if (!setErr && setDbData) {
-              setSettings({
-                orgName: setDbData.org_name || INITIAL_SETTINGS.orgName,
-                tagline: setDbData.tagline || INITIAL_SETTINGS.tagline,
-                subTagline: setDbData.sub_tagline || INITIAL_SETTINGS.subTagline,
-                description: setDbData.description || INITIAL_SETTINGS.description,
-                address: setDbData.address || INITIAL_SETTINGS.address,
-                whatsapp: setDbData.whatsapp || INITIAL_SETTINGS.whatsapp,
-                email: setDbData.email || INITIAL_SETTINGS.email,
-                tiktok: setDbData.tiktok || INITIAL_SETTINGS.tiktok,
-                instagram: setDbData.instagram || INITIAL_SETTINGS.instagram,
-                facebook: setDbData.facebook || INITIAL_SETTINGS.facebook,
-                logoUrl: setDbData.logo_url || INITIAL_SETTINGS.logoUrl
-              });
-            }
-
-            // 4. Fetch Galeri & Foto
-            const { data: galData, error: galErr } = await supabaseClient
-              .from('gallery')
-              .select('*')
-              .order('created_at', { ascending: false });
-
-            if (!galErr && galData && galData.length > 0) {
+            // Fetch Gallery
+            const { data: galData, error: galErr } = await supabaseClient.from('gallery').select('*').order('created_at', { ascending: false });
+            if (!galErr && galData) {
               setGallery(galData.map(g => ({
                 id: g.id,
                 title: g.title,
-                category: g.category || "Dokumentasi",
-                description: g.description,
-                imageUrl: g.image_url
+                category: g.category || 'Pendidikan',
+                description: g.description || '',
+                imageUrl: g.image_url || ''
               })));
             }
 
-            setDbConnected(true);
+            // Fetch Settings
+            const { data: setDb, error: setErr } = await supabaseClient.from('settings').select('*').single();
+            if (!setErr && setDb) {
+              setSettings({
+                orgName: setDb.org_name || INITIAL_SETTINGS.orgName,
+                tagline: setDb.tagline || INITIAL_SETTINGS.tagline,
+                subTagline: setDb.sub_tagline || INITIAL_SETTINGS.subTagline,
+                description: setDb.description || INITIAL_SETTINGS.description,
+                address: setDb.address || INITIAL_SETTINGS.address,
+                whatsapp: setDb.whatsapp || INITIAL_SETTINGS.whatsapp,
+                email: setDb.email || INITIAL_SETTINGS.email,
+                tiktok: setDb.tiktok || INITIAL_SETTINGS.tiktok,
+                instagram: setDb.instagram || INITIAL_SETTINGS.instagram,
+                facebook: setDb.facebook || INITIAL_SETTINGS.facebook,
+                logoUrl: setDb.logo_url || INITIAL_SETTINGS.logoUrl
+              });
+            }
           } catch (err) {
-            console.error("Gagal terhubung ke Supabase:", err);
+            console.warn("Koneksi Supabase opsional:", err);
           }
         }
 
         fetchSupabaseData();
       }, []);
 
-      // Navigation & Hash Route listener (#INFAQNUHA)
       useEffect(() => {
         const handleLocation = () => {
           const hash = window.location.hash;
@@ -430,14 +352,13 @@
         showToast("Sesi Admin telah berakhir.");
       };
 
-      // Handler Pengiriman Infaq Publik + Sync Database Supabase
       const handlePublicInfaqSubmit = async (formData) => {
-        const generatedId = `TRX-${Math.floor(10000 + Math.random() * 90000)}`;
+        const newTrxId = `TRX-${Math.floor(10000 + Math.random() * 90000)}`;
+        const donorName = formData.isAnon ? "Hamba Allah" : (formData.name || "Hamba Allah");
+        
         const newTrx = {
-          id: generatedId,
-          donorName: formData.isAnon ? "Hamba Allah" : (formData.name || "Hamba Allah"),
-          donorPhone: formData.phone || null,
-          donorEmail: formData.email || null,
+          id: newTrxId,
+          donorName: donorName,
           amount: Number(formData.amount),
           programTitle: formData.programTitle,
           paymentMethod: formData.paymentMethod,
@@ -446,27 +367,25 @@
           notes: formData.notes || ""
         };
 
-        // Local state update
         setDonations([newTrx, ...donations]);
         setInfaqSuccessData({ ...newTrx, actualName: formData.name });
 
-        // Supabase Async Insertion
         if (supabaseClient) {
           try {
             await supabaseClient.from('donations').insert([{
-              id: generatedId,
-              donor_name: newTrx.donorName,
-              donor_phone: newTrx.donorPhone,
-              donor_email: newTrx.donorEmail,
+              id: newTrxId,
+              donor_name: donorName,
+              donor_phone: formData.phone || null,
+              donor_email: formData.email || null,
               is_anonymous: formData.isAnon,
-              amount: newTrx.amount,
-              program_title: newTrx.programTitle,
-              payment_method: newTrx.paymentMethod,
+              amount: Number(formData.amount),
+              program_title: formData.programTitle,
+              payment_method: formData.paymentMethod,
               status: "Pending",
-              notes: newTrx.notes
+              notes: formData.notes || null
             }]);
-          } catch (e) {
-            console.error("Gagal menyimpan transaksi ke Supabase:", e);
+          } catch (err) {
+            console.warn("Supabase insert donation fallback:", err);
           }
         }
 
@@ -817,8 +736,20 @@
             </div>
 
             {filteredPrograms.length === 0 ? (
-              <div className="text-center py-16 bg-slate-50 rounded-3xl border border-slate-200">
-                <p className="text-slate-500 font-semibold text-sm">Belum ada program infaq yang ditampilkan saat ini.</p>
+              <div className="text-center py-16 bg-slate-50 rounded-3xl border border-slate-200 max-w-xl mx-auto p-8 space-y-3">
+                <div className="w-12 h-12 bg-emerald-100 text-[#1F5946] rounded-2xl flex items-center justify-center mx-auto">
+                  <Icons.Layers />
+                </div>
+                <h3 className="font-bold text-slate-800 text-base">Belum Ada Program Ditampilkan</h3>
+                <p className="text-slate-500 font-medium text-xs leading-relaxed">
+                  Program infaq akan segera ditambahkan oleh administrator amil. Anda juga dapat masuk ke panel admin internal untuk menambahkan program pertama.
+                </p>
+                <a 
+                  href="#INFAQNUHA" 
+                  className="inline-block px-5 py-2.5 bg-[#1F5946] text-white font-bold rounded-xl text-xs hover:bg-[#174435] transition shadow-sm"
+                >
+                  Masuk Panel Admin
+                </a>
               </div>
             ) : (
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -1285,8 +1216,20 @@
             </div>
 
             {filteredGallery.length === 0 ? (
-              <div className="text-center py-16 bg-slate-50 rounded-3xl border border-slate-200">
-                <p className="text-slate-500 font-semibold text-sm">Belum ada foto dokumentasi saat ini.</p>
+              <div className="text-center py-16 bg-slate-50 rounded-3xl border border-slate-200 max-w-xl mx-auto p-8 space-y-3">
+                <div className="w-12 h-12 bg-emerald-100 text-[#1F5946] rounded-2xl flex items-center justify-center mx-auto">
+                  <Icons.Plus />
+                </div>
+                <h3 className="font-bold text-slate-800 text-base">Belum Ada Foto Galeri</h3>
+                <p className="text-slate-500 font-medium text-xs leading-relaxed">
+                  Foto dokumentasi kegiatan akan ditambahkan oleh administrator. Masuk ke panel admin internal untuk mengunggah foto galeri baru.
+                </p>
+                <a 
+                  href="#INFAQNUHA" 
+                  className="inline-block px-5 py-2.5 bg-[#1F5946] text-white font-bold rounded-xl text-xs hover:bg-[#174435] transition shadow-sm"
+                >
+                  Tambah Foto di Panel Admin
+                </a>
               </div>
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -1517,27 +1460,68 @@
         status: 'Aktif'
       });
 
+      const [newGalleryModal, setNewGalleryModal] = useState(false);
+      const [galleryForm, setGalleryForm] = useState({
+        title: '',
+        category: 'Pendidikan',
+        description: '',
+        imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80'
+      });
+
       const [donationSearch, setDonationSearch] = useState('');
       const [donationFilterStatus, setDonationFilterStatus] = useState('Semua');
+
+      const handleSaveGallery = async (e) => {
+        e.preventDefault();
+        const newId = `GAL-${Math.floor(100 + Math.random() * 900)}`;
+        const newGalItem = { ...galleryForm, id: newId };
+        setGallery([newGalItem, ...gallery]);
+
+        if (supabaseClient) {
+          try {
+            await supabaseClient.from('gallery').insert([{
+              id: newId,
+              title: galleryForm.title,
+              category: galleryForm.category,
+              description: galleryForm.description,
+              image_url: galleryForm.imageUrl
+            }]);
+          } catch (err) {
+            console.warn("Supabase insert gallery fallback:", err);
+          }
+        }
+
+        showToast("Foto galeri baru berhasil ditambahkan!");
+        setNewGalleryModal(false);
+        setGalleryForm({
+          title: '',
+          category: 'Pendidikan',
+          description: '',
+          imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80'
+        });
+      };
 
       const handleSaveProgram = async (e) => {
         e.preventDefault();
         if (editingProgram) {
-          const updated = programs.map(p => p.id === editingProgram.id ? { ...programForm, id: editingProgram.id } : p);
-          setPrograms(updated);
-
+          setPrograms(programs.map(p => p.id === editingProgram.id ? { ...programForm, id: editingProgram.id } : p));
+          
           if (supabaseClient) {
-            await supabaseClient.from('programs').update({
-              title: programForm.title,
-              category: programForm.category,
-              description: programForm.description,
-              full_content: programForm.fullContent,
-              target_amount: programForm.targetAmount,
-              current_amount: programForm.currentAmount,
-              beneficiaries: programForm.beneficiaries,
-              image_url: programForm.imageUrl,
-              status: programForm.status
-            }).eq('id', editingProgram.id);
+            try {
+              await supabaseClient.from('programs').update({
+                title: programForm.title,
+                category: programForm.category,
+                description: programForm.description,
+                full_content: programForm.fullContent,
+                target_amount: programForm.targetAmount,
+                current_amount: programForm.currentAmount,
+                beneficiaries: programForm.beneficiaries,
+                image_url: programForm.imageUrl,
+                status: programForm.status
+              }).eq('id', editingProgram.id);
+            } catch (err) {
+              console.warn("Supabase update program fallback:", err);
+            }
           }
 
           showToast("Program berhasil diperbarui!");
@@ -1548,18 +1532,22 @@
           setPrograms([newProg, ...programs]);
 
           if (supabaseClient) {
-            await supabaseClient.from('programs').insert([{
-              id: newId,
-              title: programForm.title,
-              category: programForm.category,
-              description: programForm.description,
-              full_content: programForm.fullContent,
-              target_amount: programForm.targetAmount,
-              current_amount: programForm.currentAmount,
-              beneficiaries: programForm.beneficiaries,
-              image_url: programForm.imageUrl,
-              status: programForm.status
-            }]);
+            try {
+              await supabaseClient.from('programs').insert([{
+                id: newId,
+                title: programForm.title,
+                category: programForm.category,
+                description: programForm.description,
+                full_content: programForm.fullContent,
+                target_amount: programForm.targetAmount,
+                current_amount: programForm.currentAmount,
+                beneficiaries: programForm.beneficiaries,
+                image_url: programForm.imageUrl,
+                status: programForm.status
+              }]);
+            } catch (err) {
+              console.warn("Supabase insert program fallback:", err);
+            }
           }
 
           showToast("Program baru berhasil ditambahkan!");
@@ -1570,7 +1558,11 @@
       const handleDeleteProgram = async (id) => {
         setPrograms(programs.filter(p => p.id !== id));
         if (supabaseClient) {
-          await supabaseClient.from('programs').delete().eq('id', id);
+          try {
+            await supabaseClient.from('programs').delete().eq('id', id);
+          } catch (err) {
+            console.warn("Supabase delete program fallback:", err);
+          }
         }
         showToast("Program berhasil dihapus.");
       };
@@ -1578,9 +1570,37 @@
       const handleUpdateDonationStatus = async (id, newStatus) => {
         setDonations(donations.map(d => d.id === id ? { ...d, status: newStatus } : d));
         if (supabaseClient) {
-          await supabaseClient.from('donations').update({ status: newStatus }).eq('id', id);
+          try {
+            await supabaseClient.from('donations').update({ status: newStatus }).eq('id', id);
+          } catch (err) {
+            console.warn("Supabase update donation fallback:", err);
+          }
         }
         showToast(`Status transaksi ${id} diubah ke ${newStatus}`);
+      };
+
+      const handleSaveSettings = async () => {
+        if (supabaseClient) {
+          try {
+            await supabaseClient.from('settings').upsert([{
+              id: 'main_settings',
+              org_name: settings.orgName,
+              tagline: settings.tagline,
+              sub_tagline: settings.subTagline,
+              description: settings.description,
+              address: settings.address,
+              whatsapp: settings.whatsapp,
+              email: settings.email,
+              tiktok: settings.tiktok,
+              instagram: settings.instagram,
+              facebook: settings.facebook,
+              logo_url: settings.logoUrl
+            }]);
+          } catch (err) {
+            console.warn("Supabase update settings fallback:", err);
+          }
+        }
+        showToast("Pengaturan berhasil disimpan ke Database!");
       };
 
       const navTabs = [
@@ -1647,12 +1667,13 @@
               </div>
 
               <div className="flex items-center space-x-3">
-                <span className="hidden sm:inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-50 text-[#1F5946] border border-emerald-200">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                  <span>{dbConnected ? "Supabase Terhubung" : "Mode Offline"}</span>
+                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full flex items-center space-x-1 ${
+                  dbConnected ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-100 text-slate-600 border border-slate-200'
+                }`}>
+                  <span className={`w-2 h-2 rounded-full ${dbConnected ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'}`}></span>
+                  <span>{dbConnected ? 'Supabase Terhubung' : 'Sistem Standalone'}</span>
                 </span>
-
-                <span className="text-xs bg-slate-100 text-slate-700 font-bold px-3 py-1 rounded-full border border-slate-200">
+                <span className="text-xs bg-emerald-50 text-[#1F5946] font-bold px-3 py-1 rounded-full border border-emerald-200">
                   Admin: {adminUser?.username}
                 </span>
               </div>
@@ -1768,8 +1789,8 @@
                       <tbody className="divide-y divide-slate-100">
                         {programs.length === 0 ? (
                           <tr>
-                            <td colSpan="5" className="p-6 text-center text-slate-400 italic">
-                              Belum ada data program yang dibuat.
+                            <td colSpan="5" className="p-8 text-center text-slate-400 italic">
+                              Belum ada data program yang dibuat. Klik tombol "Tambah Program Baru" di atas untuk menambahkan program pertama Anda.
                             </td>
                           </tr>
                         ) : (
@@ -2063,9 +2084,19 @@
 
               {adminTab === 'gallery' && (
                 <div className="bg-white rounded-2xl border border-slate-200 p-6 space-y-4">
-                  <h3 className="font-bold text-slate-900 text-base">Daftar Foto Dokumentasi</h3>
+                  <div className="flex justify-between items-center">
+                    <h3 className="font-bold text-slate-900 text-base">Daftar Foto Dokumentasi ({gallery.length})</h3>
+                    <button
+                      onClick={() => setNewGalleryModal(true)}
+                      className="px-4 py-2 bg-[#1F5946] hover:bg-[#174435] text-white rounded-xl text-xs font-bold flex items-center space-x-1.5 shadow-sm"
+                    >
+                      <Icons.Plus />
+                      <span>Tambah Foto Galeri</span>
+                    </button>
+                  </div>
+
                   {gallery.length === 0 ? (
-                    <p className="text-xs text-slate-400 italic">Belum ada foto galeri saat ini.</p>
+                    <p className="text-xs text-slate-400 italic">Belum ada foto galeri saat ini. Silakan klik tombol "Tambah Foto Galeri" di atas untuk menambahkan foto baru.</p>
                   ) : (
                     <div className="grid sm:grid-cols-3 gap-4">
                       {gallery.map((g) => (
@@ -2076,7 +2107,11 @@
                             onClick={async () => {
                               setGallery(gallery.filter(item => item.id !== g.id));
                               if (supabaseClient) {
-                                await supabaseClient.from('gallery').delete().eq('id', g.id);
+                                try {
+                                  await supabaseClient.from('gallery').delete().eq('id', g.id);
+                                } catch (err) {
+                                  console.warn("Supabase delete gallery fallback:", err);
+                                }
                               }
                             }}
                             className="w-full py-1 text-red-600 bg-red-50 hover:bg-red-100 rounded text-[11px] font-bold"
@@ -2085,6 +2120,85 @@
                           </button>
                         </div>
                       ))}
+                    </div>
+                  )}
+
+                  {newGalleryModal && (
+                    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                      <div className="bg-white rounded-3xl p-6 max-w-lg w-full max-h-[90vh] overflow-y-auto space-y-4 shadow-2xl">
+                        <div className="flex justify-between items-center pb-2 border-b">
+                          <h3 className="font-bold text-base text-slate-900">Tambah Foto Galeri Baru</h3>
+                          <button onClick={() => setNewGalleryModal(false)} className="text-slate-400 hover:text-slate-600 font-bold text-lg">✕</button>
+                        </div>
+
+                        <form onSubmit={handleSaveGallery} className="space-y-4 text-xs">
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">Judul Foto / Kegiatan</label>
+                            <input
+                              type="text"
+                              required
+                              value={galleryForm.title}
+                              onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })}
+                              className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-[#1F5946] outline-none"
+                              placeholder="Masukkan judul kegiatan"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">Kategori</label>
+                            <select
+                              value={galleryForm.category}
+                              onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}
+                              className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-[#1F5946] outline-none"
+                            >
+                              <option value="Pendidikan">Pendidikan</option>
+                              <option value="Santunan">Santunan</option>
+                              <option value="Sosial">Sosial</option>
+                              <option value="Ramadhan">Ramadhan</option>
+                              <option value="Pembangunan">Pembangunan</option>
+                            </select>
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">URL Foto Image</label>
+                            <input
+                              type="url"
+                              required
+                              value={galleryForm.imageUrl}
+                              onChange={(e) => setGalleryForm({ ...galleryForm, imageUrl: e.target.value })}
+                              className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-[#1F5946] outline-none"
+                              placeholder="https://..."
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block font-bold text-slate-700 mb-1">Keterangan / Deskripsi Singkat</label>
+                            <textarea
+                              rows={2}
+                              value={galleryForm.description}
+                              onChange={(e) => setGalleryForm({ ...galleryForm, description: e.target.value })}
+                              className="w-full p-2.5 border rounded-xl focus:ring-2 focus:ring-[#1F5946] outline-none"
+                              placeholder="Deskripsi ringkas kegiatan..."
+                            />
+                          </div>
+
+                          <div className="flex justify-end space-x-2 pt-2 border-t">
+                            <button
+                              type="button"
+                              onClick={() => setNewGalleryModal(false)}
+                              className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-semibold"
+                            >
+                              Batal
+                            </button>
+                            <button
+                              type="submit"
+                              className="px-5 py-2 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-xl shadow"
+                            >
+                              Simpan Foto
+                            </button>
+                          </div>
+                        </form>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -2159,25 +2273,7 @@
 
                     <button
                       type="button"
-                      onClick={async () => {
-                        showToast("Pengaturan berhasil disimpan!");
-                        if (supabaseClient) {
-                          await supabaseClient.from('settings').upsert({
-                            id: 'main_settings',
-                            org_name: settings.orgName,
-                            tagline: settings.tagline,
-                            sub_tagline: settings.subTagline,
-                            description: settings.description,
-                            address: settings.address,
-                            whatsapp: settings.whatsapp,
-                            email: settings.email,
-                            tiktok: settings.tiktok,
-                            instagram: settings.instagram,
-                            facebook: settings.facebook,
-                            logo_url: settings.logoUrl
-                          });
-                        }
-                      }}
+                      onClick={handleSaveSettings}
                       className="w-full py-3 bg-[#1F5946] hover:bg-[#174435] text-white font-bold rounded-xl transition"
                     >
                       Simpan Perubahan
