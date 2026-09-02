@@ -395,7 +395,6 @@
                       onInfaqNow={(prog) => { setSelectedProgram(prog); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
                     />
                     <GallerySection gallery={gallery} galleryCategory={galleryCategory} setGalleryCategory={setGalleryCategory} />
-                    <ContactSection settings={settings} />
                   </>
                 )}
 
@@ -442,8 +441,7 @@
         { label: "Beranda", href: "#beranda" },
         { label: "Tentang Kami", href: "#tentang" },
         { label: "Program Infaq", href: "#program" },
-        { label: "Galeri Dokumentasi", href: "#galeri" },
-        { label: "Kontak Layanan", href: "#kontak" }
+        { label: "Galeri Dokumentasi", href: "#galeri" }
       ];
 
       return (
@@ -1186,67 +1184,6 @@
       );
     }
 
-    function ContactSection({ settings }) {
-      return (
-        <section id="kontak" className="py-20 bg-white">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div className="max-w-2xl mx-auto mb-12">
-              <h2 className="text-3xl sm:text-4xl font-black text-slate-900">
-                Kantor & Informasi Kontak Resmi
-              </h2>
-              <p className="text-slate-600 text-sm mt-3 leading-relaxed">
-                Amil kami siap melayani konsultasi perhitungan infaq, permintaan QRIS / Nomor Rekening, serta konfirmasi transaksi infaq Anda.
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-3 gap-6 text-left">
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#1F5946] border border-slate-200 flex items-center justify-center font-bold mb-4 shadow-sm">
-                  <Icons.MapPin />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Alamat Kantor Lembaga</h4>
-                  <p className="text-slate-600 text-xs mt-1 leading-relaxed">{settings.address}</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#1F5946] border border-slate-200 flex items-center justify-center font-bold mb-4 shadow-sm">
-                  <Icons.Phone />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Telepon / WhatsApp</h4>
-                  <a 
-                    href={`https://wa.me/${settings.whatsapp.replace(/\D/g, '')}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-xs mt-1 leading-relaxed font-semibold text-[#1F5946] hover:underline block"
-                  >
-                    {settings.whatsapp}
-                  </a>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-6 rounded-3xl border border-slate-200 flex flex-col justify-between">
-                <div className="w-12 h-12 rounded-2xl bg-white text-[#1F5946] border border-slate-200 flex items-center justify-center font-bold mb-4 shadow-sm">
-                  <Icons.Mail />
-                </div>
-                <div>
-                  <h4 className="font-bold text-slate-900 text-sm">Email Resmi</h4>
-                  <a 
-                    href={`mailto:${settings.email}`} 
-                    className="text-xs mt-1 leading-relaxed hover:underline block font-semibold text-slate-800"
-                  >
-                    {settings.email}
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      );
-    }
-
     function PublicFooter({ settings }) {
       const cleanWA = settings.whatsapp ? settings.whatsapp.replace(/\D/g, '') : '6282333362299';
 
@@ -1291,7 +1228,6 @@
                   <li><a href="#tentang" className="hover:text-[#1F5946] transition">Tentang Kami</a></li>
                   <li><a href="#program" className="hover:text-[#1F5946] transition">Program Infaq</a></li>
                   <li><a href="#galeri" className="hover:text-[#1F5946] transition">Galeri Kegiatan</a></li>
-                  <li><a href="#kontak" className="hover:text-[#1F5946] transition">Kontak Layanan</a></li>
                   <li><a href="#INFAQNUHA" className="hover:text-[#1F5946] transition">Laman Akses Amil</a></li>
                 </ul>
               </div>
