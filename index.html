@@ -58,8 +58,9 @@
   <div id="root"></div>
 
   <script type="text/babel">
+    // Konfigurasi Supabase Resmi (Project Ref: dxtuadkxzzcwyhwnatdt)
     const SUPABASE_URL = "https://dxtuadkxzzcwyhwnatdt.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpwd2lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTYzODE1MjQsImV4cCI6MjA3MTk1NzUyNH0.eO3cI1555B09N5I9x92s6X1S4_H8744s1B_R8L-G00M";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpjd3lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNTA0ODMsImV4cCI6MjEwMzkyNjQ4M30.XNxdbrFNcjDht97OAR3Mj4q2_AACjTvbHDCyIW8a7_0";
     
     let supabaseClient = null;
     try {
@@ -86,9 +87,82 @@
       logoUrl: "https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg"
     };
 
-    const INITIAL_PROGRAMS = [];
-    const INITIAL_GALLERY = [];
-    const INITIAL_DONATIONS = [];
+    // Data awal cadangan jika database belum selesai di-seed
+    const INITIAL_PROGRAMS = [
+      {
+        id: 'PROG-1001',
+        title: 'Beasiswa Pendidikan Santri Tahfizh Yatim & Dhuafa',
+        category: 'Pendidikan',
+        description: 'Bantuan biaya pendidikan, perlengkapan sekolah, dan beasiswa penuh santri penghafal Al-Qur\'an dhuafa.',
+        fullContent: 'Program Beasiswa Pendidikan Santri Tahfizh ditujukan untuk memberikan akses pendidikan holistik dan asrama gratis bagi santri yatim serta dhuafa. Bantuan mencakup kitab, seragam, konsumsi harian, dan uang saku santri.',
+        targetAmount: 50000000,
+        currentAmount: 28500000,
+        beneficiaries: 120,
+        imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80',
+        status: 'Aktif'
+      },
+      {
+        id: 'PROG-1002',
+        title: 'Pembangunan & Renovasi Asrama Santri Nurul Hayah',
+        category: 'Wakaf & Pembangunan',
+        description: 'Perluasan dan renovasi asrama santri agar dapat menampung lebih banyak santri dhuafa dengan layak.',
+        fullContent: 'Program Pembangunan Asrama Nurul Hayah memfasilitasi penambahan tempat tidur, sanitasi sehat, ruang belajar digital, dan perpustakaan santri.',
+        targetAmount: 120000000,
+        currentAmount: 64200000,
+        beneficiaries: 250,
+        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
+        status: 'Aktif'
+      },
+      {
+        id: 'PROG-1003',
+        title: 'Paket Sembako Berkah Kesejahteraan Keluarga Dhuafa',
+        category: 'Paket Sembako',
+        description: 'Penyaluran paket bahan pangan pokok bulanan untuk lansia dan keluarga kurang mampu di pelosok desa.',
+        fullContent: 'Paket Sembako Berkah berisi beras premium, minyak goreng, gula, telur, dan nutrisi esensial untuk menjamin kecukupan pangan warga pra-sejahtera.',
+        targetAmount: 35000000,
+        currentAmount: 19800000,
+        beneficiaries: 300,
+        imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
+        status: 'Aktif'
+      }
+    ];
+
+    const INITIAL_GALLERY = [
+      {
+        id: 'GAL-1001',
+        title: 'Penyaluran Beasiswa & Kitab Santri',
+        category: 'Pendidikan',
+        description: 'Dokumentasi penyerahan bantuan beasiswa pendidikan santri tahfizh.',
+        imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'GAL-1002',
+        title: 'Gotong Royong Pembangunan Gedung Belajar',
+        category: 'Wakaf & Pembangunan',
+        description: 'Progres renovasi ruang kelas dan perpustakaan santri.',
+        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80'
+      },
+      {
+        id: 'GAL-1003',
+        title: 'Penyaluran Paket Pangan Lansia & Dhuafa',
+        category: 'Paket Sembako',
+        description: 'Pembagian paket pangan gratis untuk warga dhuafa di Brebes.',
+        imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80'
+      }
+    ];
+
+    const INITIAL_DONATIONS = [
+      {
+        id: 'TRX-88201',
+        donorName: 'Hamba Allah',
+        amount: 500000,
+        programTitle: 'Beasiswa Pendidikan Santri Tahfizh Yatim & Dhuafa',
+        paymentMethod: 'Transfer Bank',
+        status: 'Terverifikasi',
+        date: new Date().toLocaleDateString('id-ID'),
+        notes: 'Niat infaq untuk almarhum orang tua'
+      }
+    ];
 
     const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
     const formatNumber = (num) => new Intl.NumberFormat('id-ID').format(num || 0);
@@ -161,30 +235,40 @@
       const [galleryCategory, setGalleryCategory] = useState("Semua");
       const [toastMessage, setToastMessage] = useState(null);
 
+      // Effect utama fetching data otomatis dari Supabase saat load
       useEffect(() => {
         async function fetchSupabaseData() {
           if (!supabaseClient) return;
           try {
-            // Fetch Programs
-            const { data: progData, error: progErr } = await supabaseClient.from('programs').select('*').order('created_at', { ascending: false });
-            if (!progErr && progData) {
-              setPrograms(progData.map(p => ({
+            // 1. Fetch Data Program Infaq
+            const { data: progData, error: progErr } = await supabaseClient
+              .from('programs')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!progErr && progData && progData.length > 0) {
+              const formattedPrograms = progData.map(p => ({
                 id: p.id,
                 title: p.title,
                 category: p.category || 'Pendidikan',
                 description: p.description || '',
-                fullContent: p.full_content || '',
+                fullContent: p.full_content || p.description || '',
                 targetAmount: Number(p.target_amount || 0),
                 currentAmount: Number(p.current_amount || 0),
                 beneficiaries: Number(p.beneficiaries || 0),
                 imageUrl: p.image_url || '',
                 status: p.status || 'Aktif'
-              })));
+              }));
+              setPrograms(formattedPrograms);
             }
 
-            // Fetch Donations
-            const { data: donData, error: donErr } = await supabaseClient.from('donations').select('*').order('created_at', { ascending: false });
-            if (!donErr && donData) {
+            // 2. Fetch Data Transaksi Infaq
+            const { data: donData, error: donErr } = await supabaseClient
+              .from('donations')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!donErr && donData && donData.length > 0) {
               setDonations(donData.map(d => ({
                 id: d.id,
                 donorName: d.donor_name || 'Hamba Allah',
@@ -197,9 +281,13 @@
               })));
             }
 
-            // Fetch Gallery
-            const { data: galData, error: galErr } = await supabaseClient.from('gallery').select('*').order('created_at', { ascending: false });
-            if (!galErr && galData) {
+            // 3. Fetch Data Galeri Kegiatan
+            const { data: galData, error: galErr } = await supabaseClient
+              .from('gallery')
+              .select('*')
+              .order('created_at', { ascending: false });
+
+            if (!galErr && galData && galData.length > 0) {
               setGallery(galData.map(g => ({
                 id: g.id,
                 title: g.title,
@@ -209,8 +297,12 @@
               })));
             }
 
-            // Fetch Settings
-            const { data: setDb, error: setErr } = await supabaseClient.from('settings').select('*').single();
+            // 4. Fetch Pengaturan Organisasi
+            const { data: setDb, error: setErr } = await supabaseClient
+              .from('settings')
+              .select('*')
+              .single();
+
             if (!setErr && setDb) {
               setSettings({
                 orgName: setDb.org_name || INITIAL_SETTINGS.orgName,
@@ -227,7 +319,7 @@
               });
             }
           } catch (err) {
-            console.warn("Koneksi Supabase opsional:", err);
+            console.warn("Koneksi Supabase otomatis:", err);
           }
         }
 
@@ -239,6 +331,7 @@
         setTimeout(() => setToastMessage(null), 3500);
       };
 
+      // Handle submit infaq publik dan kirim ke Supabase
       const handlePublicInfaqSubmit = async (formData) => {
         const newTrxId = `TRX-${Math.floor(10000 + Math.random() * 90000)}`;
         const donorName = formData.isAnon ? "Hamba Allah" : (formData.name || "Hamba Allah");
@@ -254,7 +347,7 @@
           notes: formData.notes || ""
         };
 
-        setDonations([newTrx, ...donations]);
+        setDonations(prev => [newTrx, ...prev]);
         setInfaqSuccessData({ ...newTrx, actualName: formData.name });
 
         if (supabaseClient) {
