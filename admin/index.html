@@ -1,0 +1,2257 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel INFAQNUHA</title>
+  
+  <!-- Favicon Resmi -->
+  <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
+  <link rel="shortcut icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Font Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- React 18 & ReactDOM 18 & Babel Standalone CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <!-- Supabase JS Client v2 CDN -->
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .animate-fade-in {
+      animation: fadeIn 0.2s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.98); }
+      to { opacity: 1; transform: scale(1); }
+    }
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+  </style>
+</head>
+<body class="bg-[#f4f7f6] text-slate-800 antialiased selection:bg-[#1F5946] selection:text-white">
+
+  <!-- Container Root React -->
+  <div id="root"></div>
+
+  <script type="text/babel">
+    // Konfigurasi Supabase Resmi
+    const DEFAULT_SUPABASE_URL = "https://dxtuadkxzzcwyhwnatdt.supabase.co";
+    const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpjd3lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNTA0ODMsImV4cCI6MjEwMzkyNjQ4M30.XNxdbrFNcjDht97OAR3Mj4q2_AACjTvbHDCyIW8a7_0";
+
+    const { useState, useEffect, useMemo, useRef } = React;
+
+    // Helper Format Rupiah Tampilan Lengkap
+    const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
+
+    // Helper Format Titik Pemisah Ribuan (contoh: 2000000 -> 2.000.000)
+    const formatThousand = (val) => {
+      if (!val && val !== 0) return '';
+      const numStr = String(val).replace(/\D/g, '');
+      if (!numStr) return '';
+      return new Intl.NumberFormat('id-ID').format(Number(numStr));
+    };
+
+    // Helper Pembersih Input Angka Murni
+    const parseCleanNumber = (val) => {
+      if (!val && val !== 0) return 0;
+      const numStr = String(val).replace(/\D/g, '');
+      return numStr ? Number(numStr) : 0;
+    };
+
+    const INITIAL_SETTINGS = {
+      orgName: "Nurul Hayah",
+      categoryTitle: "LEMBAGA INFAQ",
+      tagline: "Amanah Bersama, Sejahtera dan Berdaya",
+      subTagline: "Berbagi Kebaikan, Menebar Kebermanfaatan",
+      description: "Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa di seluruh Indonesia.",
+      address: "Jl. Lingkar Provinsi No.07, Sawah, Bulakelor, Ketanggungan, Brebes Regency",
+      whatsapp: "+62 823-3336-2299",
+      email: "infaqnuha@gmail.com",
+      tiktok: "Lembaga Infaq Nurul Hayah",
+      instagram: "Lembaga Infaq Nurul Hayah",
+      facebook: "Lembaga Infaq Nurul Hayah",
+      logoUrl: "https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg"
+    };
+
+    const DEFAULT_CATEGORIES = [
+      { id: 'cat-1', name: 'Pendidikan', description: 'Beasiswa dan fasilitas belajar santri' },
+      { id: 'cat-2', name: 'Santunan', description: 'Santunan anak yatim dan dhuafa' },
+      { id: 'cat-3', name: 'Wakaf & Pembangunan', description: 'Renovasi dan pembangunan sarana ibadah' },
+      { id: 'cat-4', name: 'Paket Sembako', description: 'Bantuan pangan pokok keluarga prasejahtera' },
+      { id: 'cat-5', name: 'Ramadhan', description: 'Program berkah berbuka dan bingkisan hari raya' }
+    ];
+
+    // Koleksi Ikon SVG
+    const Icons = {
+      Dashboard: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+      ),
+      Program: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+        </svg>
+      ),
+      Category: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+      ),
+      Infaq: () => (
+        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      ),
+      Users: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+      ),
+      Media: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+      ),
+      Settings: () => (
+        <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+        </svg>
+      ),
+      Plus: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
+        </svg>
+      ),
+      Trash: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+        </svg>
+      ),
+      Sync: () => (
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+      ),
+      Upload: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+        </svg>
+      ),
+      Link: () => (
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+        </svg>
+      )
+    };
+
+    function App() {
+      const [activeTab, setActiveTab] = useState("dashboard");
+      const [settings, setSettings] = useState(INITIAL_SETTINGS);
+      const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+      const [programs, setPrograms] = useState([]);
+      const [donations, setDonations] = useState([]);
+      const [gallery, setGallery] = useState([]);
+      const [logs, setLogs] = useState([
+        { id: "1", title: "Sistem Admin Infaq diinisialisasi", meta: `${new Date().toLocaleTimeString('id-ID')} • Kunci Supabase Terpasang` }
+      ]);
+
+      const [supabaseUrl, setSupabaseUrl] = useState(DEFAULT_SUPABASE_URL);
+      const [supabaseKey, setSupabaseKey] = useState(DEFAULT_SUPABASE_KEY);
+      const [dbStatus, setDbStatus] = useState("connecting");
+      const [dbMessage, setDbMessage] = useState("");
+      const [isSyncing, setIsSyncing] = useState(false);
+      const [toast, setToast] = useState(null);
+
+      // Modal Input Form
+      const [showProgramModal, setShowProgramModal] = useState(false);
+      const [showInfaqModal, setShowInfaqModal] = useState(false);
+      const [showGalleryModal, setShowGalleryModal] = useState(false);
+      const [showCategoryModal, setShowCategoryModal] = useState(false);
+
+      // Mode Input Foto (Upload File vs Link URL)
+      const [programImageMode, setProgramImageMode] = useState('upload');
+      const [galleryImageMode, setGalleryImageMode] = useState('upload');
+
+      // Modal Konfirmasi Hapus Kustom
+      const [deleteModal, setDeleteModal] = useState({
+        isOpen: false,
+        type: null,
+        id: null,
+        title: ''
+      });
+
+      // Form State
+      const [programForm, setProgramForm] = useState({
+        title: '',
+        category: 'Pendidikan',
+        description: '',
+        fullContent: '',
+        targetAmount: '',
+        beneficiaries: '',
+        imageUrl: '',
+        status: 'Aktif'
+      });
+
+      const [infaqForm, setInfaqForm] = useState({
+        donorName: '',
+        phone: '',
+        programTitle: '',
+        amount: '',
+        paymentMethod: 'Transfer Bank',
+        status: 'Terverifikasi',
+        notes: ''
+      });
+
+      const [galleryForm, setGalleryForm] = useState({
+        title: '',
+        category: 'Pendidikan',
+        description: '',
+        imageUrl: ''
+      });
+
+      const [categoryForm, setCategoryForm] = useState({
+        name: '',
+        description: ''
+      });
+
+      const supabaseRef = useRef(null);
+
+      const showNotification = (msg) => {
+        setToast(msg);
+        setTimeout(() => setToast(null), 3500);
+      };
+
+      const addLog = (title, metaInfo = "Oleh Admin") => {
+        const newLog = {
+          id: String(Date.now()),
+          title,
+          meta: `${new Date().toLocaleTimeString('id-ID')} • ${metaInfo}`
+        };
+        setLogs(prev => [newLog, ...prev.slice(0, 9)]);
+      };
+
+      // Handler Memproses File Gambar (Maksimal 5MB)
+      const handleProcessImageUpload = (file, onSuccess) => {
+        if (!file) return;
+
+        const maxSizeBytes = 5 * 1024 * 1024;
+        if (file.size > maxSizeBytes) {
+          showNotification(`Gagal: Ukuran file (${(file.size / (1024 * 1024)).toFixed(2)} MB) melebihi batas 5 MB!`);
+          return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = new Image();
+          img.onload = () => {
+            const maxDimension = 1400;
+            let width = img.width;
+            let height = img.height;
+
+            if (width > maxDimension || height > maxDimension) {
+              if (width > height) {
+                height = Math.round((height * maxDimension) / width);
+                width = maxDimension;
+              } else {
+                width = Math.round((width * maxDimension) / height);
+                height = maxDimension;
+              }
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            const optimizedDataUrl = canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.85);
+            onSuccess(optimizedDataUrl);
+            showNotification("Foto berhasil dipilih & siap disimpan!");
+          };
+
+          img.onerror = () => {
+            onSuccess(e.target.result);
+            showNotification("Foto berhasil dipilih!");
+          };
+
+          img.src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+      };
+
+      // Inisialisasi Supabase Client
+      const getSupabase = () => {
+        if (!supabaseRef.current && window.supabase && supabaseUrl && supabaseKey) {
+          try {
+            supabaseRef.current = window.supabase.createClient(supabaseUrl.trim(), supabaseKey.trim());
+          } catch (e) {
+            console.error("Gagal createClient:", e);
+          }
+        }
+        return supabaseRef.current;
+      };
+
+      // Tarik data langsung dari Supabase
+      const syncFromSupabase = async (isManual = false) => {
+        setIsSyncing(true);
+        const client = getSupabase();
+
+        if (!client) {
+          setDbStatus("error");
+          setDbMessage("Supabase JS belum siap");
+          setIsSyncing(false);
+          return;
+        }
+
+        try {
+          const [progRes, donRes, galRes, setRes, catRes] = await Promise.all([
+            client.from('programs').select('*').order('created_at', { ascending: false }),
+            client.from('donations').select('*').order('created_at', { ascending: false }),
+            client.from('gallery').select('*').order('created_at', { ascending: false }),
+            client.from('settings').select('*').limit(1).maybeSingle(),
+            client.from('categories').select('*').order('name', { ascending: true })
+          ]);
+
+          if (progRes.error && progRes.error.code === '42P01') {
+            setDbStatus("not_ready");
+            setDbMessage("Tabel SQL belum dibuat di Supabase");
+            if (isManual) showNotification("Koneksi Supabase OK, tapi tabel belum dibuat. Silakan cek tab Pengaturan.");
+            setIsSyncing(false);
+            return;
+          }
+
+          let anySuccess = false;
+
+          // 0. Categories
+          if (!catRes.error && catRes.data && catRes.data.length > 0) {
+            anySuccess = true;
+            setCategories(catRes.data.map(c => ({
+              id: String(c.id),
+              name: c.name || 'Kategori',
+              description: c.description || ''
+            })));
+          }
+
+          // 1. Programs
+          if (!progRes.error && progRes.data) {
+            anySuccess = true;
+            setPrograms(progRes.data.map(p => ({
+              id: String(p.id),
+              title: p.title || 'Tanpa Judul',
+              category: p.category || 'Pendidikan',
+              description: p.description || '',
+              fullContent: p.full_content || p.description || '',
+              targetAmount: Number(p.target_amount || 0),
+              currentAmount: Number(p.current_amount || 0),
+              beneficiaries: Number(p.beneficiaries || 0),
+              imageUrl: p.image_url || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
+              status: p.status || 'Aktif'
+            })));
+          }
+
+          // 2. Donations
+          if (!donRes.error && donRes.data) {
+            anySuccess = true;
+            setDonations(donRes.data.map(d => ({
+              id: String(d.id),
+              donorName: d.donor_name || 'Hamba Allah',
+              phone: d.donor_phone || '',
+              amount: Number(d.amount || 0),
+              programTitle: d.program_title || 'Infaq Umum',
+              paymentMethod: d.payment_method || 'Transfer Bank',
+              status: d.status || 'Terverifikasi',
+              date: d.created_at ? new Date(d.created_at).toLocaleString('id-ID') : new Date().toLocaleString('id-ID'),
+              notes: d.notes || ''
+            })));
+          }
+
+          // 3. Gallery
+          if (!galRes.error && galRes.data) {
+            anySuccess = true;
+            setGallery(galRes.data.map(g => ({
+              id: String(g.id),
+              title: g.title || '',
+              category: g.category || 'Dokumentasi',
+              description: g.description || '',
+              imageUrl: g.image_url || ''
+            })));
+          }
+
+          // 4. Settings
+          if (!setRes.error && setRes.data) {
+            anySuccess = true;
+            setSettings(prev => ({
+              ...prev,
+              orgName: setRes.data.org_name || prev.orgName,
+              whatsapp: setRes.data.whatsapp || prev.whatsapp,
+              email: setRes.data.email || prev.email,
+              address: setRes.data.address || prev.address,
+              tagline: setRes.data.tagline || prev.tagline
+            }));
+          }
+
+          if (anySuccess || (!progRes.error && !donRes.error)) {
+            setDbStatus("connected");
+            setDbMessage("Terhubung ke Supabase");
+            if (isManual) showNotification("Data Supabase berhasil disinkronkan!");
+          } else {
+            setDbStatus("not_ready");
+            setDbMessage("Tabel belum tersedia");
+          }
+        } catch (e) {
+          console.error("Gagal sinkronisasi Supabase:", e);
+          setDbStatus("error");
+          setDbMessage("Gagal terhubung");
+        } finally {
+          setIsSyncing(false);
+        }
+      };
+
+      useEffect(() => {
+        supabaseRef.current = null;
+        getSupabase();
+        syncFromSupabase(false);
+      }, [supabaseUrl, supabaseKey]);
+
+      // Statistik Perhitungan Realtime
+      const totalInfaq = useMemo(() => {
+        return donations
+          .filter(d => d.status === 'Terverifikasi')
+          .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
+      }, [donations]);
+
+      const totalDonatur = useMemo(() => {
+        const uniqueNames = new Set(donations.map(d => (d.donorName || '').trim()));
+        return donations.length === 0 ? 0 : Math.max(uniqueNames.size, donations.length);
+      }, [donations]);
+
+      const activePrograms = useMemo(() => {
+        return programs.filter(p => p.status === 'Aktif');
+      }, [programs]);
+
+      const danaTersalurkan = useMemo(() => {
+        return Math.round(totalInfaq * 0.85);
+      }, [totalInfaq]);
+
+      // ================= CRUD KATEGORI =================
+      const handleCreateCategory = async (e) => {
+        e.preventDefault();
+        const catName = categoryForm.name.trim();
+        if (!catName) {
+          showNotification("Nama kategori tidak boleh kosong");
+          return;
+        }
+
+        // Cek duplikasi
+        if (categories.some(c => c.name.toLowerCase() === catName.toLowerCase())) {
+          showNotification("Kategori dengan nama tersebut sudah ada!");
+          return;
+        }
+
+        const newCat = {
+          id: `CAT-${Date.now()}`,
+          name: catName,
+          description: categoryForm.description.trim() || 'Kategori Program Infaq'
+        };
+
+        setCategories(prev => [...prev, newCat]);
+        setProgramForm(prev => ({ ...prev, category: newCat.name }));
+        setGalleryForm(prev => ({ ...prev, category: newCat.name }));
+        setShowCategoryModal(false);
+        addLog(`Kategori baru: "${newCat.name}"`);
+        showNotification(`Kategori "${newCat.name}" berhasil ditambahkan!`);
+
+        const client = getSupabase();
+        if (client) {
+          try {
+            await client.from('categories').insert([{
+              id: newCat.id,
+              name: newCat.name,
+              description: newCat.description
+            }]);
+          } catch (err) {
+            console.error("Gagal simpan kategori ke Supabase:", err);
+          }
+        }
+
+        setCategoryForm({ name: '', description: '' });
+      };
+
+      // ================= CRUD PROGRAM =================
+      const handleCreateProgram = async (e) => {
+        e.preventDefault();
+        const targetClean = parseCleanNumber(programForm.targetAmount);
+
+        const newProg = {
+          id: `PROG-${Date.now()}`,
+          title: programForm.title.trim(),
+          category: programForm.category || (categories[0]?.name || 'Pendidikan'),
+          description: programForm.description.trim(),
+          fullContent: programForm.fullContent || programForm.description,
+          targetAmount: targetClean,
+          currentAmount: 0,
+          beneficiaries: Number(programForm.beneficiaries) || 0,
+          imageUrl: programForm.imageUrl.trim() || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80",
+          status: programForm.status
+        };
+
+        setPrograms(prev => [newProg, ...prev]);
+        setShowProgramModal(false);
+        addLog(`Program baru: "${newProg.title}"`);
+        showNotification("Program berhasil dibuat!");
+
+        const client = getSupabase();
+        if (client) {
+          try {
+            await client.from('programs').insert([{
+              id: newProg.id,
+              title: newProg.title,
+              category: newProg.category,
+              description: newProg.description,
+              full_content: newProg.fullContent,
+              target_amount: newProg.targetAmount,
+              current_amount: 0,
+              beneficiaries: newProg.beneficiaries,
+              image_url: newProg.imageUrl,
+              status: newProg.status
+            }]);
+          } catch (err) {
+            console.error("Gagal insert program ke Supabase:", err);
+          }
+        }
+
+        setProgramForm({
+          title: '',
+          category: categories[0]?.name || 'Pendidikan',
+          description: '',
+          fullContent: '',
+          targetAmount: '',
+          beneficiaries: '',
+          imageUrl: '',
+          status: 'Aktif'
+        });
+      };
+
+      const handleToggleProgramStatus = async (prog) => {
+        const newStatus = prog.status === 'Aktif' ? 'Selesai' : 'Aktif';
+        setPrograms(prev => prev.map(p => p.id === prog.id ? { ...p, status: newStatus } : p));
+        showNotification(`Status program diubah: ${newStatus}`);
+
+        const client = getSupabase();
+        if (client) {
+          await client.from('programs').update({ status: newStatus }).eq('id', prog.id);
+        }
+      };
+
+      // ================= CRUD GALERI =================
+      const handleCreateGallery = async (e) => {
+        e.preventDefault();
+        const newPhoto = {
+          id: `GAL-${Date.now()}`,
+          title: galleryForm.title.trim(),
+          category: galleryForm.category || (categories[0]?.name || 'Pendidikan'),
+          description: galleryForm.description.trim(),
+          imageUrl: galleryForm.imageUrl.trim() || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=700&q=80"
+        };
+
+        setGallery(prev => [newPhoto, ...prev]);
+        setShowGalleryModal(false);
+        addLog(`Foto kegiatan: "${newPhoto.title}"`);
+        showNotification("Foto dokumentasi berhasil disimpan!");
+
+        const client = getSupabase();
+        if (client) {
+          try {
+            await client.from('gallery').insert([{
+              id: newPhoto.id,
+              title: newPhoto.title,
+              category: newPhoto.category,
+              description: newPhoto.description,
+              image_url: newPhoto.imageUrl
+            }]);
+          } catch (err) {
+            console.error("Gagal simpan foto ke Supabase:", err);
+          }
+        }
+
+        setGalleryForm({ title: '', category: categories[0]?.name || 'Pendidikan', description: '', imageUrl: '' });
+      };
+
+      // ================= CRUD INFAQ =================
+      const handleCreateInfaq = async (e) => {
+        e.preventDefault();
+        const amountNum = parseCleanNumber(infaqForm.amount);
+        if (!amountNum || amountNum < 1000) {
+          showNotification("Nominal infaq minimal Rp 1.000");
+          return;
+        }
+
+        const newTrx = {
+          id: `TRX-${Math.floor(10000 + Math.random() * 90000)}`,
+          donorName: infaqForm.donorName.trim() || "Hamba Allah",
+          phone: infaqForm.phone.trim() || "-",
+          programTitle: infaqForm.programTitle || (programs[0]?.title || "Infaq Umum"),
+          amount: amountNum,
+          paymentMethod: infaqForm.paymentMethod,
+          status: infaqForm.status,
+          date: new Date().toLocaleString('id-ID'),
+          notes: infaqForm.notes.trim() || ""
+        };
+
+        setDonations(prev => [newTrx, ...prev]);
+
+        if (newTrx.status === 'Terverifikasi') {
+          setPrograms(prev => prev.map(p => {
+            if (p.title === newTrx.programTitle) {
+              const updatedAmt = (p.currentAmount || 0) + newTrx.amount;
+              const client = getSupabase();
+              if (client) {
+                client.from('programs').update({ current_amount: updatedAmt }).eq('id', p.id);
+              }
+              return { ...p, currentAmount: updatedAmt };
+            }
+            return p;
+          }));
+        }
+
+        setShowInfaqModal(false);
+        addLog(`Infaq baru ${formatIDR(newTrx.amount)} dari ${newTrx.donorName}`);
+        showNotification("Data infaq berhasil dicatat!");
+
+        const client = getSupabase();
+        if (client) {
+          try {
+            await client.from('donations').insert([{
+              id: newTrx.id,
+              donor_name: newTrx.donorName,
+              donor_phone: newTrx.phone,
+              program_title: newTrx.programTitle,
+              amount: newTrx.amount,
+              payment_method: newTrx.paymentMethod,
+              status: newTrx.status,
+              notes: newTrx.notes
+            }]);
+          } catch (err) {
+            console.error("Gagal simpan transaksi ke Supabase:", err);
+          }
+        }
+
+        setInfaqForm({
+          donorName: '',
+          phone: '',
+          programTitle: '',
+          amount: '',
+          paymentMethod: 'Transfer Bank',
+          status: 'Terverifikasi',
+          notes: ''
+        });
+      };
+
+      const handleVerifyInfaq = async (id) => {
+        let updatedStatus = 'Terverifikasi';
+        setDonations(prev => prev.map(d => {
+          if (d.id === id) {
+            updatedStatus = d.status === 'Terverifikasi' ? 'Pending' : 'Terverifikasi';
+            return { ...d, status: updatedStatus };
+          }
+          return d;
+        }));
+
+        showNotification(`Status transaksi diubah menjadi ${updatedStatus}`);
+        const client = getSupabase();
+        if (client) {
+          await client.from('donations').update({ status: updatedStatus }).eq('id', id);
+        }
+      };
+
+      // ================= PROSES EKSEKUSI HAPUS MODAL =================
+      const executeDelete = async () => {
+        const { type, id, title } = deleteModal;
+        const client = getSupabase();
+
+        if (type === 'program') {
+          setPrograms(prev => prev.filter(p => p.id !== id));
+          addLog(`Program "${title}" dihapus`);
+          showNotification("Program telah berhasil dihapus!");
+          if (client) {
+            try {
+              await client.from('programs').delete().eq('id', id);
+            } catch (e) {
+              console.error("Gagal hapus program dari Supabase:", e);
+            }
+          }
+        } else if (type === 'gallery') {
+          setGallery(prev => prev.filter(g => g.id !== id));
+          addLog(`Foto galeri "${title}" dihapus`);
+          showNotification("Foto galeri telah dihapus!");
+          if (client) {
+            try {
+              await client.from('gallery').delete().eq('id', id);
+            } catch (e) {
+              console.error("Gagal hapus galeri dari Supabase:", e);
+            }
+          }
+        } else if (type === 'infaq') {
+          setDonations(prev => prev.filter(d => d.id !== id));
+          addLog(`Transaksi infaq ID ${id} dihapus`);
+          showNotification("Transaksi infaq telah dihapus!");
+          if (client) {
+            try {
+              await client.from('donations').delete().eq('id', id);
+            } catch (e) {
+              console.error("Gagal hapus donasi dari Supabase:", e);
+            }
+          }
+        } else if (type === 'category') {
+          setCategories(prev => prev.filter(c => c.id !== id));
+          addLog(`Kategori "${title}" dihapus`);
+          showNotification(`Kategori "${title}" telah dihapus!`);
+          if (client) {
+            try {
+              await client.from('categories').delete().eq('id', id);
+            } catch (e) {
+              console.error("Gagal hapus kategori dari Supabase:", e);
+            }
+          }
+        }
+
+        setDeleteModal({ isOpen: false, type: null, id: null, title: '' });
+      };
+
+      // Handler Simpan Profil Organisasi ke Supabase
+      const handleSaveSettings = async (e) => {
+        e.preventDefault();
+        showNotification("Menyimpan profil lembaga...");
+        const client = getSupabase();
+        if (client) {
+          try {
+            await client.from('settings').upsert({
+              id: 'main',
+              org_name: settings.orgName,
+              whatsapp: settings.whatsapp,
+              email: settings.email,
+              address: settings.address,
+              tagline: settings.tagline
+            });
+            showNotification("Profil berhasil tersimpan di database Supabase!");
+          } catch (err) {
+            showNotification("Tersimpan secara lokal.");
+          }
+        }
+        addLog("Pengaturan profil diperbarui");
+      };
+
+      return (
+        <div className="flex min-h-screen bg-[#f4f7f6]">
+          {/* Toast Notification */}
+          {toast && (
+            <div className="fixed top-5 right-5 z-[9999] bg-[#1F5946] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-sm font-medium border border-[#B89355]/40 animate-fade-in">
+              <span className="w-2.5 h-2.5 rounded-full bg-[#B89355] animate-pulse"></span>
+              <span>{toast}</span>
+            </div>
+          )}
+
+          {/* ===================== SIDEBAR ===================== */}
+          <aside className="w-72 bg-[#1F5946] text-white flex flex-col flex-shrink-0 min-h-screen shadow-xl">
+            {/* Logo & Identitas Lembaga Kiri Atas */}
+            <div className="p-5 pb-5 border-b border-emerald-800/40">
+              <div className="flex items-center space-x-3.5">
+                {/* Logo Box */}
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-md flex-shrink-0 border border-emerald-200/20">
+                  <img 
+                    src={settings.logoUrl} 
+                    alt="Logo Nurul Hayah" 
+                    className="w-full h-full object-contain"
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.src = "https://placehold.co/100x100/1F5946/FFFFFF?text=NH";
+                    }}
+                  />
+                </div>
+
+                {/* Teks Identitas Lembaga */}
+                <div className="min-w-0 flex-1">
+                  <div className="text-[9px] font-extrabold tracking-[0.24em] text-emerald-200 uppercase leading-none mb-1">
+                    LEMBAGA INFAQ
+                  </div>
+                  <div className="text-lg font-black text-white tracking-tight leading-none mb-1">
+                    Nurul Hayah
+                  </div>
+                  <div className="text-[9.5px] font-semibold text-[#D4AF37] leading-tight tracking-tight">
+                    {settings.tagline || "Amanah Bersama, Sejahtera dan Berdaya"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Menu Navigasi Samping */}
+            <nav className="flex-1 px-4 space-y-1.5 mt-3">
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === 'dashboard'
+                    ? 'bg-white text-[#1F5946] shadow-sm'
+                    : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
+                }`}
+              >
+                <Icons.Dashboard />
+                <span>Dashboard Utama</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('program')}
+                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === 'program'
+                    ? 'bg-white text-[#1F5946] shadow-sm'
+                    : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
+                }`}
+              >
+                <Icons.Program />
+                <span>Kelola Program</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('kategori')}
+                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === 'kategori'
+                    ? 'bg-white text-[#1F5946] shadow-sm'
+                    : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
+                }`}
+              >
+                <Icons.Category />
+                <div className="flex-1 text-left flex items-center justify-between">
+                  <span>Kelola Kategori</span>
+                  <span className="text-[10px] bg-emerald-800/80 text-emerald-200 px-2 py-0.5 rounded-full font-bold">
+                    {categories.length}
+                  </span>
+                </div>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('infaq')}
+                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === 'infaq'
+                    ? 'bg-white text-[#1F5946] shadow-sm'
+                    : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
+                }`}
+              >
+                <Icons.Infaq />
+                <span>Data Infaq & Transaksi</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('donatur')}
+                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === 'donatur'
+                    ? 'bg-white text-[#1F5946] shadow-sm'
+                    : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
+                }`}
+              >
+                <Icons.Users />
+                <span>Data Donatur</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('galeri')}
+                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === 'galeri'
+                    ? 'bg-white text-[#1F5946] shadow-sm'
+                    : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
+                }`}
+              >
+                <Icons.Media />
+                <span>Galeri & Media</span>
+              </button>
+
+              <button
+                onClick={() => setActiveTab('pengaturan')}
+                className={`w-full flex items-center space-x-3.5 px-4 py-3 rounded-2xl text-sm font-bold transition-all ${
+                  activeTab === 'pengaturan'
+                    ? 'bg-white text-[#1F5946] shadow-sm'
+                    : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
+                }`}
+              >
+                <Icons.Settings />
+                <span>Pengaturan & Database</span>
+              </button>
+            </nav>
+
+            {/* Footer Sidebar */}
+            <div className="p-4 border-t border-emerald-800/40 text-xs text-emerald-200/60 text-center">
+              Lembaga Infaq Nurul Hayah &copy; 2026
+            </div>
+          </aside>
+
+          {/* ===================== KONTEN UTAMA ===================== */}
+          <main className="flex-1 p-6 sm:p-10 overflow-y-auto">
+            {/* Header Atas */}
+            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+              <div>
+                <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+                  {activeTab === 'dashboard' && "Dashboard Utama"}
+                  {activeTab === 'program' && "Kelola Program Infaq"}
+                  {activeTab === 'kategori' && "Kelola Kategori Program"}
+                  {activeTab === 'infaq' && "Data Infaq & Transaksi Masuk"}
+                  {activeTab === 'donatur' && "Data Donatur Terdaftar"}
+                  {activeTab === 'galeri' && "Kelola Galeri Dokumentasi"}
+                  {activeTab === 'pengaturan' && "Pengaturan & Konfigurasi Supabase"}
+                </h1>
+                <p className="text-xs text-slate-400 mt-0.5">Sistem Administrasi dan Penyaluran Infaq</p>
+              </div>
+
+              {/* Status Bar Kanan */}
+              <div className="flex items-center space-x-3 flex-wrap gap-y-2">
+                <button
+                  onClick={() => syncFromSupabase(true)}
+                  disabled={isSyncing}
+                  className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm flex items-center space-x-1.5 transition"
+                  title="Tarik ulang data dari Supabase"
+                >
+                  <span className={isSyncing ? 'animate-spin' : ''}><Icons.Sync /></span>
+                  <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkronkan'}</span>
+                </button>
+
+                {/* Status Badge Supabase */}
+                {dbStatus === 'connected' ? (
+                  <span className="bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span>Database Terhubung</span>
+                  </span>
+                ) : dbStatus === 'not_ready' ? (
+                  <button 
+                    onClick={() => setActiveTab('pengaturan')}
+                    className="bg-amber-50 text-amber-800 border border-amber-200 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-2 hover:bg-amber-100 transition"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span>Tabel Belum Siap (Lihat SQL)</span>
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => setActiveTab('pengaturan')}
+                    className="bg-rose-50 text-rose-800 border border-rose-200 text-xs font-semibold px-3 py-1.5 rounded-full flex items-center space-x-2 hover:bg-rose-100 transition"
+                  >
+                    <span className="w-2 h-2 rounded-full bg-rose-500"></span>
+                    <span>Koneksi Supabase Error</span>
+                  </button>
+                )}
+
+                <span className="bg-emerald-50 text-[#1F5946] border border-emerald-200/70 text-xs font-bold px-3.5 py-1.5 rounded-full shadow-sm">
+                  Admin: INFAQNUHA
+                </span>
+              </div>
+            </header>
+
+            {/* TAB 1: DASHBOARD UTAMA */}
+            {activeTab === 'dashboard' && (
+              <div className="space-y-8 animate-fade-in">
+                {/* 4 Kotak Metrik Statistik */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 mb-1">Total Infaq Terkumpul</div>
+                      <div className="text-2xl font-black text-slate-900 tracking-tight">
+                        {formatIDR(totalInfaq)}
+                      </div>
+                    </div>
+                    <div className="text-xs font-bold text-emerald-600 mt-4">
+                      Status Terverifikasi
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 mb-1">Total Donatur</div>
+                      <div className="text-2xl font-black text-slate-900 tracking-tight">
+                        {totalDonatur}
+                      </div>
+                    </div>
+                    <div className="text-xs font-medium text-slate-400 mt-4">
+                      Terdaftar di sistem
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 mb-1">Program Aktif</div>
+                      <div className="text-2xl font-black text-[#B89355] tracking-tight">
+                        {activePrograms.length} Program
+                      </div>
+                    </div>
+                    <div className="text-xs font-medium text-slate-400 mt-4">
+                      Dari total {programs.length} program
+                    </div>
+                  </div>
+
+                  <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                    <div>
+                      <div className="text-xs font-bold text-slate-400 mb-1">Dana Tersalurkan</div>
+                      <div className="text-2xl font-black text-[#1F5946] tracking-tight">
+                        {formatIDR(danaTersalurkan)}
+                      </div>
+                    </div>
+                    <div className="text-xs font-medium text-slate-400 mt-4">
+                      Akumulasi penyaluran
+                    </div>
+                  </div>
+                </div>
+
+                {/* Infaq Terbaru & Log Sistem */}
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  <div className="lg:col-span-7 bg-white p-6 sm:p-7 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg font-bold text-slate-900">Infaq Terbaru</h2>
+                        {donations.length > 0 && (
+                          <button 
+                            onClick={() => setActiveTab('infaq')}
+                            className="text-xs font-bold text-slate-500 hover:text-[#1F5946] transition flex items-center space-x-1"
+                          >
+                            <span>Semua</span>
+                            <span>→</span>
+                          </button>
+                        )}
+                      </div>
+
+                      {donations.length === 0 ? (
+                        <div className="py-12 px-4 text-center rounded-2xl bg-slate-50/60 border border-dashed border-slate-200">
+                          <div className="w-12 h-12 bg-emerald-50 text-[#1F5946] rounded-2xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+                            <Icons.Infaq />
+                          </div>
+                          <h3 className="font-bold text-slate-700 text-sm">Belum Ada Infaq Masuk</h3>
+                          <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
+                            Data transaksi infaq masih kosong. Data akan terupdate otomatis saat ada donasi masuk atau dicatat manual.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-3.5">
+                          {donations.slice(0, 5).map((d) => (
+                            <div 
+                              key={d.id} 
+                              className="p-4 rounded-2xl bg-slate-50/90 border border-slate-100 flex items-center justify-between hover:bg-slate-100/70 transition"
+                            >
+                              <div className="pr-4">
+                                <div className="font-bold text-slate-900 text-sm">{d.donorName}</div>
+                                <div className="text-xs text-slate-400 mt-0.5 line-clamp-1">{d.programTitle}</div>
+                              </div>
+                              <div className="text-right flex-shrink-0">
+                                <div className="font-black text-slate-900 text-sm tracking-tight">{formatIDR(d.amount)}</div>
+                                <span className={`inline-block mt-1 text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                                  d.status === 'Terverifikasi' 
+                                    ? 'bg-emerald-100 text-emerald-800' 
+                                    : 'bg-amber-100 text-amber-800'
+                                }`}>
+                                  {d.status}
+                                </span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-slate-100 flex justify-end">
+                      <button
+                        onClick={() => setShowInfaqModal(true)}
+                        className="text-xs font-bold bg-[#1F5946] text-white px-4 py-2.5 rounded-xl hover:bg-[#174435] transition flex items-center space-x-1.5 shadow-sm"
+                      >
+                        <Icons.Plus />
+                        <span>Catat Infaq Baru</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="lg:col-span-5 bg-white p-6 sm:p-7 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
+                    <div>
+                      <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-lg font-bold text-slate-900">Log Sistem Internal</h2>
+                        <span className="text-[11px] text-slate-400 font-medium">{logs.length} riwayat</span>
+                      </div>
+
+                      <div className="space-y-3.5">
+                        {logs.map((log) => (
+                          <div 
+                            key={log.id} 
+                            className="p-4 rounded-2xl bg-slate-50/90 border-l-4 border-[#1F5946] border border-slate-100"
+                          >
+                            <div className="font-bold text-slate-800 text-xs leading-snug">{log.title}</div>
+                            <div className="text-[10px] text-slate-400 mt-1 font-medium">{log.meta}</div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mt-6 pt-4 border-t border-slate-100 text-right">
+                      <button 
+                        onClick={() => setLogs([logs[0]])}
+                        className="text-xs font-semibold text-slate-400 hover:text-slate-600"
+                      >
+                        Bersihkan Riwayat
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 2: KELOLA PROGRAM */}
+            {activeTab === 'program' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Daftar Program Infaq</h2>
+                    <p className="text-xs text-slate-500">Program yang ditambahkan di sini otomatis terhubung dan tampil di halaman publik.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setProgramImageMode('upload');
+                      setShowProgramModal(true);
+                    }}
+                    className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
+                  >
+                    <Icons.Plus />
+                    <span>Tambah Program Baru</span>
+                  </button>
+                </div>
+
+                {programs.length === 0 ? (
+                  <div className="bg-white p-12 text-center rounded-3xl border border-dashed border-slate-200 space-y-3">
+                    <div className="w-12 h-12 bg-emerald-50 text-[#1F5946] rounded-2xl flex items-center justify-center mx-auto">
+                      <Icons.Program />
+                    </div>
+                    <h3 className="font-bold text-slate-700 text-sm">Belum Ada Program Terdaftar</h3>
+                    <p className="text-xs text-slate-400">Silakan klik "Tambah Program Baru" di atas untuk membuat program infaq pertama.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {programs.map((prog) => {
+                      const percent = prog.targetAmount > 0 ? Math.min(Math.round((prog.currentAmount / prog.targetAmount) * 100), 100) : 0;
+                      return (
+                        <div key={prog.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between">
+                          <div>
+                            <div className="relative h-44 bg-slate-100">
+                              <img 
+                                src={prog.imageUrl} 
+                                alt={prog.title} 
+                                className="w-full h-full object-cover" 
+                                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"; }}
+                              />
+                              <span className="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-[#1F5946] text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm">
+                                {prog.category}
+                              </span>
+                              <span className={`absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full text-white ${
+                                prog.status === 'Aktif' ? 'bg-[#1F5946]' : 'bg-slate-500'
+                              }`}>
+                                {prog.status}
+                              </span>
+                            </div>
+
+                            <div className="p-5">
+                              <h3 className="font-bold text-slate-900 text-base line-clamp-2 mb-2">{prog.title}</h3>
+                              <p className="text-xs text-slate-500 line-clamp-2 mb-4">{prog.description}</p>
+                              
+                              <div className="space-y-2">
+                                <div className="flex justify-between text-xs font-bold">
+                                  <span className="text-[#1F5946]">{formatIDR(prog.currentAmount)}</span>
+                                  <span className="text-[#B89355]">{percent}%</span>
+                                </div>
+                                <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
+                                  <div className="bg-[#1F5946] h-full" style={{ width: `${percent}%` }}></div>
+                                </div>
+                                <div className="flex justify-between text-[11px] text-slate-400">
+                                  <span>Target: {formatIDR(prog.targetAmount)}</span>
+                                  <span>{prog.beneficiaries} Penerima</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex justify-between items-center">
+                            <button
+                              onClick={() => handleToggleProgramStatus(prog)}
+                              className="text-xs font-bold text-slate-600 hover:text-[#1F5946] transition"
+                            >
+                              Ubah Status ({prog.status === 'Aktif' ? 'Selesai' : 'Aktif'})
+                            </button>
+                            <button
+                              onClick={() => setDeleteModal({
+                                isOpen: true,
+                                type: 'program',
+                                id: prog.id,
+                                title: prog.title
+                              })}
+                              className="text-xs font-bold text-red-600 hover:text-red-700 flex items-center space-x-1 p-1 hover:bg-red-50 rounded-lg transition"
+                            >
+                              <Icons.Trash />
+                              <span>Hapus</span>
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB BARU: KELOLA KATEGORI */}
+            {activeTab === 'kategori' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Manajemen Kategori Program</h2>
+                    <p className="text-xs text-slate-500">Kelola kategori yang digunakan untuk mengelompokkan program dan galeri kegiatan.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowCategoryModal(true)}
+                    className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
+                  >
+                    <Icons.Plus />
+                    <span>Tambah Kategori Baru</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {categories.map((cat) => {
+                    const programCount = programs.filter(p => p.category === cat.name).length;
+                    const galleryCount = gallery.filter(g => g.category === cat.name).length;
+                    return (
+                      <div key={cat.id} className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition">
+                        <div>
+                          <div className="flex items-center justify-between mb-3">
+                            <span className="w-10 h-10 rounded-2xl bg-emerald-50 text-[#1F5946] flex items-center justify-center font-bold">
+                              <Icons.Category />
+                            </span>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-[10px] font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full">
+                                {programCount} Program
+                              </span>
+                              <span className="text-[10px] font-bold bg-amber-50 text-[#B89355] px-2.5 py-1 rounded-full">
+                                {galleryCount} Galeri
+                              </span>
+                            </div>
+                          </div>
+
+                          <h3 className="font-bold text-base text-slate-900 mb-1">{cat.name}</h3>
+                          <p className="text-xs text-slate-400 line-clamp-2">{cat.description || 'Tidak ada keterangan'}</p>
+                        </div>
+
+                        <div className="mt-5 pt-4 border-t border-slate-100 flex justify-between items-center">
+                          <span className="text-[10px] font-mono text-slate-400">{cat.id}</span>
+                          <button
+                            onClick={() => setDeleteModal({
+                              isOpen: true,
+                              type: 'category',
+                              id: cat.id,
+                              title: cat.name
+                            })}
+                            className="text-xs font-bold text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition flex items-center space-x-1"
+                            title="Hapus Kategori"
+                          >
+                            <Icons.Trash />
+                            <span>Hapus</span>
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* TAB 3: DATA INFAQ & TRANSAKSI */}
+            {activeTab === 'infaq' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Catatan Semua Infaq</h2>
+                    <p className="text-xs text-slate-500">Daftar transaksi donasi yang masuk tersimpan langsung di tabel Supabase.</p>
+                  </div>
+                  <button
+                    onClick={() => setShowInfaqModal(true)}
+                    className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
+                  >
+                    <Icons.Plus />
+                    <span>Catat Infaq Manual</span>
+                  </button>
+                </div>
+
+                <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead className="bg-slate-50 text-slate-500 font-bold border-b border-slate-100 uppercase tracking-wider text-[10px]">
+                        <tr>
+                          <th className="p-4">ID Transaksi</th>
+                          <th className="p-4">Donatur</th>
+                          <th className="p-4">Program Tujuan</th>
+                          <th className="p-4">Nominal</th>
+                          <th className="p-4">Metode</th>
+                          <th className="p-4">Status</th>
+                          <th className="p-4">Waktu</th>
+                          <th className="p-4 text-center">Aksi</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {donations.length === 0 ? (
+                          <tr>
+                            <td colSpan="8" className="p-12 text-center text-slate-400">
+                              <p className="font-semibold">Belum ada data transaksi infaq.</p>
+                              <p className="text-[11px] text-slate-400 mt-0.5">Klik tombol "Catat Infaq Manual" di atas untuk menambahkan data transaksi pertama.</p>
+                            </td>
+                          </tr>
+                        ) : (
+                          donations.map((d) => (
+                            <tr key={d.id} className="hover:bg-slate-50/80 transition">
+                              <td className="p-4 font-mono font-bold text-slate-800">{d.id}</td>
+                              <td className="p-4">
+                                <div className="font-bold text-slate-900">{d.donorName}</div>
+                                <div className="text-[11px] text-slate-400">{d.phone || '-'}</div>
+                              </td>
+                              <td className="p-4 max-w-xs text-slate-700 font-medium">{d.programTitle}</td>
+                              <td className="p-4 font-black text-[#1F5946]">{formatIDR(d.amount)}</td>
+                              <td className="p-4 text-slate-600 font-medium">{d.paymentMethod}</td>
+                              <td className="p-4">
+                                <button
+                                  onClick={() => handleVerifyInfaq(d.id)}
+                                  className={`px-3 py-1 rounded-full text-[10px] font-extrabold cursor-pointer transition ${
+                                    d.status === 'Terverifikasi'
+                                      ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200'
+                                      : 'bg-amber-100 text-amber-800 hover:bg-amber-200'
+                                  }`}
+                                  title="Klik untuk ubah status verifikasi"
+                                >
+                                  {d.status} ↻
+                                </button>
+                              </td>
+                              <td className="p-4 text-slate-400 text-[11px] whitespace-nowrap">{d.date}</td>
+                              <td className="p-4 text-center">
+                                <button
+                                  onClick={() => setDeleteModal({
+                                    isOpen: true,
+                                    type: 'infaq',
+                                    id: d.id,
+                                    title: `Infaq ${d.donorName} (${formatIDR(d.amount)})`
+                                  })}
+                                  className="text-red-500 hover:text-red-700 p-1.5 rounded-lg hover:bg-red-50 transition"
+                                  title="Hapus transaksi"
+                                >
+                                  <Icons.Trash />
+                                </button>
+                              </td>
+                            </tr>
+                          ))
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* TAB 4: DATA DONATUR */}
+            {activeTab === 'donatur' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                  <h2 className="text-lg font-bold text-slate-900">Database Donatur</h2>
+                  <p className="text-xs text-slate-500">Daftar donatur dermawan yang tercatat di sistem.</p>
+                </div>
+
+                {donations.length === 0 ? (
+                  <div className="bg-white p-12 text-center rounded-3xl border border-dashed border-slate-200 space-y-3">
+                    <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-2xl flex items-center justify-center mx-auto">
+                      <Icons.Users />
+                    </div>
+                    <h3 className="font-bold text-slate-700 text-sm">Belum Ada Data Donatur</h3>
+                    <p className="text-xs text-slate-400">Data donatur akan otomatis tersusun saat ada infaq masuk.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    {donations.map((d, index) => (
+                      <div key={index} className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm flex items-center space-x-4">
+                        <div className="w-12 h-12 rounded-2xl bg-emerald-50 text-[#1F5946] font-black flex items-center justify-center text-base border border-emerald-100">
+                          {d.donorName.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-slate-900 text-sm truncate">{d.donorName}</div>
+                          <div className="text-xs text-slate-400">{d.phone || 'Nomor Tidak Tersedia'}</div>
+                          <div className="text-xs font-extrabold text-[#1F5946] mt-1">{formatIDR(d.amount)}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 5: GALERI & MEDIA */}
+            {activeTab === 'galeri' && (
+              <div className="space-y-6 animate-fade-in">
+                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Galeri & Media Dokumentasi</h2>
+                    <p className="text-xs text-slate-500">Foto dokumentasi penyaluran yang tampil di website publik.</p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setGalleryImageMode('upload');
+                      setShowGalleryModal(true);
+                    }}
+                    className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
+                  >
+                    <Icons.Plus />
+                    <span>Tambah Dokumentasi Foto</span>
+                  </button>
+                </div>
+
+                {gallery.length === 0 ? (
+                  <div className="bg-white p-12 text-center rounded-3xl border border-dashed border-slate-200 space-y-3">
+                    <div className="w-12 h-12 bg-slate-100 text-slate-400 rounded-full flex items-center justify-center mx-auto">
+                      <Icons.Media />
+                    </div>
+                    <h3 className="font-bold text-slate-700 text-sm">Belum Ada Foto Galeri</h3>
+                    <p className="text-xs text-slate-400">Klik tombol di atas untuk menambahkan foto dokumentasi baru.</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {gallery.map(item => (
+                      <div key={item.id} className="bg-white rounded-3xl overflow-hidden border border-slate-100 shadow-sm group">
+                        <div className="relative h-48 bg-slate-100">
+                          <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                          <span className="absolute top-3 left-3 bg-[#B89355] text-white text-[10px] font-extrabold px-3 py-1 rounded-full uppercase shadow-sm">
+                            {item.category}
+                          </span>
+                        </div>
+                        <div className="p-4 flex justify-between items-center">
+                          <div className="pr-2">
+                            <h4 className="font-bold text-slate-800 text-sm line-clamp-1">{item.title}</h4>
+                            <p className="text-xs text-slate-400 line-clamp-1">{item.description}</p>
+                          </div>
+                          <button
+                            onClick={() => setDeleteModal({
+                              isOpen: true,
+                              type: 'gallery',
+                              id: item.id,
+                              title: item.title
+                            })}
+                            className="text-red-500 hover:text-red-700 p-2 hover:bg-red-50 rounded-xl transition flex-shrink-0"
+                            title="Hapus Foto"
+                          >
+                            <Icons.Trash />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* TAB 6: PENGATURAN & DATABASE SUPABASE */}
+            {activeTab === 'pengaturan' && (
+              <div className="max-w-4xl space-y-6 animate-fade-in">
+                <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h2 className="text-lg font-bold text-slate-900">Koneksi Database Supabase</h2>
+                      <p className="text-xs text-slate-400">Data tersimpan di project Supabase Nurul Hayah.</p>
+                    </div>
+                    <span className={`text-xs font-bold px-3 py-1 rounded-full ${
+                      dbStatus === 'connected' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    }`}>
+                      {dbStatus === 'connected' ? 'Status: Terhubung' : `Status: ${dbMessage || 'Menghubungkan...'}`}
+                    </span>
+                  </div>
+
+                  <div className="space-y-4 pt-2">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Supabase URL</label>
+                      <input 
+                        type="text" 
+                        value={supabaseUrl} 
+                        onChange={(e) => setSupabaseUrl(e.target.value)}
+                        placeholder="https://xxxx.supabase.co"
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Supabase Anon Key (Public)</label>
+                      <input 
+                        type="text" 
+                        value={supabaseKey} 
+                        onChange={(e) => setSupabaseKey(e.target.value)}
+                        placeholder="eyJhbGciOiJIUzI1Ni..."
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      />
+                    </div>
+
+                    <div className="flex items-center space-x-3 pt-2">
+                      <button
+                        onClick={() => syncFromSupabase(true)}
+                        className="px-5 py-2.5 bg-[#1F5946] text-white text-xs font-bold rounded-xl shadow-md hover:bg-[#174435] transition flex items-center space-x-2"
+                      >
+                        <Icons.Sync />
+                        <span>Tes & Hubungkan Sekarang</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Panduan Struktur Tabel SQL */}
+                  <div className="mt-6 pt-6 border-t border-slate-100">
+                    <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">Panduan Skrip SQL Editor Supabase</h3>
+                    <p className="text-xs text-slate-500 mb-3">
+                      Jika tabel belum pernah dibuat di dashboard Supabase Anda, cukup buka menu <b>SQL Editor</b> di Supabase, lalu jalankan query di bawah ini agar tabel kategori & tabel lainnya otomatis aktif:
+                    </p>
+                    <pre className="p-4 bg-slate-900 text-emerald-400 rounded-2xl text-[11px] overflow-x-auto font-mono leading-relaxed select-all">
+{`-- 0. Tabel Categories (Kategori Dinamis)
+CREATE TABLE IF NOT EXISTS categories (
+  id TEXT PRIMARY KEY,
+  name TEXT UNIQUE NOT NULL,
+  description TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 1. Tabel Programs
+CREATE TABLE IF NOT EXISTS programs (
+  id TEXT PRIMARY KEY,
+  title TEXT NOT NULL,
+  category TEXT DEFAULT 'Pendidikan',
+  description TEXT,
+  full_content TEXT,
+  target_amount BIGINT DEFAULT 0,
+  current_amount BIGINT DEFAULT 0,
+  beneficiaries INT DEFAULT 0,
+  image_url TEXT,
+  status TEXT DEFAULT 'Aktif',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 2. Tabel Donations
+CREATE TABLE IF NOT EXISTS donations (
+  id TEXT PRIMARY KEY,
+  donor_name TEXT,
+  donor_phone TEXT,
+  program_title TEXT,
+  amount BIGINT NOT NULL,
+  payment_method TEXT,
+  status TEXT DEFAULT 'Terverifikasi',
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 3. Tabel Gallery
+CREATE TABLE IF NOT EXISTS gallery (
+  id TEXT PRIMARY KEY,
+  title TEXT,
+  category TEXT,
+  description TEXT,
+  image_url TEXT,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- 4. Tabel Settings
+CREATE TABLE IF NOT EXISTS settings (
+  id TEXT PRIMARY KEY,
+  org_name TEXT,
+  whatsapp TEXT,
+  email TEXT,
+  address TEXT,
+  tagline TEXT,
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Nonaktifkan RLS agar dapat dibaca & ditulis langsung
+ALTER TABLE categories DISABLE ROW LEVEL SECURITY;
+ALTER TABLE programs DISABLE ROW LEVEL SECURITY;
+ALTER TABLE donations DISABLE ROW LEVEL SECURITY;
+ALTER TABLE gallery DISABLE ROW LEVEL SECURITY;
+ALTER TABLE settings DISABLE ROW LEVEL SECURITY;`}
+                    </pre>
+                  </div>
+                </div>
+
+                {/* Pengaturan Organisasi */}
+                <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">Pengaturan Organisasi</h2>
+                    <p className="text-xs text-slate-400">Informasi ini tersimpan langsung di tabel 'settings' database.</p>
+                  </div>
+
+                  <form onSubmit={handleSaveSettings} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">Nama Lembaga</label>
+                      <input 
+                        type="text" 
+                        value={settings.orgName} 
+                        onChange={(e) => setSettings({ ...settings, orgName: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">WhatsApp CS / Amil</label>
+                        <input 
+                          type="text" 
+                          value={settings.whatsapp} 
+                          onChange={(e) => setSettings({ ...settings, whatsapp: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">Email Resmi</label>
+                        <input 
+                          type="email" 
+                          value={settings.email} 
+                          onChange={(e) => setSettings({ ...settings, email: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">Alamat Kantor</label>
+                      <textarea 
+                        rows={2}
+                        value={settings.address} 
+                        onChange={(e) => setSettings({ ...settings, address: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      ></textarea>
+                    </div>
+
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-[#1F5946] text-white text-xs font-bold rounded-xl shadow-md hover:bg-[#174435] transition"
+                    >
+                      Simpan Profil ke Database
+                    </button>
+                  </form>
+                </div>
+              </div>
+            )}
+          </main>
+
+          {/* ===================== MODAL KONFIRMASI HAPUS KUSTOM ===================== */}
+          {deleteModal.isOpen && (
+            <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 animate-fade-in">
+              <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 text-center">
+                <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                  <Icons.Trash />
+                </div>
+                <h3 className="text-base font-bold text-slate-900 mb-1">Hapus Data Ini?</h3>
+                <p className="text-xs text-slate-500 mb-6">
+                  Apakah Anda yakin ingin menghapus <b>"{deleteModal.title}"</b>? Data ini juga akan otomatis dihapus dari database Supabase.
+                </p>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={() => setDeleteModal({ isOpen: false, type: null, id: null, title: '' })}
+                    className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold hover:bg-slate-50 transition"
+                  >
+                    Batal
+                  </button>
+                  <button
+                    onClick={executeDelete}
+                    className="flex-1 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold shadow-md transition"
+                  >
+                    Ya, Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ===================== MODAL TAMBAH KATEGORI BARU ===================== */}
+          {showCategoryModal && (
+            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                  <div className="flex items-center space-x-2">
+                    <span className="w-8 h-8 rounded-xl bg-emerald-50 text-[#1F5946] flex items-center justify-center">
+                      <Icons.Category />
+                    </span>
+                    <h3 className="text-base font-bold text-slate-900">Tambah Kategori Baru</h3>
+                  </div>
+                  <button onClick={() => setShowCategoryModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+                </div>
+
+                <form onSubmit={handleCreateCategory} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Kategori</label>
+                    <input 
+                      type="text" 
+                      required 
+                      placeholder="Contoh: Tanggap Bencana, Zakat Fitrah"
+                      value={categoryForm.name}
+                      onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi / Keterangan Singkat</label>
+                    <textarea 
+                      rows={3} 
+                      placeholder="Keterangan sasaran atau bidang kegiatan kategori ini..."
+                      value={categoryForm.description}
+                      onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    ></textarea>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-3">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowCategoryModal(false)}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold"
+                    >
+                      Batal
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold hover:bg-[#174435]"
+                    >
+                      Simpan Kategori
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* ===================== MODAL TAMBAH PROGRAM ===================== */}
+          {showProgramModal && (
+            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                  <h3 className="text-lg font-bold text-slate-900">Tambah Program Infaq Baru</h3>
+                  <button onClick={() => setShowProgramModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+                </div>
+
+                <form onSubmit={handleCreateProgram} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Judul Program</label>
+                    <input 
+                      type="text" 
+                      required 
+                      placeholder="Contoh: Paket Pangan Santri Yatim"
+                      value={programForm.title}
+                      onChange={(e) => setProgramForm({ ...programForm, title: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-xs font-bold text-slate-700 uppercase">Kategori</label>
+                        <button
+                          type="button"
+                          onClick={() => setShowCategoryModal(true)}
+                          className="text-[10px] font-bold text-[#1F5946] hover:underline flex items-center space-x-0.5"
+                        >
+                          <span>+ Buat Baru</span>
+                        </button>
+                      </div>
+                      <select
+                        value={programForm.category}
+                        onChange={(e) => setProgramForm({ ...programForm, category: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      >
+                        {categories.map((cat) => (
+                          <option key={cat.id} value={cat.name}>{cat.name}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Penerima Manfaat</label>
+                      <input 
+                        type="number" 
+                        placeholder="Contoh: 50"
+                        value={programForm.beneficiaries}
+                        onChange={(e) => setProgramForm({ ...programForm, beneficiaries: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Input Target Nominal dengan Titik Pemisah Ribuan Otomatis */}
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-xs font-bold text-slate-700 uppercase">Target Nominal Program</label>
+                      {programForm.targetAmount && (
+                        <span className="text-[11px] font-bold text-[#1F5946]">
+                          {formatIDR(parseCleanNumber(programForm.targetAmount))}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="relative flex items-center">
+                      <span className="absolute left-3.5 text-xs font-black text-slate-400 select-none">Rp</span>
+                      <input 
+                        type="text" 
+                        inputMode="numeric"
+                        required 
+                        placeholder="2.000.000"
+                        value={formatThousand(programForm.targetAmount)}
+                        onChange={(e) => {
+                          const rawDigits = e.target.value.replace(/\D/g, '');
+                          setProgramForm({ ...programForm, targetAmount: rawDigits });
+                        }}
+                        className="w-full pl-11 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-slate-800 tracking-wide outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      />
+                    </div>
+
+                    {/* Tombol Pintasan Cepat Nominal Target */}
+                    <div className="flex flex-wrap items-center gap-1.5 mt-2">
+                      <span className="text-[10px] text-slate-400 mr-1">Pilihan Cepat:</span>
+                      {[1000000, 2000000, 5000000, 10000000, 25000000, 50000000].map((nom) => (
+                        <button
+                          key={nom}
+                          type="button"
+                          onClick={() => setProgramForm({ ...programForm, targetAmount: String(nom) })}
+                          className="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-[#1F5946] hover:text-white text-slate-600 transition"
+                        >
+                          {nom >= 1000000 ? `${nom / 1000000} Jt` : formatThousand(nom)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pilihan Foto: Upload File vs Link URL */}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-bold text-slate-700 uppercase">Foto Sampul Program</label>
+                      <div className="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-[11px] font-bold">
+                        <button
+                          type="button"
+                          onClick={() => setProgramImageMode('upload')}
+                          className={`px-3 py-1 rounded-md flex items-center space-x-1.5 transition ${
+                            programImageMode === 'upload' ? 'bg-white text-[#1F5946] shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                          }`}
+                        >
+                          <Icons.Upload />
+                          <span>Upload File</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProgramImageMode('url')}
+                          className={`px-3 py-1 rounded-md flex items-center space-x-1.5 transition ${
+                            programImageMode === 'url' ? 'bg-white text-[#1F5946] shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                          }`}
+                        >
+                          <Icons.Link />
+                          <span>Link URL</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {programImageMode === 'upload' ? (
+                      <div className="relative border-2 border-dashed border-slate-200 hover:border-[#1F5946] rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50/50 group">
+                        <input 
+                          type="file" 
+                          accept="image/png, image/jpeg, image/webp, image/gif"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleProcessImageUpload(e.target.files[0], (dataUrl) => {
+                                setProgramForm(prev => ({ ...prev, imageUrl: dataUrl }));
+                              });
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        {programForm.imageUrl ? (
+                          <div className="flex items-center space-x-3.5 text-left">
+                            <img 
+                              src={programForm.imageUrl} 
+                              alt="Preview" 
+                              className="w-16 h-14 object-cover rounded-xl border border-slate-200 shadow-sm"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-slate-800 truncate">Foto Terpilih</p>
+                              <p className="text-[10px] text-emerald-600 font-semibold">Klik / seret file untuk mengganti foto</p>
+                              <span className="text-[9.5px] text-slate-400">Ukuran maksimal 5 MB</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="py-2">
+                            <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#1F5946] flex items-center justify-center mx-auto mb-2">
+                              <Icons.Upload />
+                            </div>
+                            <p className="text-xs font-bold text-slate-700">Pilih / Seret Foto ke Sini</p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">Format: JPG, PNG, WEBP (Maksimal 5 MB)</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <input 
+                          type="url" 
+                          placeholder="https://images.unsplash.com/..."
+                          value={programForm.imageUrl}
+                          onChange={(e) => setProgramForm({ ...programForm, imageUrl: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                        />
+                        {programForm.imageUrl && (
+                          <div className="flex items-center space-x-2 text-[11px] text-slate-500">
+                            <img src={programForm.imageUrl} alt="Preview" className="w-8 h-8 rounded-lg object-cover border" onError={(e) => e.target.style.display = 'none'} />
+                            <span>Pratinjau tautan foto</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi Singkat</label>
+                    <textarea 
+                      rows={3} 
+                      required
+                      placeholder="Penjelasan ringkas mengenai sasaran infaq..."
+                      value={programForm.description}
+                      onChange={(e) => setProgramForm({ ...programForm, description: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    ></textarea>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-3">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowProgramModal(false)}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold"
+                    >
+                      Batal
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold hover:bg-[#174435]"
+                    >
+                      Simpan Program
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* ===================== MODAL CATAT INFAQ MANUAL ===================== */}
+          {showInfaqModal && (
+            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                  <h3 className="text-lg font-bold text-slate-900">Catat Infaq / Donasi Baru</h3>
+                  <button onClick={() => setShowInfaqModal(false)} className="text-slate-400 hover:text-slate-600 text-lg font-bold">✕</button>
+                </div>
+
+                <form onSubmit={handleCreateInfaq} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Donatur</label>
+                    <input 
+                      type="text" 
+                      placeholder="Boleh diisi 'Hamba Allah'"
+                      value={infaqForm.donorName}
+                      onChange={(e) => setInfaqForm({ ...infaqForm, donorName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal (Rp)</label>
+                      <div className="relative flex items-center">
+                        <span className="absolute left-3 text-xs font-black text-slate-400 select-none">Rp</span>
+                        <input 
+                          type="text" 
+                          inputMode="numeric"
+                          required
+                          placeholder="100.000"
+                          value={formatThousand(infaqForm.amount)}
+                          onChange={(e) => {
+                            const rawDigits = e.target.value.replace(/\D/g, '');
+                            setInfaqForm({ ...infaqForm, amount: rawDigits });
+                          }}
+                          className="w-full pl-9 pr-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-black text-[#1F5946] outline-none focus:ring-2 focus:ring-[#1F5946]"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap gap-1 mt-1.5">
+                        {[25000, 50000, 100000, 250000, 500000].map((nom) => (
+                          <button
+                            key={nom}
+                            type="button"
+                            onClick={() => setInfaqForm({ ...infaqForm, amount: String(nom) })}
+                            className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 hover:bg-[#1F5946] hover:text-white text-slate-600 transition"
+                          >
+                            {nom >= 1000 ? `${nom / 1000}k` : nom}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">No. WhatsApp/HP</label>
+                      <input 
+                        type="tel" 
+                        placeholder="08xxxx"
+                        value={infaqForm.phone}
+                        onChange={(e) => setInfaqForm({ ...infaqForm, phone: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Program Tujuan</label>
+                    <select
+                      value={infaqForm.programTitle}
+                      onChange={(e) => setInfaqForm({ ...infaqForm, programTitle: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    >
+                      <option value="Infaq Umum">Infaq Umum / Operasional</option>
+                      {programs.map(p => (
+                        <option key={p.id} value={p.title}>{p.title}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Metode Bayar</label>
+                      <select
+                        value={infaqForm.paymentMethod}
+                        onChange={(e) => setInfaqForm({ ...infaqForm, paymentMethod: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      >
+                        <option value="Transfer Bank">Transfer Bank</option>
+                        <option value="QRIS Online">QRIS Online</option>
+                        <option value="WhatsApp Transfer">WhatsApp Transfer</option>
+                        <option value="Tunai / Kantor">Tunai Langsung</option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Status Verifikasi</label>
+                      <select
+                        value={infaqForm.status}
+                        onChange={(e) => setInfaqForm({ ...infaqForm, status: e.target.value })}
+                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                      >
+                        <option value="Terverifikasi">Terverifikasi</option>
+                        <option value="Pending">Pending</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Doa / Catatan Niat</label>
+                    <textarea 
+                      rows={2} 
+                      placeholder="Catatan dari donatur..."
+                      value={infaqForm.notes}
+                      onChange={(e) => setInfaqForm({ ...infaqForm, notes: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    ></textarea>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-3">
+                    <button 
+                      type="button" 
+                      onClick={() => setShowInfaqModal(false)}
+                      className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold"
+                    >
+                      Batal
+                    </button>
+                    <button 
+                      type="submit" 
+                      className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold hover:bg-[#174435]"
+                    >
+                      Simpan Infaq
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+
+          {/* ===================== MODAL TAMBAH GALERI ===================== */}
+          {showGalleryModal && (
+            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white w-full max-w-md rounded-3xl p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+                <div className="flex justify-between items-center mb-4 pb-2 border-b border-slate-100">
+                  <h3 className="text-base font-bold text-slate-900">Tambah Foto Kegiatan</h3>
+                  <button onClick={() => setShowGalleryModal(false)} className="text-slate-400 font-bold">✕</button>
+                </div>
+
+                <form onSubmit={handleCreateGallery} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Judul Kegiatan</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="Contoh: Penyaluran Seragam Santri"
+                      value={galleryForm.title}
+                      onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                  </div>
+
+                  <div>
+                    <div className="flex justify-between items-center mb-1">
+                      <label className="block text-xs font-bold text-slate-700 uppercase">Kategori</label>
+                      <button
+                        type="button"
+                        onClick={() => setShowCategoryModal(true)}
+                        className="text-[10px] font-bold text-[#1F5946] hover:underline flex items-center space-x-0.5"
+                      >
+                        <span>+ Buat Baru</span>
+                      </button>
+                    </div>
+                    <select
+                      value={galleryForm.category}
+                      onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    >
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.name}>{cat.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-xs font-bold text-slate-700 uppercase">Foto Dokumentasi</label>
+                      <div className="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200 text-[10px] font-bold">
+                        <button
+                          type="button"
+                          onClick={() => setGalleryImageMode('upload')}
+                          className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition ${
+                            galleryImageMode === 'upload' ? 'bg-white text-[#1F5946] shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                          }`}
+                        >
+                          <Icons.Upload />
+                          <span>Upload File</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setGalleryImageMode('url')}
+                          className={`px-2.5 py-1 rounded-md flex items-center space-x-1 transition ${
+                            galleryImageMode === 'url' ? 'bg-white text-[#1F5946] shadow-sm' : 'text-slate-500 hover:text-slate-800'
+                          }`}
+                        >
+                          <Icons.Link />
+                          <span>Link URL</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    {galleryImageMode === 'upload' ? (
+                      <div className="relative border-2 border-dashed border-slate-200 hover:border-[#1F5946] rounded-2xl p-4 text-center cursor-pointer transition bg-slate-50/50">
+                        <input 
+                          type="file" 
+                          accept="image/png, image/jpeg, image/webp, image/gif"
+                          onChange={(e) => {
+                            if (e.target.files && e.target.files[0]) {
+                              handleProcessImageUpload(e.target.files[0], (dataUrl) => {
+                                setGalleryForm(prev => ({ ...prev, imageUrl: dataUrl }));
+                              });
+                            }
+                          }}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                        />
+                        {galleryForm.imageUrl ? (
+                          <div className="flex items-center space-x-3 text-left">
+                            <img 
+                              src={galleryForm.imageUrl} 
+                              alt="Preview" 
+                              className="w-14 h-12 object-cover rounded-xl border border-slate-200"
+                            />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-slate-800 truncate">Foto Siap Digunakan</p>
+                              <p className="text-[10px] text-emerald-600 font-semibold">Klik untuk ganti foto</p>
+                              <span className="text-[9px] text-slate-400">Maksimal 5 MB</span>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="py-2">
+                            <div className="w-8 h-8 rounded-full bg-emerald-50 text-[#1F5946] flex items-center justify-center mx-auto mb-1.5">
+                              <Icons.Upload />
+                            </div>
+                            <p className="text-xs font-bold text-slate-700">Pilih Foto dari Galeri / Kamera</p>
+                            <p className="text-[10px] text-slate-400 mt-0.5">JPG, PNG, WEBP (Maksimal 5 MB)</p>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        <input 
+                          type="url" 
+                          required={galleryImageMode === 'url'}
+                          placeholder="https://images.unsplash.com/..."
+                          value={galleryForm.imageUrl}
+                          onChange={(e) => setGalleryForm({ ...galleryForm, imageUrl: e.target.value })}
+                          className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                        />
+                        {galleryForm.imageUrl && (
+                          <div className="flex items-center space-x-2 text-[10px] text-slate-500">
+                            <img src={galleryForm.imageUrl} alt="Preview" className="w-7 h-7 rounded-md object-cover border" onError={(e) => e.target.style.display = 'none'} />
+                            <span>Pratinjau link foto</span>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Keterangan Singkat</label>
+                    <input 
+                      type="text" 
+                      placeholder="Lokasi atau penerima manfaat"
+                      value={galleryForm.description}
+                      onChange={(e) => setGalleryForm({ ...galleryForm, description: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-2">
+                    <button type="button" onClick={() => setShowGalleryModal(false)} className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600">Batal</button>
+                    <button type="submit" className="px-5 py-2 bg-[#1F5946] text-white text-xs font-bold rounded-xl">Simpan Foto</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    const rootElement = document.getElementById('root');
+    const root = ReactDOM.createRoot(rootElement);
+    root.render(<App />);
+  </script>
+</body>
+</html>
