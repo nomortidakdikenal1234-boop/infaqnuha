@@ -1526,6 +1526,40 @@
         setSlides(prev => prev.map((s, idx) => idx === activeSlideIdx ? { ...s, ...fields } : s));
       };
 
+      const handleAddSlide = () => {
+        const newSlide = {
+          id: slides.length + 1,
+          bg_image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80",
+          overlay_opacity: 0.55,
+          title: "Judul Slide Baru",
+          title_pos_x: 50,
+          title_pos_y: 38,
+          title_size: 28,
+          title_color: "#ffffff",
+          title_align: "center",
+          subtitle: "Deskripsi singkat untuk slide baru ini.",
+          subtitle_pos_x: 50,
+          subtitle_pos_y: 62,
+          subtitle_size: 13,
+          subtitle_color: "#f1f5f9",
+          subtitle_align: "center"
+        };
+        setSlides(prev => [...prev, newSlide]);
+        setActiveSlideIdx(slides.length);
+        showNotification("Slide baru berhasil ditambahkan!");
+      };
+
+      const handleDeleteSlide = () => {
+        if (slides.length <= 1) {
+          showNotification("Minimal harus ada 1 slide hero!");
+          return;
+        }
+        const updated = slides.filter((_, idx) => idx !== activeSlideIdx);
+        setSlides(updated);
+        setActiveSlideIdx(Math.max(0, activeSlideIdx - 1));
+        showNotification("Slide berhasil dihapus!");
+      };
+
       const handleFileUpload = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -1533,13 +1567,13 @@
         const reader = new FileReader();
         reader.onloadend = () => {
           updateCurrentSlide({ bg_image: reader.result });
-          showNotification("Gambar berhasil diunggah ke slide!");
+          showNotification("Gambar background berhasil diunggah!");
         };
         reader.readAsDataURL(file);
       };
 
       const handleSaveAllSlides = async () => {
-        showNotification("Menyimpan slide hero...");
+        showNotification("Menyimpan slide hero ke database...");
         const client = getSupabase();
         if (client) {
           try {
@@ -1570,6 +1604,7 @@
 
       return (
         <div className="space-y-6 animate-fade-in">
+          {/* Bar Kontrol Navigasi Slide */}
           <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-wrap items-center justify-between gap-3">
             <div className="flex flex-wrap items-center gap-2">
               {slides.map((s, idx) => (
@@ -1583,65 +1618,321 @@
                   <span>Slide #{idx + 1}</span>
                 </button>
               ))}
+              
+              <button
+                onClick={handleAddSlide}
+                className="px-3.5 py-2 rounded-2xl text-xs font-bold bg-emerald-50 text-[#1F5946] hover:bg-emerald-100 transition flex items-center space-x-1 border border-emerald-200"
+              >
+                <Icons.Plus />
+                <span>Tambah Slide</span>
+              </button>
             </div>
 
-            <button
-              onClick={handleSaveAllSlides}
-              className="px-5 py-2.5 bg-[#B89355] hover:bg-[#a37e43] text-white rounded-2xl text-xs font-extrabold shadow-md flex items-center space-x-2 transition"
-            >
-              <Icons.Save />
-              <span>Simpan Slide</span>
-            </button>
+            <div className="flex items-center space-x-2">
+              {slides.length > 1 && (
+                <button
+                  onClick={handleDeleteSlide}
+                  className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl text-xs font-bold transition flex items-center space-x-1 border border-red-200"
+                >
+                  <Icons.Trash />
+                  <span>Hapus Slide Ini</span>
+                </button>
+              )}
+
+              <button
+                onClick={handleSaveAllSlides}
+                className="px-5 py-2.5 bg-[#B89355] hover:bg-[#a37e43] text-white rounded-2xl text-xs font-extrabold shadow-md flex items-center space-x-2 transition"
+              >
+                <Icons.Save />
+                <span>Simpan Semua Slide</span>
+              </button>
+            </div>
           </div>
 
+          {/* Pratinjau Langsung (Live Preview) */}
           <div className="bg-slate-900 rounded-3xl overflow-hidden shadow-2xl relative border-4 border-slate-800">
             <div className="p-3 bg-slate-950 text-slate-400 text-[10.5px] font-bold flex justify-between items-center border-b border-slate-800">
-              <span>Preview Slide #{activeSlideIdx + 1}</span>
-              <span>Live Preview</span>
+              <span>Pratinjau Langsung Slide #{activeSlideIdx + 1}</span>
+              <span className="text-emerald-400 font-mono">16:9 Aspect Preview</span>
             </div>
 
-            <div className="relative h-64 sm:h-80 w-full overflow-hidden bg-slate-950">
+            <div className="relative h-72 sm:h-96 w-full overflow-hidden bg-slate-950 select-none">
               <img 
                 src={currentSlide.bg_image} 
                 alt="Slide Preview"
                 className="w-full h-full object-cover"
+                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80"; }}
               />
               <div 
                 className="absolute inset-0 bg-black pointer-events-none transition-opacity"
                 style={{ opacity: currentSlide.overlay_opacity ?? 0.55 }}
               ></div>
 
-              <div
-                className="absolute transform -translate-x-1/2 -translate-y-1/2 w-11/12 max-w-2xl pointer-events-none px-2"
-                style={{
-                  left: `${currentSlide.title_pos_x ?? 50}%`,
-                  top: `${currentSlide.title_pos_y ?? 38}%`,
-                  textAlign: currentSlide.title_align || 'center'
-                }}
-              >
-                <h2 
-                  className="font-black drop-shadow-md leading-tight"
-                  style={{
-                    fontSize: `${Math.max(14, (currentSlide.title_size || 28) * 0.7)}px`,
-                    color: currentSlide.title_color || '#ffffff'
-                  }}
-                >
-                  {currentSlide.title || "Judul Slide"}
-                </h2>
+              <div className="absolute inset-0 pointer-events-none">
+                {/* Judul Live */}
+                {currentSlide.title && (
+                  <div
+                    className="absolute transform -translate-x-1/2 -translate-y-1/2 p-2 w-11/12 max-w-2xl"
+                    style={{
+                      left: `${currentSlide.title_pos_x ?? 50}%`,
+                      top: `${currentSlide.title_pos_y ?? 38}%`,
+                      textAlign: currentSlide.title_align || 'center'
+                    }}
+                  >
+                    <h2 
+                      className="font-black drop-shadow-md leading-tight"
+                      style={{
+                        fontSize: `${Math.max(14, (currentSlide.title_size || 28) * 0.8)}px`,
+                        color: currentSlide.title_color || '#ffffff'
+                      }}
+                    >
+                      {currentSlide.title}
+                    </h2>
+                  </div>
+                )}
+
+                {/* Subtitle Live */}
+                {currentSlide.subtitle && (
+                  <div
+                    className="absolute transform -translate-x-1/2 -translate-y-1/2 p-2 w-11/12 max-w-xl"
+                    style={{
+                      left: `${currentSlide.subtitle_pos_x ?? 50}%`,
+                      top: `${currentSlide.subtitle_pos_y ?? 62}%`,
+                      textAlign: currentSlide.subtitle_align || 'center'
+                    }}
+                  >
+                    <p 
+                      className="font-medium drop-shadow leading-relaxed"
+                      style={{
+                        fontSize: `${Math.max(10, (currentSlide.subtitle_size || 13) * 0.85)}px`,
+                        color: currentSlide.subtitle_color || '#f1f5f9'
+                      }}
+                    >
+                      {currentSlide.subtitle}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           </div>
 
-          <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-            <h3 className="font-bold text-slate-900 text-sm border-b pb-2">Foto Background Slide</h3>
-            <div>
-              <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Upload dari Komputer / HP</label>
-              <input 
-                type="file" 
-                accept="image/*"
-                onChange={handleFileUpload}
-                className="w-full text-xs text-slate-500 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#1F5946]"
-              />
+          {/* Form Editor Parameter Lengkap */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Background & Overlay */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+              <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#1F5946]"></span>
+                <span>1. Background & Karakter Visual Slide</span>
+              </h3>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Unggah Gambar Background</label>
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  onChange={handleFileUpload}
+                  className="w-full text-xs text-slate-500 mb-2 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#1F5946] hover:file:bg-emerald-100 cursor-pointer"
+                />
+                <label className="block text-[11px] font-bold text-slate-500 uppercase mt-2 mb-1">Atau Gunakan Link / URL Gambar</label>
+                <input 
+                  type="text" 
+                  placeholder="https://images.unsplash.com/..."
+                  value={currentSlide.bg_image || ''}
+                  onChange={(e) => updateCurrentSlide({ bg_image: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                />
+              </div>
+
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <label className="text-xs font-bold text-slate-700 uppercase">Kegelapan Overlay (Dimmer)</label>
+                  <span className="text-xs font-mono font-bold text-[#1F5946]">{Math.round((currentSlide.overlay_opacity ?? 0.55) * 100)}%</span>
+                </div>
+                <input 
+                  type="range" 
+                  min="0" 
+                  max="1" 
+                  step="0.05"
+                  value={currentSlide.overlay_opacity ?? 0.55}
+                  onChange={(e) => updateCurrentSlide({ overlay_opacity: parseFloat(e.target.value) })}
+                  className="w-full accent-[#1F5946] cursor-pointer"
+                />
+                <p className="text-[10.5px] text-slate-400 mt-1">Makin tinggi persentase, latar belakang makin gelap agar teks terbaca jelas.</p>
+              </div>
+            </div>
+
+            {/* Pengaturan Judul */}
+            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+              <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#B89355]"></span>
+                <span>2. Pengaturan Judul Utama (Title)</span>
+              </h3>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Teks Judul</label>
+                <textarea 
+                  rows={2}
+                  placeholder="Tuliskan judul utama slide..."
+                  value={currentSlide.title || ''}
+                  onChange={(e) => updateCurrentSlide({ title: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                ></textarea>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi X (%)</label>
+                    <span className="text-xs font-mono text-slate-500">{currentSlide.title_pos_x ?? 50}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="90" 
+                    value={currentSlide.title_pos_x ?? 50}
+                    onChange={(e) => updateCurrentSlide({ title_pos_x: parseInt(e.target.value) })}
+                    className="w-full accent-[#1F5946] cursor-pointer"
+                  />
+                </div>
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi Y (%)</label>
+                    <span className="text-xs font-mono text-slate-500">{currentSlide.title_pos_y ?? 38}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="90" 
+                    value={currentSlide.title_pos_y ?? 38}
+                    onChange={(e) => updateCurrentSlide({ title_pos_y: parseInt(e.target.value) })}
+                    className="w-full accent-[#1F5946] cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 items-center">
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Ukuran Font (px)</label>
+                  <input 
+                    type="number" 
+                    min="14" 
+                    max="60"
+                    value={currentSlide.title_size || 28}
+                    onChange={(e) => updateCurrentSlide({ title_size: parseInt(e.target.value) || 28 })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Warna Teks</label>
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="color" 
+                      value={currentSlide.title_color || '#ffffff'}
+                      onChange={(e) => updateCurrentSlide({ title_color: e.target.value })}
+                      className="w-9 h-9 rounded-xl border border-slate-200 cursor-pointer p-0.5 bg-white"
+                    />
+                    <span className="text-xs font-mono uppercase text-slate-600">{currentSlide.title_color || '#ffffff'}</span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Rata Teks</label>
+                  <select
+                    value={currentSlide.title_align || 'center'}
+                    onChange={(e) => updateCurrentSlide({ title_align: e.target.value })}
+                    className="w-full px-2 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
+                  >
+                    <option value="left">Kiri</option>
+                    <option value="center">Tengah</option>
+                    <option value="right">Kanan</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* Pengaturan Subtitle */}
+            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
+              <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center space-x-2">
+                <span className="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
+                <span>3. Pengaturan Deskripsi / Subtitle</span>
+              </h3>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Teks Subtitle / Deskripsi</label>
+                <textarea 
+                  rows={2}
+                  placeholder="Tuliskan deskripsi penjelas untuk slide ini..."
+                  value={currentSlide.subtitle || ''}
+                  onChange={(e) => updateCurrentSlide({ subtitle: e.target.value })}
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                ></textarea>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi X (%)</label>
+                    <span className="text-xs font-mono text-slate-500">{currentSlide.subtitle_pos_x ?? 50}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="90" 
+                    value={currentSlide.subtitle_pos_x ?? 50}
+                    onChange={(e) => updateCurrentSlide({ subtitle_pos_x: parseInt(e.target.value) })}
+                    className="w-full accent-[#1F5946] cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi Y (%)</label>
+                    <span className="text-xs font-mono text-slate-500">{currentSlide.subtitle_pos_y ?? 62}%</span>
+                  </div>
+                  <input 
+                    type="range" 
+                    min="10" 
+                    max="90" 
+                    value={currentSlide.subtitle_pos_y ?? 62}
+                    onChange={(e) => updateCurrentSlide({ subtitle_pos_y: parseInt(e.target.value) })}
+                    className="w-full accent-[#1F5946] cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Ukuran Font (px)</label>
+                  <input 
+                    type="number" 
+                    min="10" 
+                    max="30"
+                    value={currentSlide.subtitle_size || 13}
+                    onChange={(e) => updateCurrentSlide({ subtitle_size: parseInt(e.target.value) || 13 })}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Warna & Alignment</label>
+                  <div className="flex items-center space-x-2">
+                    <input 
+                      type="color" 
+                      value={currentSlide.subtitle_color || '#f1f5f9'}
+                      onChange={(e) => updateCurrentSlide({ subtitle_color: e.target.value })}
+                      className="w-9 h-9 rounded-xl border border-slate-200 cursor-pointer p-0.5 bg-white"
+                    />
+                    <select
+                      value={currentSlide.subtitle_align || 'center'}
+                      onChange={(e) => updateCurrentSlide({ subtitle_align: e.target.value })}
+                      className="flex-1 px-2 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
+                    >
+                      <option value="left">Kiri</option>
+                      <option value="center">Tengah</option>
+                      <option value="right">Kanan</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
