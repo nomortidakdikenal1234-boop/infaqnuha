@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin INFAQNUHA</title>
+  <title>Admin Panel INFAQNUHA</title>
   
   <!-- Favicon Resmi -->
   <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
@@ -196,7 +196,6 @@
       const [showProgramModal, setShowProgramModal] = useState(false);
       const [showCategoryModal, setShowCategoryModal] = useState(false);
       const [showGalleryModal, setShowGalleryModal] = useState(false);
-      const [isAiGenerating, setIsAiGenerating] = useState(false);
 
       const [deleteModal, setDeleteModal] = useState({
         isOpen: false,
@@ -634,7 +633,6 @@
               </div>
             </header>
 
-            {}
             {activeTab === 'dashboard' && (
               <DashboardView 
                 totalInfaq={totalInfaq}
@@ -824,13 +822,15 @@
               <InfaqTransactionsView 
                 donations={donations} 
                 setDonations={setDonations}
+                programs={programs}
+                setPrograms={setPrograms}
                 setDeleteModal={setDeleteModal}
-                showNotification={showNotification} 
+                showNotification={showNotification}
+                getSupabase={getSupabase}
               />
             )}
           </main>
 
-          {}
           {/* Modal Program */}
           {showProgramModal && (
             <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
@@ -1341,8 +1341,109 @@
       );
     }
 
-    function InfaqTransactionsView({ donations, setDonations, setDeleteModal, showNotification }) {
+    function InfaqTransactionsView({ donations, setDonations, programs, setPrograms, setDeleteModal, showNotification, getSupabase }) {
       const [searchQuery, setSearchQuery] = useState('');
+      const [showAddModal, setShowAddModal] = useState(false);
+
+      const getCurrentDateTimeLocal = () => {
+        const now = new Date();
+        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+        return now.toISOString().slice(0, 16);
+      };
+
+      const [form, setForm] = useState({
+        donorName: '',
+        programTitle: programs && programs[0] ? programs[0].title : 'Infaq Umum',
+        amount: '',
+        transactionDate: getCurrentDateTimeLocal()
+      });
+
+      const handleOpenModal = () => {
+        setForm({
+          donorName: '',
+          programTitle: programs && programs[0] ? programs[0].title : 'Infaq Umum',
+          amount: '',
+          transactionDate: getCurrentDateTimeLocal()
+        });
+        setShowAddModal(true);
+      };
+
+      const handleAddManualInfaq = async (e) => {
+        e.preventDefault();
+        const cleanAmount = parseCleanNumber(form.amount);
+        if (!cleanAmount || cleanAmount <= 0) {
+          showNotification("Nominal infaq harus lebih besar dari 0!");
+          return;
+        }
+
+        const newId = `TRX-${Math.floor(10000 + Math.random() * 90000)}`;
+        const donorName = form.donorName.trim() || 'Hamba Allah';
+        const progTitle = form.programTitle || 'Infaq Umum';
+        const selectedDateISO = form.transactionDate ? new Date(form.transactionDate).toISOString() : new Date().toISOString();
+
+        const newDonation = {
+          id: newId,
+          donorName: donorName,
+          phone: '',
+          amount: cleanAmount,
+          programTitle: progTitle,
+          paymentMethod: 'Manual / Tunai',
+          status: 'Terverifikasi',
+          created_at: selectedDateISO,
+          notes: 'Input Manual Admin'
+        };
+
+        setDonations(prev => [newDonation, ...prev].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
+
+        if (setPrograms) {
+          setPrograms(prev => prev.map(p => {
+            if (p.title === progTitle) {
+              return { ...p, currentAmount: (p.currentAmount || 0) + cleanAmount };
+            }
+            return p;
+          }));
+        }
+
+        setShowAddModal(false);
+        setForm({ 
+          donorName: '', 
+          programTitle: programs && programs[0] ? programs[0].title : 'Infaq Umum', 
+          amount: '', 
+          transactionDate: getCurrentDateTimeLocal() 
+        });
+        showNotification("Data infaq manual berhasil ditambahkan!");
+
+        const client = getSupabase ? getSupabase() : null;
+        if (client) {
+          try {
+            await client.from('donations').insert([{
+              id: newId,
+              donor_name: donorName,
+              amount: cleanAmount,
+              program_title: progTitle,
+              payment_method: 'Manual / Tunai',
+              status: 'Terverifikasi',
+              created_at: selectedDateISO,
+              notes: 'Input Manual Admin'
+            }]);
+
+            const { data: currentProg } = await client
+              .from('programs')
+              .select('id, current_amount')
+              .eq('title', progTitle)
+              .maybeSingle();
+
+            if (currentProg) {
+              await client
+                .from('programs')
+                .update({ current_amount: (Number(currentProg.current_amount) || 0) + cleanAmount })
+                .eq('id', currentProg.id);
+            }
+          } catch (err) {
+            console.warn("Gagal simpan transaksi manual ke Supabase:", err);
+          }
+        }
+      };
 
       const filteredDonations = useMemo(() => {
         if (!searchQuery.trim()) return donations;
@@ -1362,15 +1463,25 @@
               <p className="text-xs text-slate-500">Seluruh data donasi masuk yang tercatat pada sistem.</p>
             </div>
 
-            <div className="relative w-full sm:w-64">
-              <span className="absolute left-3.5 top-3 text-slate-400"><Icons.Search /></span>
-              <input 
-                type="text" 
-                placeholder="Cari ID, Nama, atau Program..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#1F5946]"
-              />
+            <div className="flex flex-wrap items-center gap-3">
+              <div className="relative w-full sm:w-64">
+                <span className="absolute left-3.5 top-3 text-slate-400"><Icons.Search /></span>
+                <input 
+                  type="text" 
+                  placeholder="Cari ID, Nama, atau Program..." 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#1F5946]"
+                />
+              </div>
+
+              <button
+                onClick={handleOpenModal}
+                className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
+              >
+                <Icons.Plus />
+                <span>Tambah Infaq Manual</span>
+              </button>
             </div>
           </div>
 
@@ -1380,18 +1491,19 @@
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
                     <th className="py-4 px-6">ID TRX</th>
-                    <th className="py-4 px-6">Donatur</th>
-                    <th className="py-4 px-6">Program Tujuan</th>
-                    <th className="py-4 px-6 text-right">Nominal</th>
-                    <th className="py-4 px-6">Metode</th>
-                    <th className="py-4 px-6 text-center">Status</th>
-                    <th className="py-4 px-6 text-center">Aksi</th>
+                    <th className="py-4 px-6">TANGGAL & WAKTU</th>
+                    <th className="py-4 px-6">DONATUR</th>
+                    <th className="py-4 px-6">PROGRAM TUJUAN</th>
+                    <th className="py-4 px-6 text-right">NOMINAL</th>
+                    <th className="py-4 px-6">METODE</th>
+                    <th className="py-4 px-6 text-center">STATUS</th>
+                    <th className="py-4 px-6 text-center">AKSI</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
                   {filteredDonations.length === 0 ? (
                     <tr>
-                      <td colSpan="7" className="py-12 text-center text-slate-400 italic">
+                      <td colSpan="8" className="py-12 text-center text-slate-400 italic">
                         Belum ada riwayat transaksi infaq.
                       </td>
                     </tr>
@@ -1399,6 +1511,9 @@
                     filteredDonations.map((d) => (
                       <tr key={d.id} className="hover:bg-slate-50/80 transition">
                         <td className="py-4 px-6 font-mono font-bold text-[#1F5946]">{d.id}</td>
+                        <td className="py-4 px-6 text-slate-500 text-[11px]">
+                          {d.created_at ? new Date(d.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </td>
                         <td className="py-4 px-6 font-bold text-slate-900">{d.donorName}</td>
                         <td className="py-4 px-6 text-slate-600">{d.programTitle}</td>
                         <td className="py-4 px-6 text-right font-bold text-[#1F5946] text-sm">{formatIDR(d.amount)}</td>
@@ -1423,6 +1538,77 @@
               </table>
             </div>
           </div>
+
+          {/* Modal Tambah Infaq Manual */}
+          {showAddModal && (
+            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+              <div className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100">
+                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                  <h3 className="text-lg font-bold text-slate-900">Tambah Data Infaq Manual</h3>
+                  <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-sm font-bold">Tutup</button>
+                </div>
+
+                <form onSubmit={handleAddManualInfaq} className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal & Waktu Transaksi</label>
+                    <input 
+                      type="datetime-local" 
+                      required
+                      value={form.transactionDate}
+                      onChange={(e) => setForm({ ...form, transactionDate: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                    <p className="text-[10px] text-slate-400 mt-1">Anda dapat menyesuaikan tanggal dan jam transaksi (bisa untuk pencatatan infaq lampau).</p>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Donatur</label>
+                    <input 
+                      type="text" 
+                      placeholder="Contoh: H. Ahmad Subarkah (Kosongkan = Hamba Allah)"
+                      value={form.donorName}
+                      onChange={(e) => setForm({ ...form, donorName: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Program Tujuan</label>
+                    <select
+                      value={form.programTitle}
+                      onChange={(e) => setForm({ ...form, programTitle: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    >
+                      {programs && programs.length > 0 ? (
+                        programs.map(p => (
+                          <option key={p.id} value={p.title}>{p.title}</option>
+                        ))
+                      ) : (
+                        <option value="Infaq Umum">Infaq Umum</option>
+                      )}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal Infaq (Rp)</label>
+                    <input 
+                      type="text" 
+                      required
+                      placeholder="Contoh: 100.000"
+                      value={formatThousand(form.amount)}
+                      onChange={(e) => setForm({ ...form, amount: e.target.value })}
+                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3 pt-3">
+                    <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold">Batal</button>
+                    <button type="submit" className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold shadow-md">Simpan Data</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
       );
     }
@@ -1430,16 +1616,22 @@
     function AiAssistantView({ programs, showNotification }) {
       const [aiTopic, setAiTopic] = useState("");
       const [selectedProgTitle, setSelectedProgTitle] = useState(programs[0]?.title || "");
+      const [inputInstruction, setInputInstruction] = useState("");
+      const [isGenerating, setIsGenerating] = useState(false);
       const chatEndRef = useRef(null);
 
       const [chatMessages, setChatMessages] = useState([
         {
           id: 'welcome-msg',
           sender: 'ai',
-          text: 'Assalamu\'alaikum! Saya adalah Asisten Amil AI Lembaga Infaq Nurul Hayah. Pilih program atau ketik instruksi khusus untuk pembuatan deskripsi, pesan broadcast WA, atau caption medsos tanpa emoji.',
+          text: 'Assalamu\'alaikum! Saya adalah Asisten Amil AI Lembaga Infaq Nurul Hayah. Silakan pilih program atau tuliskan instruksi pembuatan konten promosi, pesan broadcast WA, caption medsos, atau laporan penyaluran infaq tanpa emoji.',
           timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
         }
       ]);
+
+      useEffect(() => {
+        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, [chatMessages, isGenerating]);
 
       const copyToClipboard = (textToCopy) => {
         const textarea = document.createElement('textarea');
@@ -1449,6 +1641,88 @@
         document.execCommand('copy');
         document.body.removeChild(textarea);
         showNotification("Teks disalin ke clipboard!");
+      };
+
+      const handleSendInstruction = async (overridePrompt) => {
+        const promptToUse = overridePrompt || inputInstruction.trim() || (aiTopic ? `Buat tulisan ajakan infaq untuk program ${aiTopic}` : `Buat pesan ajakan infaq umum untuk Lembaga Infaq Nurul Hayah`);
+        if (!promptToUse) return;
+
+        const userMsg = {
+          id: `usr-${Date.now()}`,
+          sender: 'user',
+          text: promptToUse,
+          timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+        };
+
+        setChatMessages(prev => [...prev, userMsg]);
+        setInputInstruction("");
+        setIsGenerating(true);
+
+        try {
+          const targetProgram = programs.find(p => p.title === (aiTopic || selectedProgTitle));
+          const progDetails = targetProgram 
+            ? `\nDetail Program:\n- Judul: ${targetProgram.title}\n- Kategori: ${targetProgram.category}\n- Deskripsi: ${targetProgram.description}\n- Target Dana: ${formatIDR(targetProgram.targetAmount)}\n- Penerima Manfaat: ${targetProgram.beneficiaries} Jiwa` 
+            : '';
+
+          const systemPrompt = `Anda adalah Asisten Amil AI resmi Lembaga Infaq Nurul Hayah.
+Tugas Anda: Membuat narasi, ajakan infaq, broadcast WhatsApp, caption media sosial (IG/Facebook/TikTok), atau deskripsi program yang islami, santun, transparan, akuntabel, dan sangat persuasif.
+ATURAN KHUSUS (MANDATORI):
+1. JANGAN PERNAH MENGGUNAKAN EMOJI SAMA SEKALI dalam seluruh teks hasil karya Anda. Gunakan Bahasa Indonesia yang baku, indah, serta menyentuh hati.
+2. Cantumkan nama lembaga: Lembaga Infaq Nurul Hayah.
+3. Gunakan sapaan islami (Assalamu'alaikum Warahmatullahi Wabarakatuh, Semoga Allah memberkahi, dsb).`;
+
+          const fullQuery = `${promptToUse}${progDetails}`;
+          const apiKey = ""; // API key managed automatically in runtime
+          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+
+          const payload = {
+            contents: [{ parts: [{ text: fullQuery }] }],
+            systemInstruction: { parts: [{ text: systemPrompt }] }
+          };
+
+          const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const result = await response.json();
+          const candidateText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          const aiReply = candidateText || "Mohon maaf, sistem Amil AI sedang sibuk. Silakan ulangi permintaan Anda.";
+
+          setChatMessages(prev => [...prev, {
+            id: `ai-${Date.now()}`,
+            sender: 'ai',
+            text: aiReply,
+            timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+          }]);
+        } catch (err) {
+          console.error("AI Generation error:", err);
+          setChatMessages(prev => [...prev, {
+            id: `err-${Date.now()}`,
+            sender: 'ai',
+            text: "Mohon maaf, terjadi kendala koneksi ke server Amil AI. Silakan periksa jaringan Anda dan coba lagi.",
+            timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+          }]);
+        } finally {
+          setIsGenerating(false);
+        }
+      };
+
+      const handleQuickPrompt = (type) => {
+        const topic = aiTopic || selectedProgTitle || "Infaq Santri & Dhuafa";
+        let prompt = "";
+        if (type === 'wa_broadcast') {
+          prompt = `Buatlah teks Broadcast WhatsApp ajakan berinfaq untuk program "${topic}". Format dengan ucapan salam, poin penting keberkahan, penjelasan singkat program, serta nomor kontak layanan amil WhatsApp.`;
+        } else if (type === 'social_caption') {
+          prompt = `Buatlah Caption Media Sosial (Instagram/Facebook) yang inspiratif untuk program "${topic}". Sertakan hashtag islami yang relevan tanpa emoji.`;
+        } else if (type === 'program_desc') {
+          prompt = `Buatlah Deskripsi Lengkap & Narasi Penggalangan Dana untuk ditaruh pada halaman website program "${topic}".`;
+        } else if (type === 'report_summary') {
+          prompt = `Buatlah teks Laporan Singkat Penyaluran Infaq untuk disampaikan kepada donatur sebagai bentuk transparansi dan akuntabilitas.`;
+        }
+        handleSendInstruction(prompt);
       };
 
       return (
@@ -1470,7 +1744,7 @@
                 <select
                   value={selectedProgTitle}
                   onChange={(e) => { setSelectedProgTitle(e.target.value); setAiTopic(e.target.value); }}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
                 >
                   <option value="">-- Pilih Program --</option>
                   {programs.map(p => (
@@ -1486,13 +1760,31 @@
                   placeholder="Misal: Sedekah Subuh Santri Hafiz"
                   value={aiTopic}
                   onChange={(e) => setAiTopic(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
+                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
                 />
+              </div>
+            </div>
+
+            <div className="pt-2 border-t border-slate-100">
+              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Instruksi Cepat (Quick Action)</label>
+              <div className="flex flex-wrap gap-2">
+                <button onClick={() => handleQuickPrompt('wa_broadcast')} className="px-3 py-1.5 bg-emerald-50 text-[#1F5946] hover:bg-emerald-100 rounded-xl text-xs font-bold border border-emerald-200 transition">
+                  Pesan Broadcast WA
+                </button>
+                <button onClick={() => handleQuickPrompt('social_caption')} className="px-3 py-1.5 bg-amber-50 text-amber-800 hover:bg-amber-100 rounded-xl text-xs font-bold border border-amber-200 transition">
+                  Caption Medsos (IG/FB)
+                </button>
+                <button onClick={() => handleQuickPrompt('program_desc')} className="px-3 py-1.5 bg-blue-50 text-blue-800 hover:bg-blue-100 rounded-xl text-xs font-bold border border-blue-200 transition">
+                  Deskripsi Detail Program
+                </button>
+                <button onClick={() => handleQuickPrompt('report_summary')} className="px-3 py-1.5 bg-purple-50 text-purple-800 hover:bg-purple-100 rounded-xl text-xs font-bold border border-purple-200 transition">
+                  Laporan Penyaluran
+                </button>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[480px]">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[520px]">
             <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center text-xs font-bold text-slate-700">
               <span>Ruang Diskusi Amil AI</span>
               <span className="text-[10px] text-slate-400 font-normal">Bebas Emoji • Bahasa Amanah</span>
@@ -1506,13 +1798,44 @@
                   }`}>
                     <div className="whitespace-pre-wrap">{msg.text}</div>
                     {msg.sender === 'ai' && (
-                      <button onClick={() => copyToClipboard(msg.text)} className="mt-3 inline-flex items-center space-x-1 px-2.5 py-1 bg-white border border-slate-200 text-slate-700 text-[10px] font-bold rounded-lg"><Icons.Copy /><span>Salin Teks</span></button>
+                      <button onClick={() => copyToClipboard(msg.text)} className="mt-3 inline-flex items-center space-x-1 px-2.5 py-1 bg-white border border-slate-200 text-slate-700 text-[10px] font-bold rounded-lg hover:bg-slate-50 transition">
+                        <Icons.Copy />
+                        <span>Salin Teks</span>
+                      </button>
                     )}
                   </div>
                   <span className="text-[9.5px] text-slate-400 mt-1 px-1">{msg.timestamp}</span>
                 </div>
               ))}
+
+              {isGenerating && (
+                <div className="flex items-center space-x-2 text-xs font-semibold text-[#1F5946] bg-emerald-50 p-3 rounded-2xl w-max border border-emerald-200 animate-pulse">
+                  <span className="w-2 h-2 rounded-full bg-[#1F5946] animate-ping"></span>
+                  <span>Amil AI sedang menyusun teks...</span>
+                </div>
+              )}
               <div ref={chatEndRef} />
+            </div>
+
+            <div className="p-3 bg-slate-50 border-t border-slate-100">
+              <form onSubmit={(e) => { e.preventDefault(); handleSendInstruction(); }} className="flex items-center space-x-2">
+                <input 
+                  type="text" 
+                  placeholder="Ketik instruksi khusus untuk Amil AI (misal: 'Buat ajakan infaq singkat 2 paragraf')..." 
+                  value={inputInstruction}
+                  onChange={(e) => setInputInstruction(e.target.value)}
+                  disabled={isGenerating}
+                  className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#1F5946] disabled:opacity-50"
+                />
+                <button
+                  type="submit"
+                  disabled={isGenerating || !inputInstruction.trim()}
+                  className="px-5 py-2.5 bg-[#1F5946] hover:bg-[#174435] text-white rounded-2xl text-xs font-bold shadow-md transition disabled:opacity-50 flex items-center space-x-1.5"
+                >
+                  <Icons.Send />
+                  <span>Kirim</span>
+                </button>
+              </form>
             </div>
           </div>
         </div>
