@@ -58,7 +58,6 @@
   <div id="root"></div>
 
   <script type="text/babel">
-    // Konfigurasi Supabase Resmi (Project Ref: dxtuadkxzzcwyhwnatdt)
     const SUPABASE_URL = "https://dxtuadkxzzcwyhwnatdt.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpjd3lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNTA0ODMsImV4cCI6MjEwMzkyNjQ4M30.XNxdbrFNcjDht97OAR3Mj4q2_AACjTvbHDCyIW8a7_0";
     
@@ -87,82 +86,57 @@
       logoUrl: "https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg"
     };
 
-    // Data awal cadangan jika database belum selesai di-seed
-    const INITIAL_PROGRAMS = [
+    const DEFAULT_HERO_SLIDES = [
       {
-        id: 'PROG-1001',
-        title: 'Beasiswa Pendidikan Santri Tahfizh Yatim & Dhuafa',
-        category: 'Pendidikan',
-        description: 'Bantuan biaya pendidikan, perlengkapan sekolah, dan beasiswa penuh santri penghafal Al-Qur\'an dhuafa.',
-        fullContent: 'Program Beasiswa Pendidikan Santri Tahfizh ditujukan untuk memberikan akses pendidikan holistik dan asrama gratis bagi santri yatim serta dhuafa. Bantuan mencakup kitab, seragam, konsumsi harian, dan uang saku santri.',
-        targetAmount: 50000000,
-        currentAmount: 28500000,
-        beneficiaries: 120,
-        imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80',
-        status: 'Aktif'
+        id: "slide-1",
+        bgImage: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80",
+        overlayOpacity: 0.55,
+        title: "Membangun Masa Depan Umat Melalui Infaq & Pendidikan",
+        titlePos: { x: 50, y: 38 },
+        titleSize: 28,
+        titleColor: "#ffffff",
+        titleAlign: "center",
+        subtitle: "Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa.",
+        subtitlePos: { x: 50, y: 62 },
+        subtitleSize: 13,
+        subtitleColor: "#f1f5f9",
+        subtitleAlign: "center"
       },
       {
-        id: 'PROG-1002',
-        title: 'Pembangunan & Renovasi Asrama Santri Nurul Hayah',
-        category: 'Wakaf & Pembangunan',
-        description: 'Perluasan dan renovasi asrama santri agar dapat menampung lebih banyak santri dhuafa dengan layak.',
-        fullContent: 'Program Pembangunan Asrama Nurul Hayah memfasilitasi penambahan tempat tidur, sanitasi sehat, ruang belajar digital, dan perpustakaan santri.',
-        targetAmount: 120000000,
-        currentAmount: 64200000,
-        beneficiaries: 250,
-        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80',
-        status: 'Aktif'
+        id: "slide-2",
+        bgImage: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1600&q=80",
+        overlayOpacity: 0.55,
+        title: "Amanah Bersama, Sejahtera & Berdaya",
+        titlePos: { x: 50, y: 38 },
+        titleSize: 28,
+        titleColor: "#ffffff",
+        titleAlign: "center",
+        subtitle: "Menyalurkan kepedulian Anda tepat sasaran kepada para santri, anak yatim, dan keluarga prasejahtera di seluruh penjuru pelosok.",
+        subtitlePos: { x: 50, y: 62 },
+        subtitleSize: 13,
+        subtitleColor: "#f1f5f9",
+        subtitleAlign: "center"
       },
       {
-        id: 'PROG-1003',
-        title: 'Paket Sembako Berkah Kesejahteraan Keluarga Dhuafa',
-        category: 'Paket Sembako',
-        description: 'Penyaluran paket bahan pangan pokok bulanan untuk lansia dan keluarga kurang mampu di pelosok desa.',
-        fullContent: 'Paket Sembako Berkah berisi beras premium, minyak goreng, gula, telur, dan nutrisi esensial untuk menjamin kecukupan pangan warga pra-sejahtera.',
-        targetAmount: 35000000,
-        currentAmount: 19800000,
-        beneficiaries: 300,
-        imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
-        status: 'Aktif'
+        id: "slide-3",
+        bgImage: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80",
+        overlayOpacity: 0.55,
+        title: "Pemberdayaan Santri & Fasilitas Pendidikan Islam",
+        titlePos: { x: 50, y: 38 },
+        titleSize: 28,
+        titleColor: "#ffffff",
+        titleAlign: "center",
+        subtitle: "Mari bergotong-royong membangun sarana prasarana belajar yang layak untuk generasi penerus bangsa yang berakhlak mulia.",
+        subtitlePos: { x: 50, y: 62 },
+        subtitleSize: 13,
+        subtitleColor: "#f1f5f9",
+        subtitleAlign: "center"
       }
     ];
 
-    const INITIAL_GALLERY = [
-      {
-        id: 'GAL-1001',
-        title: 'Penyaluran Beasiswa & Kitab Santri',
-        category: 'Pendidikan',
-        description: 'Dokumentasi penyerahan bantuan beasiswa pendidikan santri tahfizh.',
-        imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        id: 'GAL-1002',
-        title: 'Gotong Royong Pembangunan Gedung Belajar',
-        category: 'Wakaf & Pembangunan',
-        description: 'Progres renovasi ruang kelas dan perpustakaan santri.',
-        imageUrl: 'https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80'
-      },
-      {
-        id: 'GAL-1003',
-        title: 'Penyaluran Paket Pangan Lansia & Dhuafa',
-        category: 'Paket Sembako',
-        description: 'Pembagian paket pangan gratis untuk warga dhuafa di Brebes.',
-        imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80'
-      }
-    ];
-
-    const INITIAL_DONATIONS = [
-      {
-        id: 'TRX-88201',
-        donorName: 'Hamba Allah',
-        amount: 500000,
-        programTitle: 'Beasiswa Pendidikan Santri Tahfizh Yatim & Dhuafa',
-        paymentMethod: 'Transfer Bank',
-        status: 'Terverifikasi',
-        date: new Date().toLocaleDateString('id-ID'),
-        notes: 'Niat infaq untuk almarhum orang tua'
-      }
-    ];
+    const INITIAL_PROGRAMS = [];
+    const INITIAL_GALLERY = [];
+    const INITIAL_DONATIONS = [];
 
     const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
     const formatNumber = (num) => new Intl.NumberFormat('id-ID').format(num || 0);
@@ -222,9 +196,11 @@
 
     function App() {
       const [settings, setSettings] = useState(INITIAL_SETTINGS);
+      const [heroSlides, setHeroSlides] = useState(DEFAULT_HERO_SLIDES);
       const [programs, setPrograms] = useState(INITIAL_PROGRAMS);
       const [donations, setDonations] = useState(INITIAL_DONATIONS);
       const [gallery, setGallery] = useState(INITIAL_GALLERY);
+      const [isLoading, setIsLoading] = useState(true);
 
       const [currentRoute, setCurrentRoute] = useState('home');
       const [selectedProgram, setSelectedProgram] = useState(null);
@@ -235,19 +211,45 @@
       const [galleryCategory, setGalleryCategory] = useState("Semua");
       const [toastMessage, setToastMessage] = useState(null);
 
-      // Effect utama fetching data otomatis dari Supabase saat load
       useEffect(() => {
-        async function fetchSupabaseData() {
-          if (!supabaseClient) return;
+        async function fetchInitialData() {
+          if (!supabaseClient) {
+            setIsLoading(false);
+            return;
+          }
           try {
-            // 1. Fetch Data Program Infaq
+            // 1. Fetch Hero Slides (Sinkronisasi dengan Admin Panel)
+            const { data: sliData, error: sliErr } = await supabaseClient
+              .from('hero_slides')
+              .select('*')
+              .order('id', { ascending: true });
+
+            if (!sliErr && sliData && sliData.length > 0) {
+              setHeroSlides(sliData.map(s => ({
+                id: String(s.id),
+                bgImage: s.bg_image || s.bg_url || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80',
+                overlayOpacity: Number(s.overlay_opacity ?? 0.55),
+                title: s.title || '',
+                titlePos: { x: Number(s.title_pos_x ?? 50), y: Number(s.title_pos_y ?? 38) },
+                titleSize: Number(s.title_size ?? 28),
+                titleColor: s.title_color || '#ffffff',
+                titleAlign: s.title_align || 'center',
+                subtitle: s.subtitle || '',
+                subtitlePos: { x: Number(s.subtitle_pos_x ?? 50), y: Number(s.subtitle_pos_y ?? 62) },
+                subtitleSize: Number(s.subtitle_size ?? 13),
+                subtitleColor: s.subtitle_color || '#f1f5f9',
+                subtitleAlign: s.subtitle_align || 'center'
+              })));
+            }
+
+            // 2. Fetch Programs
             const { data: progData, error: progErr } = await supabaseClient
               .from('programs')
               .select('*')
               .order('created_at', { ascending: false });
 
-            if (!progErr && progData && progData.length > 0) {
-              const formattedPrograms = progData.map(p => ({
+            if (!progErr && progData) {
+              setPrograms(progData.map(p => ({
                 id: p.id,
                 title: p.title,
                 category: p.category || 'Pendidikan',
@@ -258,36 +260,35 @@
                 beneficiaries: Number(p.beneficiaries || 0),
                 imageUrl: p.image_url || '',
                 status: p.status || 'Aktif'
-              }));
-              setPrograms(formattedPrograms);
+              })));
             }
 
-            // 2. Fetch Data Transaksi Infaq
+            // 3. Fetch Donations
             const { data: donData, error: donErr } = await supabaseClient
               .from('donations')
               .select('*')
               .order('created_at', { ascending: false });
 
-            if (!donErr && donData && donData.length > 0) {
+            if (!donErr && donData) {
               setDonations(donData.map(d => ({
                 id: d.id,
                 donorName: d.donor_name || 'Hamba Allah',
                 amount: Number(d.amount || 0),
                 programTitle: d.program_title || 'Infaq Umum',
                 paymentMethod: d.payment_method || 'WhatsApp Transfer',
-                status: d.status || 'Pending',
+                status: d.status || 'Terverifikasi',
                 date: new Date(d.created_at).toLocaleString('id-ID'),
                 notes: d.notes || ''
               })));
             }
 
-            // 3. Fetch Data Galeri Kegiatan
+            // 4. Fetch Gallery
             const { data: galData, error: galErr } = await supabaseClient
               .from('gallery')
               .select('*')
               .order('created_at', { ascending: false });
 
-            if (!galErr && galData && galData.length > 0) {
+            if (!galErr && galData) {
               setGallery(galData.map(g => ({
                 id: g.id,
                 title: g.title,
@@ -297,11 +298,11 @@
               })));
             }
 
-            // 4. Fetch Pengaturan Organisasi
+            // 5. Fetch Settings
             const { data: setDb, error: setErr } = await supabaseClient
               .from('settings')
               .select('*')
-              .single();
+              .maybeSingle();
 
             if (!setErr && setDb) {
               setSettings({
@@ -319,11 +320,13 @@
               });
             }
           } catch (err) {
-            console.warn("Koneksi Supabase otomatis:", err);
+            console.warn("Fetch error:", err);
+          } finally {
+            setIsLoading(false);
           }
         }
 
-        fetchSupabaseData();
+        fetchInitialData();
       }, []);
 
       const showToast = (msg) => {
@@ -331,24 +334,31 @@
         setTimeout(() => setToastMessage(null), 3500);
       };
 
-      // Handle submit infaq publik dan kirim ke Supabase
       const handlePublicInfaqSubmit = async (formData) => {
         const newTrxId = `TRX-${Math.floor(10000 + Math.random() * 90000)}`;
         const donorName = formData.isAnon ? "Hamba Allah" : (formData.name || "Hamba Allah");
+        const amountNum = Number(formData.amount);
         
         const newTrx = {
           id: newTrxId,
           donorName: donorName,
-          amount: Number(formData.amount),
+          amount: amountNum,
           programTitle: formData.programTitle,
           paymentMethod: formData.paymentMethod,
-          status: "Pending",
+          status: "Terverifikasi",
           date: new Date().toLocaleString('id-ID'),
           notes: formData.notes || ""
         };
 
         setDonations(prev => [newTrx, ...prev]);
         setInfaqSuccessData({ ...newTrx, actualName: formData.name });
+
+        setPrograms(prevPrograms => prevPrograms.map(p => {
+          if (p.title === formData.programTitle) {
+            return { ...p, currentAmount: (p.currentAmount || 0) + amountNum };
+          }
+          return p;
+        }));
 
         if (supabaseClient) {
           try {
@@ -358,14 +368,28 @@
               donor_phone: formData.phone || null,
               donor_email: formData.email || null,
               is_anonymous: formData.isAnon,
-              amount: Number(formData.amount),
+              amount: amountNum,
               program_title: formData.programTitle,
               payment_method: formData.paymentMethod,
-              status: "Pending",
+              status: "Terverifikasi",
               notes: formData.notes || null
             }]);
+
+            const { data: currentProg } = await supabaseClient
+              .from('programs')
+              .select('id, current_amount')
+              .eq('title', formData.programTitle)
+              .maybeSingle();
+
+            if (currentProg) {
+              const updatedAmt = (Number(currentProg.current_amount) || 0) + amountNum;
+              await supabaseClient
+                .from('programs')
+                .update({ current_amount: updatedAmt })
+                .eq('id', currentProg.id);
+            }
           } catch (err) {
-            console.warn("Supabase insert donation fallback:", err);
+            console.warn("Error updating Supabase:", err);
           }
         }
 
@@ -390,16 +414,17 @@
           <main className="flex-grow bg-white">
             {currentRoute === 'home' && (
               <>
-                <HeroSection />
+                <HeroSection slides={heroSlides} />
                 <AboutUsSection />
                 <ProgramsSection 
                   programs={programs}
+                  isLoading={isLoading}
                   selectedCategory={selectedCategory}
                   setSelectedCategory={setSelectedCategory}
                   onSelectProgram={(prog) => { setSelectedProgram(prog); setCurrentRoute('program-detail'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
                   onInfaqNow={(prog) => { setSelectedProgram(prog); setCurrentRoute('infaq'); window.scrollTo({top: 0, behavior: 'smooth'}); }}
                 />
-                <GallerySection gallery={gallery} galleryCategory={galleryCategory} setGalleryCategory={setGalleryCategory} />
+                <GallerySection gallery={gallery} isLoading={isLoading} galleryCategory={galleryCategory} setGalleryCategory={setGalleryCategory} />
               </>
             )}
 
@@ -502,107 +527,147 @@
       );
     }
 
-    function HeroSection() {
-      const slides = [
-        {
-          title: "Membangun Masa Depan Umat Melalui Infaq & Pendidikan",
-          subtitle: "Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa.",
-          image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80"
-        },
-        {
-          title: "Amanah Bersama, Sejahtera & Berdaya",
-          subtitle: "Menyalurkan kepedulian Anda tepat sasaran kepada para santri, anak yatim, dan keluarga prasejahtera di seluruh penjuru pelosok.",
-          image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1600&q=80"
-        },
-        {
-          title: "Pemberdayaan Santri & Fasilitas Pendidikan Islam",
-          subtitle: "Mari bergotong-royong membangun sarana prasarana belajar yang layak untuk generasi penerus bangsa yang berakhlak mulia.",
-          image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80"
-        }
-      ];
-
+    function HeroSection({ slides }) {
       const [currentSlide, setCurrentSlide] = useState(0);
 
       useEffect(() => {
+        if (!slides || slides.length === 0) return;
         const timer = setInterval(() => {
           setCurrentSlide((prev) => (prev + 1) % slides.length);
         }, 6000);
         return () => clearInterval(timer);
-      }, [slides.length]);
+      }, [slides?.length]);
 
+      if (!slides || slides.length === 0) return null;
+
+      const activeSlideIdx = Math.min(currentSlide, slides.length - 1);
       const prevSlide = () => setCurrentSlide((prev) => (prev === 0 ? slides.length - 1 : prev - 1));
       const nextSlide = () => setCurrentSlide((prev) => (prev + 1) % slides.length);
 
       return (
-        <section id="beranda" className="relative bg-slate-900 text-white overflow-hidden">
-          <div className="relative min-h-[520px] sm:min-h-[580px] flex items-center justify-center">
-            {slides.map((slide, idx) => (
-              <div
-                key={idx}
-                className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
-                  idx === currentSlide ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
-                }`}
-              >
-                <div className="absolute inset-0 bg-slate-950/75 z-10"></div>
-                <img
-                  src={slide.image}
-                  alt={slide.title}
-                  className="w-full h-full object-cover object-center transform scale-105"
-                />
+        <section id="beranda" className="relative bg-slate-950 text-white overflow-hidden">
+          <div className="relative min-h-[480px] sm:min-h-[560px] flex items-center justify-center overflow-hidden bg-slate-950">
+            {slides.map((slide, idx) => {
+              const isActive = idx === activeSlideIdx;
+              const bgImg = slide.bgImage || slide.image || "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80";
+              const opacity = slide.overlayOpacity ?? 0.55;
 
-                <div className="absolute inset-0 z-20 flex items-center justify-center">
-                  <div className="max-w-4xl mx-auto px-6 sm:px-8 text-center space-y-6">
-                    <h1 className="text-3xl sm:text-5xl font-black tracking-tight leading-tight text-white drop-shadow-md">
-                      {slide.title}
-                    </h1>
+              return (
+                <div
+                  key={slide.id || idx}
+                  className={`absolute inset-0 overflow-hidden transition-opacity duration-1000 ease-in-out ${
+                    isActive ? 'opacity-100 z-10 pointer-events-auto' : 'opacity-0 z-0 pointer-events-none'
+                  }`}
+                >
+                  {/* Slide Background Image */}
+                  <img
+                    src={bgImg}
+                    alt={slide.title || "Hero Slide"}
+                    className="w-full h-full object-cover object-center transform scale-105"
+                    onError={(e) => {
+                      e.target.src = "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80";
+                    }}
+                  />
+                  
+                  {/* Overlay Opacity */}
+                  <div 
+                    className="absolute inset-0 bg-black z-10 pointer-events-none transition-opacity"
+                    style={{ opacity: opacity }}
+                  ></div>
 
-                    <p className="text-sm sm:text-lg text-slate-200 max-w-2xl mx-auto leading-relaxed font-normal drop-shadow">
-                      {slide.subtitle}
-                    </p>
+                  {/* Absolute Positioning for Corel-Style Layout */}
+                  <div className="absolute inset-0 z-20 pointer-events-none">
+                    {/* Judul Slide */}
+                    {slide.title && (
+                      <div
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 p-2 sm:p-3 w-11/12 max-w-4xl"
+                        style={{
+                          left: `${slide.titlePos?.x ?? 50}%`,
+                          top: `${slide.titlePos?.y ?? 38}%`,
+                          textAlign: slide.titleAlign || 'center'
+                        }}
+                      >
+                        <h1
+                          className="font-black leading-tight drop-shadow-lg"
+                          style={{
+                            fontSize: `${slide.titleSize ? Math.max(18, slide.titleSize * 1.15) : 32}px`,
+                            color: slide.titleColor || '#ffffff'
+                          }}
+                        >
+                          {slide.title}
+                        </h1>
+                      </div>
+                    )}
+
+                    {/* Deskripsi Subtitle Slide */}
+                    {slide.subtitle && (
+                      <div
+                        className="absolute transform -translate-x-1/2 -translate-y-1/2 p-2 sm:p-3 w-11/12 max-w-3xl"
+                        style={{
+                          left: `${slide.subtitlePos?.x ?? 50}%`,
+                          top: `${slide.subtitlePos?.y ?? 62}%`,
+                          textAlign: slide.subtitleAlign || 'center'
+                        }}
+                      >
+                        <p
+                          className="font-medium leading-relaxed drop-shadow-md"
+                          style={{
+                            fontSize: `${slide.subtitleSize ? Math.max(12, slide.subtitleSize * 1.1) : 15}px`,
+                            color: slide.subtitleColor || '#f1f5f9'
+                          }}
+                        >
+                          {slide.subtitle}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
 
-            <button
-              onClick={prevSlide}
-              aria-label="Slide Sebelumnya"
-              className="absolute left-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/60 hover:bg-[#1F5946] text-white transition backdrop-blur-md border border-white/10"
-            >
-              <Icons.ChevronLeft />
-            </button>
-            <button
-              onClick={nextSlide}
-              aria-label="Slide Selanjutnya"
-              className="absolute right-4 top-1/2 -translate-y-1/2 z-30 p-3 rounded-full bg-slate-900/60 hover:bg-[#1F5946] text-white transition backdrop-blur-md border border-white/10"
-            >
-              <Icons.ChevronRight />
-            </button>
-
-            <div className="absolute bottom-6 left-0 right-0 z-30 flex justify-center space-x-2">
-              {slides.map((_, idx) => (
+            {slides.length > 1 && (
+              <>
                 <button
-                  key={idx}
-                  onClick={() => setCurrentSlide(idx)}
-                  className={`h-2.5 rounded-full transition-all duration-300 ${
-                    idx === currentSlide ? 'w-8 bg-[#B89355]' : 'w-2.5 bg-white/40 hover:bg-white/70'
-                  }`}
-                  aria-label={`Ke slide ${idx + 1}`}
-                />
-              ))}
-            </div>
+                  onClick={prevSlide}
+                  aria-label="Slide Sebelumnya"
+                  className="absolute left-3 sm:left-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-slate-900/60 hover:bg-[#1F5946] text-white transition backdrop-blur-md border border-white/10 cursor-pointer"
+                >
+                  <Icons.ChevronLeft />
+                </button>
+                <button
+                  onClick={nextSlide}
+                  aria-label="Slide Selanjutnya"
+                  className="absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 z-30 p-2.5 sm:p-3 rounded-full bg-slate-900/60 hover:bg-[#1F5946] text-white transition backdrop-blur-md border border-white/10 cursor-pointer"
+                >
+                  <Icons.ChevronRight />
+                </button>
+
+                <div className="absolute bottom-6 left-0 right-0 z-30 flex justify-center space-x-2">
+                  {slides.map((_, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setCurrentSlide(idx)}
+                      className={`h-2.5 rounded-full transition-all duration-300 ${
+                        idx === activeSlideIdx ? 'w-8 bg-[#B89355]' : 'w-2.5 bg-white/40 hover:bg-white/70'
+                      }`}
+                      aria-label={`Ke slide ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
           </div>
 
-          <div className="w-full h-3 bg-gradient-to-r from-[#1F5946] via-[#B89355] to-[#1F5946]"></div>
+          <div className="w-full h-2 bg-gradient-to-r from-[#1F5946] via-[#B89355] to-[#1F5946] relative z-30"></div>
         </section>
       );
     }
 
     function AboutUsSection() {
       return (
-        <section id="tentang" className="py-20 bg-white border-b-8 border-slate-100">
-          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-            <div className="text-center max-w-2xl mx-auto mb-8">
+        <section id="tentang" className="py-16 sm:py-20 bg-white border-b border-slate-100">
+          <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+            <div className="text-center max-w-2xl mx-auto">
               <h2 className="text-3xl sm:text-4xl font-black text-[#1F5946]">
                 Tentang Lembaga Infaq Nurul Hayah
               </h2>
@@ -612,41 +677,38 @@
               <p>
                 Lembaga Infaq Nurul Hayah berdiri atas arahan dan bimbingan pengasuh Pondok Pesantren Nurul Hayah, <strong className="text-slate-900">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</strong> Kami hadir sebagai penggerak sosial skala nasional yang berfokus pada penghimpunan dan penyaluran infaq untuk pembangunan infrastruktur pendidikan Islam serta pemberdayaan kesejahteraan umat.
               </p>
-              <p className="italic text-slate-600 bg-emerald-50/60 p-4 rounded-2xl border-l-4 border-[#1F5946]">
+              <p className="italic text-slate-600 bg-emerald-50/60 p-5 rounded-2xl border-l-4 border-[#1F5946] text-sm sm:text-base">
                 "Kami percaya bahwa pendidikan adalah kunci utama untuk mencetak generasi muslim yang mandiri, berdaya saing, dan berakhlak mulia."
               </p>
             </div>
 
-            <div className="space-y-3 pt-6 border-t border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">Visi Kami</h3>
-              <p className="text-slate-700 text-sm sm:text-base leading-relaxed">
-                Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.
-              </p>
-            </div>
+            <div className="grid sm:grid-cols-2 gap-6 pt-4 border-t border-slate-100">
+              <div className="space-y-2.5 p-5 bg-slate-50/80 rounded-2xl border border-slate-100">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-[#1F5946]"></span>
+                  <span>Visi Utama</span>
+                </h3>
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                  Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.
+                </p>
+              </div>
 
-            <div className="space-y-4 pt-6 border-t border-slate-100">
-              <h3 className="text-xl font-bold text-slate-900">Misi & Fokus Gerakan</h3>
-              <ul className="space-y-3 text-slate-700 text-sm sm:text-base list-disc list-inside leading-relaxed">
-                <li>
-                  <strong>Akses Pendidikan Layak:</strong> Menjamin anak-anak yatim dan dhuafa mendapatkan fasilitas belajar, buku, dan seragam gratis.
-                </li>
-                <li>
-                  <strong>Pengembangan Fasilitas:</strong> Membangun dan merenovasi sekolah, asrama, serta fasilitas pendukung pembelajaran.
-                </li>
-                <li>
-                  <strong>Inovasi & Keterampilan:</strong> Mengembangkan akses teknologi digital dan pelatihan kerja bagi generasi muda.
-                </li>
-                <li>
-                  <strong>Pengelolaan Akuntabel:</strong> Menjaga kepercayaan donatur melalui tata kelola dana yang transparan dan profesional.
-                </li>
-              </ul>
+              <div className="space-y-2.5 p-5 bg-slate-50/80 rounded-2xl border border-slate-100">
+                <h3 className="text-lg font-bold text-slate-900 flex items-center space-x-2">
+                  <span className="w-2 h-2 rounded-full bg-[#B89355]"></span>
+                  <span>Misi Gerakan</span>
+                </h3>
+                <p className="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                  Menjamin fasilitas pendidikan gratis untuk santri yatim & dhuafa, pembangunan sarana ibadah, serta pengelolaan dana infaq secara amanah dan akuntabel.
+                </p>
+              </div>
             </div>
           </div>
         </section>
       );
     }
 
-    function ProgramsSection({ programs, selectedCategory, setSelectedCategory, onSelectProgram, onInfaqNow }) {
+    function ProgramsSection({ programs, isLoading, selectedCategory, setSelectedCategory, onSelectProgram, onInfaqNow }) {
       const categories = ["Semua", "Pendidikan", "Santunan", "Wakaf & Pembangunan", "Paket Sembako", "Ramadhan"];
 
       const filteredPrograms = useMemo(() => {
@@ -684,7 +746,13 @@
               </div>
             </div>
 
-            {filteredPrograms.length === 0 ? (
+            {isLoading ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
+                {[1, 2, 3].map(i => (
+                  <div key={i} className="bg-slate-100 h-96 rounded-3xl border border-slate-200"></div>
+                ))}
+              </div>
+            ) : filteredPrograms.length === 0 ? (
               <div className="text-center py-16 bg-slate-50 rounded-3xl border border-slate-200 max-w-xl mx-auto p-8 space-y-3">
                 <div className="w-12 h-12 bg-emerald-100 text-[#1F5946] rounded-2xl flex items-center justify-center mx-auto">
                   <Icons.Layers />
