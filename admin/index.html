@@ -3,14 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LINUHA Panel</title>
-    <!-- Favicon Website -->
+    <title>LINUHA Panel Admin</title>
     <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19930797/Primary_Logo_1.jpg">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
@@ -25,7 +22,6 @@
         }
     </script>
     <style>
-        /* Gold Shimmer Button Animation */
         @keyframes shimmerSlide {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(200%); }
@@ -37,16 +33,8 @@
         .btn-shimmer::after {
             content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 50%;
-            height: 100%;
-            background: linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0) 0%,
-                rgba(255, 215, 0, 0.45) 50%,
-                rgba(255, 255, 255, 0) 100%
-            );
+            top: 0; left: 0; width: 50%; height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,215,0,0.45) 50%, rgba(255,255,255,0) 100%);
             transform: skewX(-20deg);
             animation: shimmerSlide 2.5s infinite;
         }
@@ -54,14 +42,11 @@
 </head>
 <body class="bg-gray-100 text-gray-800 antialiased min-h-screen">
 
-    <div id="admin-root" class="w-full min-h-screen flex">
-        <!-- Admin App Rendered via JS -->
-    </div>
+    <div id="admin-root" class="w-full min-h-screen flex"></div>
 
     <script>
         const OFFICIAL_LOGO = "https://www.upload.ee/image/19930797/Primary_Logo_1.jpg";
 
-        // Shared LocalStorage Database
         let DB = JSON.parse(localStorage.getItem('NUHA_DATABASE')) || {
             settings: {
                 siteName: "Lembaga Infaq Nurul Hayah",
@@ -108,27 +93,25 @@
                 }
             ],
             gallery: [
-                { id: 1, judul: "Kajian Rutin Bersama Pengasuh", ket: "Kegiatan rutin santri bersama pembina utama", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80", tanggal: "2026-10-20" }
+                { id: 1, judul: "Kajian Rutin Bersama Pengasuh", tanggal: "2026-10-20", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80" }
             ],
-            pendingConfirmations: [
+            pendingConfirmations: [],
+            blockedIPs: [],
+            logs: [],
+            programs: [
                 {
-                    id: 101,
-                    trxCode: "TRX-9821",
-                    donorName: "Ahmad Hidayat",
-                    amount: 250000,
-                    proofImage: "https://placehold.co/400x300/286B56/FFFFFF?text=Bukti+Transfer+BSI",
-                    status: "Menunggu Verifikasi Admin",
-                    timestamp: "2026-11-04 14:20",
-                    ip: "182.253.18.22"
+                    id: 1,
+                    judul: "Beasiswa Santri Yatim & Dhuafa NUHA",
+                    kategori: "Pendidikan",
+                    deskripsi: "Beasiswa penuh, tempat tinggal, dan konsumsi santri penghafal Qur'an.",
+                    target: 150000000,
+                    calcMode: "auto",
+                    terkumpulManual: 112500000,
+                    terkumpul: 112500000,
+                    foto: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80"
                 }
             ],
-            blockedIPs: ["114.122.35.10"],
-            logs: [
-                { id: 1, timestamp: "2026-11-04 14:20:05", action: "Klik Tombol Donasi", details: "Membuka modal infak dari tombol hero", ip: "182.253.18.22" }
-            ],
-            programs: [],
-            news: [],
-            donations: []
+            news: []
         };
 
         function saveDB() {
@@ -141,7 +124,7 @@
         };
 
         function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number || 0);
         }
 
         function renderAdminApp() {
@@ -157,7 +140,6 @@
             if (window.lucide) lucide.createIcons();
         }
 
-        // GREEN BACKGROUND LOGIN PAGE FOR ADMIN
         function renderAdminLoginPage() {
             const container = document.createElement('div');
             container.className = "w-full min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#0f4e2b] via-[#146438] to-[#0a381e]";
@@ -197,6 +179,9 @@
         function renderAdminDashboard() {
             const container = document.createElement('div');
             container.className = "flex w-full min-h-screen";
+
+            const pendingCount = (DB.pendingConfirmations || []).filter(c => c.status && c.status.includes('Menunggu')).length;
+
             container.innerHTML = `
                 <!-- Sidebar -->
                 <div class="w-64 bg-nuha-dark text-white p-6 space-y-8 flex flex-col justify-between shrink-0">
@@ -208,16 +193,14 @@
                         <nav class="space-y-1 text-xs font-semibold">
                             <button onclick="setAdminTab('dashboard')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='dashboard'?'bg-white/20':''}">Dashboard & Stat</button>
                             <button onclick="setAdminTab('verifikasi')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='verifikasi'?'bg-white/20':''} flex justify-between items-center">
-                                <span>Verifikasi Konfirmasi Donasi</span>
-                                ${(DB.pendingConfirmations||[]).filter(c=>c.status.includes('Menunggu')).length > 0 ? `
-                                    <span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] rounded-full font-bold">${(DB.pendingConfirmations||[]).filter(c=>c.status.includes('Menunggu')).length}</span>
-                                `: ''}
+                                <span>Verifikasi Donasi</span>
+                                ${pendingCount > 0 ? `<span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] rounded-full font-bold">${pendingCount}</span>` : ''}
                             </button>
-                            <button onclick="setAdminTab('logs')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='logs'?'bg-white/20':''}">Log Aktivitas & Blokir IP</button>
-                            <button onclick="setAdminTab('settings')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='settings'?'bg-white/20':''}">Pengaturan Website & Lock</button>
+                            <button onclick="setAdminTab('logs')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='logs'?'bg-white/20':''}">Log Aktivitas & IP</button>
+                            <button onclick="setAdminTab('settings')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='settings'?'bg-white/20':''}">Pengaturan Web & Lock</button>
                             <button onclick="setAdminTab('heroSlides')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='heroSlides'?'bg-white/20':''}">Hero Slide & Teks</button>
                             <button onclick="setAdminTab('pengurus')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='pengurus'?'bg-white/20':''}">Susunan Pengurus</button>
-                            <button onclick="setAdminTab('program')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='program'?'bg-white/20':''}">Kelola Program Unggulan</button>
+                            <button onclick="setAdminTab('program')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='program'?'bg-white/20':''}">Program & Dana Terkumpul</button>
                             <button onclick="setAdminTab('gallery')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='gallery'?'bg-white/20':''}">Kelola Galeri Foto</button>
                             <button onclick="setAdminTab('berita')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='berita'?'bg-white/20':''}">Berita & Embed Media</button>
                             <button onclick="setAdminTab('pembayaran')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='pembayaran'?'bg-white/20':''}">Metode Pembayaran</button>
@@ -226,16 +209,311 @@
                     <button onclick="logoutAdmin()" class="w-full p-3 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2">Keluar Admin</button>
                 </div>
 
-                <!-- Content Area -->
+                <!-- Main Content Area -->
                 <div class="flex-1 p-8 space-y-6 overflow-y-auto max-h-screen bg-gray-50">
                     <div class="flex justify-between items-center border-b pb-4">
                         <h1 class="text-2xl font-bold text-gray-900 capitalize">CMS Admin - ${adminState.adminSubTab}</h1>
                         <a href="index.html" target="_blank" class="text-xs bg-emerald-100 text-nuha-primary px-3 py-1.5 rounded-xl font-bold hover:bg-emerald-200">Lihat Live Website &rarr;</a>
                     </div>
 
-                    ${adminState.adminSubTab === 'verifikasi' ? `
+                    ${renderAdminSubTabContent()}
+                </div>
+            `;
+            return container;
+        }
+
+        function renderAdminSubTabContent() {
+            switch(adminState.adminSubTab) {
+                case 'dashboard':
+                    return `
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                                <span class="text-xs text-gray-400">Total Donasi Terkumpul</span>
+                                <h3 class="text-2xl font-bold text-nuha-primary mt-1">${formatRupiah(DB.stats.totalInfaq)}</h3>
+                            </div>
+                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                                <span class="text-xs text-gray-400">Total Donatur</span>
+                                <h3 class="text-2xl font-bold text-gray-900 mt-1">${DB.stats.totalDonatur} Orang</h3>
+                            </div>
+                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                                <span class="text-xs text-gray-400">Status Akses Website</span>
+                                <h3 class="text-lg font-bold ${DB.settings.isLocked?'text-red-600':'text-emerald-600'} mt-1">${DB.settings.isLocked ? 'Terkunci (Maintenance)' : 'Aktif Publik'}</h3>
+                            </div>
+                        </div>
+                    `;
+                
+                case 'settings':
+                    return `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6 max-w-3xl">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Pengaturan Identitas & Konten Website</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Nama Website</label>
+                                        <input type="text" id="set-site-name" value="${DB.settings.siteName || ''}" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Nomor Telepon / WA</label>
+                                        <input type="text" id="set-phone" value="${DB.settings.phone || ''}" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">URL Logo Website</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="set-logo-url" value="${DB.settings.siteLogo || ''}" class="flex-1 p-3 border border-gray-200 rounded-xl text-xs">
+                                        <input type="file" id="logo-file-input" onchange="uploadImageFile(this, 'set-logo-url')" class="hidden">
+                                        <button onclick="document.getElementById('logo-file-input').click()" class="px-4 py-2 bg-gray-100 border text-xs font-bold rounded-xl hover:bg-gray-200">Upload</button>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4 border-t space-y-3">
+                                    <h4 class="font-bold text-xs text-nuha-primary">Edit Teks Profil (Tentang, Visi & Misi)</h4>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Teks "Tentang LINUHA"</label>
+                                        <textarea id="set-about-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.aboutText || ''}</textarea>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="text-xs font-bold text-gray-700">Teks Visi Kami</label>
+                                            <textarea id="set-visi-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.visiText || ''}</textarea>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs font-bold text-gray-700">Teks Misi & Fokus</label>
+                                            <textarea id="set-misi-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.misiText || ''}</textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="updateSettings()" class="w-full py-3 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark">Simpan Perubahan Settings</button>
+
+                                <div class="pt-6 border-t space-y-4">
+                                    <h4 class="font-bold text-xs text-red-700">Kontrol Kunci / Maintenance Website</h4>
+                                    <div class="flex gap-3">
+                                        <button onclick="toggleWebsiteLock(true)" class="flex-1 py-3 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700">Kunci Website (Maintenance)</button>
+                                        <button onclick="toggleWebsiteLock(false)" class="flex-1 py-3 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700">Buka Akses Website</button>
+                                    </div>
+                                    <div class="flex gap-3">
+                                        <button onclick="toggleDonationsLock(true)" class="flex-1 py-3 bg-amber-600 text-white font-bold text-xs rounded-xl hover:bg-amber-700">Kunci Semua Tombol Donasi</button>
+                                        <button onclick="toggleDonationsLock(false)" class="flex-1 py-3 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700">Buka Tombol Donasi</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'program':
+                    return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Daftar Konfirmasi Donasi Masuk Dari Donatur</h3>
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Program & Dana Terkumpul (Auto / Manual)</h3>
+                            
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Form Tambah Program Baru</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input type="text" id="prog-judul" placeholder="Judul Program..." class="p-3 border rounded-xl text-xs">
+                                    <input type="text" id="prog-kategori" placeholder="Kategori (Contoh: Pendidikan)..." class="p-3 border rounded-xl text-xs">
+                                </div>
+                                <textarea id="prog-deskripsi" rows="2" placeholder="Deskripsi Singkat Program..." class="w-full p-3 border rounded-xl text-xs"></textarea>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-600 block">Target Dana (Rp)</label>
+                                        <input type="number" id="prog-target" placeholder="Contoh: 100000000" class="w-full p-3 border rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-600 block">Mode Perhitungan</label>
+                                        <select id="prog-calc-mode" class="w-full p-3 border rounded-xl text-xs font-bold bg-white">
+                                            <option value="auto">Otomatis (Dari Transaksi)</option>
+                                            <option value="manual">Manual (Nominal Custom)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-[10px] font-bold text-gray-600 block">Nominal Terkumpul Manual (Rp)</label>
+                                        <input type="number" id="prog-terkumpul-manual" placeholder="Jika mode manual..." class="w-full p-3 border rounded-xl text-xs">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">Foto Program</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="prog-foto" placeholder="Paste Link Foto URL..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="prog-file" onchange="uploadImageFile(this, 'prog-foto')" class="hidden">
+                                        <button onclick="document.getElementById('prog-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload</button>
+                                    </div>
+                                </div>
+
+                                <button onclick="addProgram()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Simpan Program Baru</button>
+                            </div>
+
+                            <div class="space-y-4 pt-4">
+                                <h4 class="font-bold text-xs text-gray-800">Daftar Program & Kontrol Perhitungan Dana</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    ${(DB.programs||[]).map((prog, idx) => `
+                                        <div class="p-4 border border-gray-200 rounded-2xl bg-white space-y-3 shadow-xs">
+                                            <img src="${prog.foto}" class="w-full h-32 object-cover rounded-xl border">
+                                            <div class="space-y-2">
+                                                <input type="text" id="prog-edit-judul-${idx}" value="${prog.judul}" class="w-full p-2 border rounded-lg text-xs font-bold">
+                                                
+                                                <div class="grid grid-cols-2 gap-2">
+                                                    <div>
+                                                        <label class="text-[10px] text-gray-500 font-bold block">Target (Rp)</label>
+                                                        <input type="number" id="prog-edit-target-${idx}" value="${prog.target}" class="w-full p-2 border rounded-lg text-xs font-bold">
+                                                    </div>
+                                                    <div>
+                                                        <label class="text-[10px] text-gray-500 font-bold block">Mode Perhitungan</label>
+                                                        <select id="prog-edit-mode-${idx}" class="w-full p-2 border rounded-lg text-xs font-bold bg-gray-50">
+                                                            <option value="auto" ${prog.calcMode==='auto'||!prog.calcMode?'selected':''}>Otomatis</option>
+                                                            <option value="manual" ${prog.calcMode==='manual'?'selected':''}>Manual</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+
+                                                <div>
+                                                    <label class="text-[10px] text-gray-500 font-bold block">Dana Terkumpul Manual (Rp)</label>
+                                                    <input type="number" id="prog-edit-manual-${idx}" value="${prog.terkumpulManual || prog.terkumpul || 0}" class="w-full p-2 border rounded-lg text-xs text-emerald-700 font-bold">
+                                                </div>
+
+                                                <div class="flex gap-2 pt-1">
+                                                    <button onclick="updateProgram(${idx})" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Update Program</button>
+                                                    <button onclick="removeProgram(${idx})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold">Hapus</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'pengurus':
+                    return `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola & Atur Level Hirarki Susunan Pengurus</h3>
+                            
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Jabatan Pengurus Baru</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input type="text" id="pengurus-nama" placeholder="Nama Lengkap & Gelar..." class="p-3 border rounded-xl text-xs">
+                                    <input type="text" id="pengurus-jabatan" placeholder="Jabatan (Contoh: Pengasuh/Ketua)..." class="p-3 border rounded-xl text-xs">
+                                </div>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Level Hirarki Jabatan</label>
+                                        <select id="pengurus-level" class="w-full mt-1 p-3 border rounded-xl text-xs font-bold bg-white">
+                                            <option value="1">Level 1 - Pengasuh / Pembina Utama</option>
+                                            <option value="2" selected>Level 2 - Pimpinan / Ketua Pengurus</option>
+                                            <option value="3">Level 3 - Bendahara / Staf</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Foto Pengurus</label>
+                                        <div class="flex gap-2 mt-1">
+                                            <input type="text" id="pengurus-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                            <input type="file" id="p-file" onchange="uploadImageFile(this, 'pengurus-foto')" class="hidden">
+                                            <button onclick="document.getElementById('p-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="addPengurus()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Simpan Pengurus Baru</button>
+                            </div>
+
+                            <div class="space-y-4 pt-4">
+                                <h4 class="font-bold text-xs text-gray-800">Daftar Susunan Pengurus Aktif</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    ${(DB.pengurusList||[]).map((p, idx) => `
+                                        <div class="p-4 border border-gray-200 rounded-2xl bg-white space-y-3">
+                                            <div class="space-y-2">
+                                                <label class="text-[10px] font-bold text-gray-400">Nama</label>
+                                                <input type="text" id="p-edit-nama-${idx}" value="${p.nama}" class="w-full p-2 border rounded-xl text-xs font-bold">
+                                                <label class="text-[10px] font-bold text-gray-400">Jabatan</label>
+                                                <input type="text" id="p-edit-jabatan-${idx}" value="${p.jabatan}" class="w-full p-2 border rounded-xl text-xs text-nuha-primary font-semibold">
+                                                <label class="text-[10px] font-bold text-gray-400">Level Hirarki</label>
+                                                <select id="p-edit-level-${idx}" class="w-full p-2 border rounded-xl text-xs font-bold bg-gray-50">
+                                                    <option value="1" ${p.level===1?'selected':''}>Level 1 (Pembina)</option>
+                                                    <option value="2" ${p.level===2||!p.level?'selected':''}>Level 2 (Ketua)</option>
+                                                    <option value="3" ${p.level===3?'selected':''}>Level 3 (Staf)</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button onclick="updatePengurus(${idx})" class="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Simpan Update</button>
+                                                <button onclick="removePengurus(${idx})" class="px-3 py-2 bg-red-600 text-white rounded-xl text-xs font-bold">Hapus</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                case 'gallery':
+                    return `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Galeri Foto LINUHA</h3>
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Foto Galeri Baru</h4>
+                                <input type="text" id="gal-judul" placeholder="Judul / Keterangan Foto..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="date" id="gal-tanggal" class="w-full p-3 border rounded-xl text-xs">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">Foto Galeri</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="gal-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="g-file" onchange="uploadImageFile(this, 'gal-foto')" class="hidden">
+                                        <button onclick="document.getElementById('g-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload</button>
+                                    </div>
+                                </div>
+                                <button onclick="addGalleryItem()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Simpan ke Galeri</button>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                                ${(DB.gallery||[]).map((item, idx) => `
+                                    <div class="p-3 border rounded-2xl bg-white space-y-2">
+                                        <img src="${item.foto}" class="h-32 w-full object-cover rounded-xl">
+                                        <h4 class="font-bold text-xs text-gray-900">${item.judul}</h4>
+                                        <span class="text-[10px] text-gray-400 block">${item.tanggal}</span>
+                                        <button onclick="removeGalleryItem(${idx})" class="w-full py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'heroSlides':
+                    return `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Teks & Gambar Hero Slide Slider</h3>
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Slide Baru</h4>
+                                <input type="text" id="slide-judul" placeholder="Judul Teks Slide..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="text" id="slide-subjudul" placeholder="Subjudul / Keterangan Teks Slide..." class="w-full p-3 border rounded-xl text-xs">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">Foto Hero Slide</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="slide-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="s-file" onchange="uploadImageFile(this, 'slide-foto')" class="hidden">
+                                        <button onclick="document.getElementById('s-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload</button>
+                                    </div>
+                                </div>
+                                <button onclick="addHeroSlide()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Tambah Slide</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                                ${(DB.heroSlides||[]).map((slide, idx) => `
+                                    <div class="p-4 border rounded-2xl bg-white space-y-2">
+                                        <img src="${slide.foto}" class="h-32 w-full object-cover rounded-xl">
+                                        <h4 class="font-bold text-xs text-gray-900">${slide.judul}</h4>
+                                        <p class="text-[10px] text-gray-500">${slide.subjudul}</p>
+                                        <button onclick="removeHeroSlide(${idx})" class="w-full py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus Slide Ini</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+
+                case 'verifikasi':
+                    return `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Daftar Konfirmasi Donasi Masuk</h3>
                             <div class="space-y-4">
                                 ${(DB.pendingConfirmations||[]).length === 0 ? '<p class="text-xs text-gray-500">Belum ada konfirmasi donasi masuk.</p>' : ''}
                                 ${(DB.pendingConfirmations||[]).map((c, idx) => `
@@ -252,7 +530,7 @@
                                         <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
                                             ${c.proofImage ? `<a href="${c.proofImage}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl text-center hover:bg-gray-200">Lihat Bukti</a>` : ''}
                                             ${c.status.includes('Menunggu') ? `
-                                                <button onclick="approveDonation(${idx})" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">Setujui (Terverifikasi)</button>
+                                                <button onclick="approveDonation(${idx})" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">Setujui</button>
                                                 <button onclick="rejectDonation(${idx})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl">Tolak</button>
                                             ` : ''}
                                         </div>
@@ -260,20 +538,20 @@
                                 `).join('')}
                             </div>
                         </div>
-                    ` : ''}
+                    `;
 
-                    ${adminState.adminSubTab === 'logs' ? `
+                case 'logs':
+                    return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
                             <div class="flex justify-between items-center border-b pb-3">
-                                <h3 class="font-bold text-sm text-gray-900">Log Aktivitas Pengunjung & Sistem</h3>
-                                <button onclick="clearLogs()" class="px-3 py-1 bg-red-100 text-red-600 hover:bg-red-200 font-bold text-xs rounded-xl">Bersihkan Log</button>
+                                <h3 class="font-bold text-sm text-gray-900">Log Aktivitas & Pemblokiran IP</h3>
+                                <button onclick="clearLogs()" class="px-3 py-1 bg-red-100 text-red-600 font-bold text-xs rounded-xl">Bersihkan Log</button>
                             </div>
 
-                            <!-- KELOLA DIBLOKIR IP -->
                             <div class="p-4 bg-red-50 border border-red-100 rounded-2xl space-y-3">
-                                <h4 class="font-bold text-xs text-red-800">Manajemen Blokir Alamat IP (Blacklist)</h4>
+                                <h4 class="font-bold text-xs text-red-800">Manajemen Pemblokiran IP (Blacklist)</h4>
                                 <div class="flex gap-2">
-                                    <input type="text" id="ip-to-block" placeholder="Masukkan Alamat IP (Contoh: 182.253.18.22)..." class="flex-1 p-2.5 border border-red-200 rounded-xl text-xs">
+                                    <input type="text" id="ip-to-block" placeholder="Masukkan Alamat IP..." class="flex-1 p-2.5 border border-red-200 rounded-xl text-xs">
                                     <button onclick="blockIP()" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl">Blokir IP Ini</button>
                                 </div>
                                 <div class="flex flex-wrap gap-2 pt-1">
@@ -286,20 +564,19 @@
                                 </div>
                             </div>
 
-                            <!-- TABEL LOG AKTIVITAS -->
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left text-xs border-collapse">
                                     <thead>
                                         <tr class="bg-gray-100 text-gray-700 border-b">
                                             <th class="p-3">Waktu</th>
-                                            <th class="p-3">Aksi/Aktivitas</th>
-                                            <th class="p-3">Detail Keterangan</th>
+                                            <th class="p-3">Aksi</th>
+                                            <th class="p-3">Detail</th>
                                             <th class="p-3">Alamat IP</th>
                                             <th class="p-3 text-right">Opsi</th>
                                         </tr>
                                     </thead>
                                     <tbody class="divide-y divide-gray-100">
-                                        ${(DB.logs||[]).length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada rekaman aktivitas.</td></tr>' : ''}
+                                        ${(DB.logs||[]).length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada log.</td></tr>' : ''}
                                         ${(DB.logs||[]).map(log => `
                                             <tr class="hover:bg-gray-50">
                                                 <td class="p-3 text-gray-500 whitespace-nowrap">${log.timestamp}</td>
@@ -307,7 +584,7 @@
                                                 <td class="p-3 text-gray-700">${log.details}</td>
                                                 <td class="p-3 font-mono text-gray-600">${log.ip || '127.0.0.1'}</td>
                                                 <td class="p-3 text-right">
-                                                    <button onclick="blockSpecificIP('${log.ip}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] rounded-lg">Blokir IP</button>
+                                                    <button onclick="blockSpecificIP('${log.ip}')" class="px-2 py-1 bg-red-100 text-red-700 font-bold text-[10px] rounded-lg">Blokir IP</button>
                                                 </td>
                                             </tr>
                                         `).join('')}
@@ -315,522 +592,140 @@
                                 </table>
                             </div>
                         </div>
-                    ` : ''}
+                    `;
 
-                    ${adminState.adminSubTab === 'dashboard' ? `
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Total Donasi Terkumpul</span>
-                                <h3 class="text-2xl font-bold text-nuha-primary mt-1">${formatRupiah(DB.stats.totalInfaq)}</h3>
-                            </div>
-                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Total Donatur</span>
-                                <h3 class="text-2xl font-bold text-gray-900 mt-1">${DB.stats.totalDonatur} Orang</h3>
-                            </div>
-                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Status Akses Website</span>
-                                <h3 class="text-lg font-bold ${DB.settings.isLocked?'text-red-600':'text-emerald-600'} mt-1">${DB.settings.isLocked ? 'Terkunci (Maintenance)' : 'Aktif Publik'}</h3>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${adminState.adminSubTab === 'settings' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6 max-w-3xl">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Pengaturan Identitas, Halaman Profil & Akses</h3>
-                            
-                            <div class="space-y-4">
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Nama Website</label>
-                                        <input type="text" id="set-site-name" value="${DB.settings.siteName}" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Nomor Telepon / WA</label>
-                                        <input type="text" id="set-phone" value="${DB.settings.phone}" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700">URL Logo Website</label>
-                                    <div class="flex gap-2 mt-1">
-                                        <input type="text" id="set-logo-url" value="${DB.settings.siteLogo}" class="flex-1 p-3 border border-gray-200 rounded-xl text-xs">
-                                        <input type="file" id="logo-file-input" onchange="uploadImageFile(this, 'set-logo-url')" class="hidden">
-                                        <button onclick="document.getElementById('logo-file-input').click()" class="px-4 py-2 bg-gray-100 border text-xs font-bold rounded-xl hover:bg-gray-200">Upload Foto</button>
-                                    </div>
-                                </div>
-
-                                <!-- EDIT TENTANG LINUHA, VISI & MISI -->
-                                <div class="pt-4 border-t space-y-3">
-                                    <h4 class="font-bold text-xs text-nuha-primary">Edit Teks Tentang LINUHA, Visi, dan Misi</h4>
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Teks Halaman "Tentang LINUHA"</label>
-                                        <textarea id="set-about-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.aboutText || ''}</textarea>
-                                    </div>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <div>
-                                            <label class="text-xs font-bold text-gray-700">Teks Visi Kami</label>
-                                            <textarea id="set-visi-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.visiText || ''}</textarea>
-                                        </div>
-                                        <div>
-                                            <label class="text-xs font-bold text-gray-700">Teks Misi & Fokus Gerakan</label>
-                                            <textarea id="set-misi-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.misiText || ''}</textarea>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="pt-4 border-t space-y-3">
-                                    <h4 class="font-bold text-xs text-gray-800">Link Sosial Media</h4>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                        <input type="text" id="soc-wa" placeholder="WhatsApp Link" value="${DB.settings.socials?.whatsapp || ''}" class="p-3 border rounded-xl text-xs">
-                                        <input type="text" id="soc-ig" placeholder="Instagram Link" value="${DB.settings.socials?.instagram || ''}" class="p-3 border rounded-xl text-xs">
-                                        <input type="text" id="soc-yt" placeholder="YouTube Link" value="${DB.settings.socials?.youtube || ''}" class="p-3 border rounded-xl text-xs">
-                                        <input type="text" id="soc-tiktok" placeholder="TikTok Link" value="${DB.settings.socials?.tiktok || ''}" class="p-3 border rounded-xl text-xs">
-                                        <input type="text" id="soc-fb" placeholder="Facebook Link" value="${DB.settings.socials?.facebook || ''}" class="p-3 border rounded-xl text-xs">
-                                    </div>
-                                </div>
-
-                                <div class="pt-4 border-t space-y-4">
-                                    <h4 class="font-bold text-xs text-gray-800">Kontrol Kunci Website & Tombol</h4>
-                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                                        <div>
-                                            <span class="font-bold text-xs text-gray-900 block">Kunci Seluruh Website (Maintenance Mode)</span>
-                                            <span class="text-[10px] text-gray-500">Pengunjung tidak bisa membuka website saat ini</span>
-                                        </div>
-                                        <input type="checkbox" id="set-is-locked" ${DB.settings.isLocked?'checked':''} class="w-5 h-5 accent-nuha-primary">
-                                    </div>
-
-                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
-                                        <div>
-                                            <span class="font-bold text-xs text-gray-900 block">Kunci Tombol Program & Donasi</span>
-                                            <span class="text-[10px] text-gray-500">Mencegah pengunjung menekan tombol berdonasi</span>
-                                        </div>
-                                        <input type="checkbox" id="set-disable-donations" ${DB.settings.disableDonations?'checked':''} class="w-5 h-5 accent-nuha-primary">
-                                    </div>
-
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Pesan Pemeliharaan Website</label>
-                                        <textarea id="set-lock-msg" rows="2" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.lockMessage}</textarea>
-                                    </div>
-                                </div>
-
-                                <button onclick="saveWebsiteSettings()" class="w-full py-3 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark transition shadow-md">Simpan Semua Pengaturan &rarr;</button>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${adminState.adminSubTab === 'heroSlides' ? `
+                case 'berita':
+                    return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Tambah & Kelola Semua Foto Slide Hero</h3>
-                            
-                            <!-- FORM TAMBAH / EDIT SLIDE -->
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Berita & Embed Media</h3>
                             <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Form Tambah Slide Banner</h4>
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Berita Baru</h4>
+                                <input type="text" id="news-judul" placeholder="Judul Berita..." class="w-full p-3 border rounded-xl text-xs">
+                                <textarea id="news-ringkasan" rows="2" placeholder="Ringkasan Berita..." class="w-full p-3 border rounded-xl text-xs"></textarea>
+                                <input type="text" id="news-embed" placeholder="URL Link YouTube/TikTok/IG/FB..." class="w-full p-3 border rounded-xl text-xs">
                                 <div>
-                                    <label class="text-xs font-bold text-gray-700">URL Foto Slide / File Upload</label>
+                                    <label class="text-xs font-bold text-gray-700">Foto Berita</label>
                                     <div class="flex gap-2 mt-1">
-                                        <input type="text" id="new-slide-url" placeholder="Paste Link Foto URL..." class="flex-1 p-3 border rounded-xl text-xs">
-                                        <input type="file" id="slide-file-input" onchange="uploadImageFile(this, 'new-slide-url')" class="hidden">
-                                        <button onclick="document.getElementById('slide-file-input').click()" class="px-4 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload Foto</button>
+                                        <input type="text" id="news-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="n-file" onchange="uploadImageFile(this, 'news-foto')" class="hidden">
+                                        <button onclick="document.getElementById('n-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload</button>
                                     </div>
                                 </div>
-                                <input type="text" id="new-slide-title" placeholder="Judul Teks Slide Hero..." class="w-full p-3 border rounded-xl text-xs">
-                                <input type="text" id="new-slide-sub" placeholder="Sub-Judul Teks Slide..." class="w-full p-3 border rounded-xl text-xs">
-                                <button onclick="addHeroSlide()" class="w-full py-3 bg-nuha-primary hover:bg-nuha-dark text-white rounded-xl text-xs font-bold transition">Simpan Slide Banner Baru</button>
+                                <button onclick="addNewsItem()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Terbitkan Berita</button>
                             </div>
-
-                            <!-- DISPLAY ALL SLIDES FOR EDITING & MANAGE -->
-                            <div class="space-y-4 pt-4">
-                                <h4 class="font-bold text-xs text-gray-800">Daftar Seluruh Slide Aktif (${(DB.heroSlides||[]).length} Foto Slide)</h4>
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    ${(DB.heroSlides||[]).map((slide, idx) => {
-                                        const imgUrl = typeof slide === 'string' ? slide : slide.foto;
-                                        const title = slide.judul || 'Tanpa Judul';
-                                        const sub = slide.subjudul || '';
-                                        return `
-                                            <div class="p-4 border border-gray-200 rounded-2xl bg-white space-y-3 shadow-xs">
-                                                <img src="${imgUrl}" class="w-full h-40 object-cover rounded-xl border">
-                                                <div class="space-y-2">
-                                                    <input type="text" id="slide-edit-title-${idx}" value="${title}" class="w-full p-2 border rounded-lg text-xs font-bold">
-                                                    <input type="text" id="slide-edit-sub-${idx}" value="${sub}" class="w-full p-2 border rounded-lg text-xs text-gray-600">
-                                                    <input type="text" id="slide-edit-foto-${idx}" value="${imgUrl}" class="w-full p-2 border rounded-lg text-xs font-mono">
-                                                    <div class="flex gap-2 pt-1">
-                                                        <button onclick="updateHeroSlide(${idx})" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Update Text/Foto</button>
-                                                        <button onclick="removeHeroSlide(${idx})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold">Hapus</button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        `;
-                                    }).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${adminState.adminSubTab === 'pengurus' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola & Atur Level Hirarki Susunan Pengurus</h3>
-                            
-                            <!-- FORM TAMBAH PENGURUS -->
-                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Jabatan Pengurus Baru</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <input type="text" id="pengurus-nama" placeholder="Nama Lengkap & Gelar Pengurus..." class="p-3 border rounded-xl text-xs">
-                                    <input type="text" id="pengurus-jabatan" placeholder="Jabatan (Contoh: Pengasuh/Ketua/Bendahara)..." class="p-3 border rounded-xl text-xs">
-                                </div>
-                                
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Level Hirarki Jabatan</label>
-                                        <select id="pengurus-level" class="w-full mt-1 p-3 border rounded-xl text-xs font-bold bg-white">
-                                            <option value="1">Level 1 - Pengasuh / Pembina Utama (Paling Tinggi)</option>
-                                            <option value="2" selected>Level 2 - Pimpinan / Ketua Pengurus (Menengah)</option>
-                                            <option value="3">Level 3 - Bendahara / Anggota / Staf (Bawah)</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Foto Pengurus (Upload / Link URL)</label>
-                                        <div class="flex gap-2 mt-1">
-                                            <input type="text" id="pengurus-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
-                                            <input type="file" id="p-file" onchange="uploadImageFile(this, 'pengurus-foto')" class="hidden">
-                                            <button onclick="document.getElementById('p-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload</button>
+                            <div class="space-y-3 pt-4">
+                                ${(DB.news||[]).map((n, idx) => `
+                                    <div class="p-4 border rounded-2xl bg-white flex justify-between items-center gap-4">
+                                        <div>
+                                            <h4 class="font-bold text-xs text-gray-900">${n.judul}</h4>
+                                            <p class="text-[10px] text-gray-500">${n.tanggal}</p>
                                         </div>
-                                    </div>
-                                </div>
-
-                                <button onclick="addPengurus()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark transition">Simpan Pengurus Baru</button>
-                            </div>
-
-                            <!-- DAFTAR PENGURUS DENGAN EDITING FITUR -->
-                            <div class="space-y-4 pt-4">
-                                <h4 class="font-bold text-xs text-gray-800">Daftar Susunan Pengurus Aktif (Bisa Langsung Edit)</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    ${(DB.pengurusList||[]).map((p, idx) => `
-                                        <div class="p-4 border border-gray-200 rounded-2xl bg-white space-y-3">
-                                            <div class="space-y-2">
-                                                <label class="text-[10px] font-bold text-gray-400">Nama</label>
-                                                <input type="text" id="p-edit-nama-${idx}" value="${p.nama}" class="w-full p-2 border rounded-xl text-xs font-bold">
-                                                <label class="text-[10px] font-bold text-gray-400">Jabatan</label>
-                                                <input type="text" id="p-edit-jabatan-${idx}" value="${p.jabatan}" class="w-full p-2 border rounded-xl text-xs text-nuha-primary font-semibold">
-                                                <label class="text-[10px] font-bold text-gray-400">Level Hirarki</label>
-                                                <select id="p-edit-level-${idx}" class="w-full p-2 border rounded-xl text-xs font-bold bg-gray-50">
-                                                    <option value="1" ${p.level===1?'selected':''}>Level 1 (Utama)</option>
-                                                    <option value="2" ${p.level===2||!p.level?'selected':''}>Level 2 (Ketua)</option>
-                                                    <option value="3" ${p.level===3?'selected':''}>Level 3 (Staf)</option>
-                                                </select>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button onclick="updatePengurus(${idx})" class="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Simpan Update</button>
-                                                <button onclick="removePengurus(${idx})" class="px-3 py-2 bg-red-600 text-white rounded-xl text-xs font-bold">Hapus</button>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${adminState.adminSubTab === 'gallery' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Galeri Foto & Kegiatan</h3>
-                            
-                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Foto Galeri Baru</h4>
-                                <input type="text" id="gal-judul" placeholder="Judul Foto Kegiatan..." class="w-full p-3 border rounded-xl text-xs">
-                                <textarea id="gal-ket" placeholder="Keterangan Teks Singkat..." class="w-full p-3 border rounded-xl text-xs" rows="2"></textarea>
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700">Foto (Upload File / Link Foto)</label>
-                                    <div class="flex gap-2 mt-1">
-                                        <input type="text" id="gal-foto" placeholder="Paste Link Foto URL..." class="flex-1 p-3 border rounded-xl text-xs">
-                                        <input type="file" id="gal-file" onchange="uploadImageFile(this, 'gal-foto')" class="hidden">
-                                        <button onclick="document.getElementById('gal-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload</button>
-                                    </div>
-                                </div>
-                                <button onclick="addGalleryItem()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark transition">Tambah ke Galeri</button>
-                            </div>
-
-                            <!-- DISPLAY GALERI DENGAN DOKUMEN FOTO BEBERAPA -->
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                                ${(DB.gallery||[]).map((item, idx) => `
-                                    <div class="p-4 border rounded-2xl bg-white space-y-2">
-                                        <img src="${item.foto}" class="h-32 w-full object-cover rounded-xl">
-                                        <h4 class="font-bold text-xs text-gray-900">${item.judul}</h4>
-                                        <p class="text-[10px] text-gray-500">${item.ket || ''}</p>
-                                        <button onclick="removeGallery(${idx})" class="w-full py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold">Hapus Foto</button>
+                                        <button onclick="removeNewsItem(${idx})" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus</button>
                                     </div>
                                 `).join('')}
                             </div>
                         </div>
-                    ` : ''}
+                    `;
 
-                    ${adminState.adminSubTab === 'pembayaran' ? `
+                case 'pembayaran':
+                    return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
                             <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Metode Pembayaran & QRIS</h3>
-                            
                             <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Rekening / QRIS Baru</h4>
-                                <input type="text" id="pay-name" placeholder="Nama Bank / QRIS (Contoh: Bank BSI / QRIS All Payment)..." class="w-full p-3 border rounded-xl text-xs">
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Bank / QRIS Baru</h4>
+                                <input type="text" id="pay-name" placeholder="Nama Bank / QRIS..." class="w-full p-3 border rounded-xl text-xs">
                                 <input type="text" id="pay-account" placeholder="Nomor Rekening & Atas Nama..." class="w-full p-3 border rounded-xl text-xs">
                                 <div>
-                                    <label class="text-xs font-bold text-gray-700">Gambar Kode QRIS (Jika Metode QRIS)</label>
+                                    <label class="text-xs font-bold text-gray-700">Foto QRIS (Opsional)</label>
                                     <div class="flex gap-2 mt-1">
-                                        <input type="text" id="pay-qr" placeholder="Paste Link Foto QRIS..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="text" id="pay-qr" placeholder="Paste URL Foto QRIS..." class="flex-1 p-3 border rounded-xl text-xs">
                                         <input type="file" id="pay-file" onchange="uploadImageFile(this, 'pay-qr')" class="hidden">
-                                        <button onclick="document.getElementById('pay-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload QR</button>
+                                        <button onclick="document.getElementById('pay-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload QR</button>
                                     </div>
                                 </div>
-                                <button onclick="addPaymentMethod()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark transition">Simpan Metode Pembayaran</button>
+                                <button onclick="addPaymentMethod()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Simpan Pembayaran</button>
                             </div>
-
-                            <div class="space-y-3 pt-2">
-                                <h4 class="font-bold text-xs text-gray-800">Metode Pembayaran Aktif di Website</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    ${(DB.paymentMethods||[]).map((m, idx) => `
-                                        <div class="p-4 border rounded-2xl bg-white space-y-2 flex flex-col justify-between">
-                                            <div>
-                                                <h4 class="font-bold text-xs text-gray-900">${m.name}</h4>
-                                                <p class="text-xs text-nuha-primary font-semibold">${m.account}</p>
-                                                ${m.qrImage ? `<img src="${m.qrImage}" class="h-24 w-24 object-contain mt-2 border p-1 rounded-lg">` : ''}
-                                            </div>
-                                            <button onclick="removePaymentMethod(${idx})" class="w-full py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold">Hapus Rekening</button>
+                            <div class="space-y-3 pt-4">
+                                ${(DB.paymentMethods||[]).map((m, idx) => `
+                                    <div class="p-4 border rounded-2xl bg-white flex justify-between items-center">
+                                        <div>
+                                            <h4 class="font-bold text-xs text-gray-900">${m.name}</h4>
+                                            <p class="text-[10px] text-nuha-primary font-mono">${m.account}</p>
                                         </div>
-                                    `).join('')}
-                                </div>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${adminState.adminSubTab === 'pengurus' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm">Tambah / Ubah Susunan Pengurus</h3>
-                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <input type="text" id="pengurus-nama" placeholder="Nama Lengkap & Gelar Pengurus..." class="w-full p-3 border rounded-xl text-xs">
-                                <input type="text" id="pengurus-jabatan" placeholder="Jabatan (Contoh: Pengasuh Utama)..." class="w-full p-3 border rounded-xl text-xs">
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700">Foto Pengurus (Opsional)</label>
-                                    <div class="flex gap-2">
-                                        <input type="text" id="pengurus-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
-                                        <input type="file" id="p-file" onchange="uploadImageFile(this, 'pengurus-foto')" class="hidden">
-                                        <button onclick="document.getElementById('p-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload Foto</button>
-                                    </div>
-                                </div>
-                                <button onclick="addPengurus()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Tambah Pengurus Baru</button>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                                ${(DB.pengurusList||[]).map((p, idx) => `
-                                    <div class="p-4 border rounded-2xl text-center space-y-2 bg-white">
-                                        <h4 class="font-bold text-xs">${p.nama}</h4>
-                                        <span class="text-[10px] text-emerald-700 font-semibold block">${p.jabatan}</span>
-                                        <button onclick="removePengurus(${idx})" class="text-xs text-red-600 font-bold hover:underline">Hapus</button>
+                                        <button onclick="removePaymentMethod(${idx})" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus</button>
                                     </div>
                                 `).join('')}
                             </div>
                         </div>
-                    ` : ''}
+                    `;
 
-                    ${adminState.adminSubTab === 'program' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm">Kelola Program Unggulan</h3>
-                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <input type="text" id="prog-judul" placeholder="Judul Program..." class="w-full p-3 border rounded-xl text-xs">
-                                <input type="text" id="prog-kat" placeholder="Kategori (Pendidikan/Infrastruktur)..." class="w-full p-3 border rounded-xl text-xs">
-                                <textarea id="prog-desc" placeholder="Deskripsi Singkat..." class="w-full p-3 border rounded-xl text-xs"></textarea>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <input type="number" id="prog-target" placeholder="Target Dana (Rp)..." class="p-3 border rounded-xl text-xs">
-                                    <input type="number" id="prog-terkumpul" placeholder="Terkumpul (Rp)..." class="p-3 border rounded-xl text-xs">
-                                </div>
-                                <div class="flex gap-2">
-                                    <input type="text" id="prog-foto" placeholder="URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
-                                    <input type="file" id="prog-file" onchange="uploadImageFile(this, 'prog-foto')" class="hidden">
-                                    <button onclick="document.getElementById('prog-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload Foto</button>
-                                </div>
-                                <button onclick="addProgram()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Simpan Program</button>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${adminState.adminSubTab === 'berita' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm">Kelola Berita & Embed Media (TikTok/YT/IG/FB)</h3>
-                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <input type="text" id="news-judul" placeholder="Judul Berita..." class="w-full p-3 border rounded-xl text-xs">
-                                <textarea id="news-ringkasan" placeholder="Ringkasan Berita..." class="w-full p-3 border rounded-xl text-xs"></textarea>
-                                <input type="text" id="news-embed" placeholder="Link Media Embed (TikTok, YouTube, IG, FB)..." class="w-full p-3 border rounded-xl text-xs">
-                                <div class="flex gap-2">
-                                    <input type="text" id="news-foto" placeholder="URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
-                                    <input type="file" id="news-file" onchange="uploadImageFile(this, 'news-foto')" class="hidden">
-                                    <button onclick="document.getElementById('news-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload Foto</button>
-                                </div>
-                                <button onclick="addNews()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Simpan Berita</button>
-                            </div>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-            return container;
-        }
-
-        // HELPER READ FILE TO BASE64 DATA URL
-        function uploadImageFile(inputEl, targetId) {
-            if (inputEl.files && inputEl.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const target = document.getElementById(targetId);
-                    if (target) target.value = e.target.result;
-                };
-                reader.readAsDataURL(inputEl.files[0]);
+                default:
+                    return `<div class="p-4 bg-white rounded-2xl text-xs">Tab tidak ditemukan.</div>`;
             }
         }
 
+        // MANAGEMENT FUNCTIONS
         function setAdminTab(tab) {
             adminState.adminSubTab = tab;
             renderAdminApp();
         }
 
-        function saveWebsiteSettings() {
+        function logoutAdmin() {
+            sessionStorage.removeItem('NUHA_ADMIN_AUTH');
+            adminState.isLoggedIn = false;
+            renderAdminApp();
+        }
+
+        function uploadImageFile(fileInput, targetId) {
+            const file = fileInput.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const target = document.getElementById(targetId);
+                    if (target) target.value = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateSettings() {
             DB.settings.siteName = document.getElementById('set-site-name')?.value || DB.settings.siteName;
             DB.settings.phone = document.getElementById('set-phone')?.value || DB.settings.phone;
             DB.settings.siteLogo = document.getElementById('set-logo-url')?.value || DB.settings.siteLogo;
             DB.settings.aboutText = document.getElementById('set-about-text')?.value || DB.settings.aboutText;
             DB.settings.visiText = document.getElementById('set-visi-text')?.value || DB.settings.visiText;
             DB.settings.misiText = document.getElementById('set-misi-text')?.value || DB.settings.misiText;
-            DB.settings.isLocked = document.getElementById('set-is-locked')?.checked || false;
-            DB.settings.disableDonations = document.getElementById('set-disable-donations')?.checked || false;
-            DB.settings.lockMessage = document.getElementById('set-lock-msg')?.value || DB.settings.lockMessage;
-            
-            DB.settings.socials = {
-                whatsapp: document.getElementById('soc-wa')?.value || '',
-                instagram: document.getElementById('soc-ig')?.value || '',
-                youtube: document.getElementById('soc-yt')?.value || '',
-                tiktok: document.getElementById('soc-tiktok')?.value || '',
-                facebook: document.getElementById('soc-fb')?.value || ''
-            };
-
             saveDB();
-            alert('Pengaturan Website & Halaman Profil Berhasil Diperbarui!');
+            alert('Pengaturan Website Berhasil Diperbarui!');
             renderAdminApp();
         }
 
-        function addHeroSlide() {
-            const url = document.getElementById('new-slide-url')?.value.trim();
-            const title = document.getElementById('new-slide-title')?.value.trim();
-            const sub = document.getElementById('new-slide-sub')?.value.trim();
-            if (url) {
-                if(!DB.heroSlides) DB.heroSlides = [];
-                DB.heroSlides.push({ id: Date.now(), foto: url, judul: title, subjudul: sub });
-                saveDB();
-                alert('Foto Slide Hero berhasil ditambahkan!');
-                renderAdminApp();
-            }
-        }
-
-        function updateHeroSlide(idx) {
-            const title = document.getElementById(`slide-edit-title-${idx}`)?.value;
-            const sub = document.getElementById(`slide-edit-sub-${idx}`)?.value;
-            const foto = document.getElementById(`slide-edit-foto-${idx}`)?.value;
-            if (DB.heroSlides && DB.heroSlides[idx]) {
-                DB.heroSlides[idx] = { id: Date.now(), foto: foto, judul: title, subjudul: sub };
-                saveDB();
-                alert('Slide Hero berhasil di-update!');
-                renderAdminApp();
-            }
-        }
-
-        function removeHeroSlide(index) {
-            DB.heroSlides.splice(index, 1);
+        function toggleWebsiteLock(lock) {
+            DB.settings.isLocked = lock;
             saveDB();
+            alert(lock ? 'Website Dikunci (Mode Pemeliharaan)!' : 'Akses Website Dibuka kembali!');
             renderAdminApp();
         }
 
-        function addPengurus() {
-            const nama = document.getElementById('pengurus-nama')?.value.trim();
-            const jabatan = document.getElementById('pengurus-jabatan')?.value.trim();
-            const level = parseInt(document.getElementById('pengurus-level')?.value || 2);
-            const foto = document.getElementById('pengurus-foto')?.value.trim();
-            if (nama && jabatan) {
-                if(!DB.pengurusList) DB.pengurusList = [];
-                DB.pengurusList.push({ id: Date.now(), nama: nama, jabatan: jabatan, foto: foto, level: level });
-                saveDB();
-                renderAdminApp();
-            }
-        }
-
-        function updatePengurus(idx) {
-            const nama = document.getElementById(`p-edit-nama-${idx}`)?.value;
-            const jabatan = document.getElementById(`p-edit-jabatan-${idx}`)?.value;
-            const level = parseInt(document.getElementById(`p-edit-level-${idx}`)?.value || 2);
-            if (DB.pengurusList && DB.pengurusList[idx]) {
-                DB.pengurusList[idx].nama = nama;
-                DB.pengurusList[idx].jabatan = jabatan;
-                DB.pengurusList[idx].level = level;
-                saveDB();
-                alert('Pengurus berhasil diperbarui!');
-                renderAdminApp();
-            }
-        }
-
-        function removePengurus(idx) {
-            DB.pengurusList.splice(idx, 1);
+        function toggleDonationsLock(lock) {
+            DB.settings.disableDonations = lock;
             saveDB();
-            renderAdminApp();
-        }
-
-        function addGalleryItem() {
-            const judul = document.getElementById('gal-judul')?.value;
-            const ket = document.getElementById('gal-ket')?.value;
-            const foto = document.getElementById('gal-foto')?.value;
-
-            if (judul && foto) {
-                if(!DB.gallery) DB.gallery = [];
-                DB.gallery.unshift({
-                    id: Date.now(), judul, ket, foto, tanggal: new Date().toISOString().split('T')[0]
-                });
-                saveDB();
-                alert('Foto galeri berhasil disimpan!');
-                renderAdminApp();
-            }
-        }
-
-        function removeGallery(idx) {
-            DB.gallery.splice(idx, 1);
-            saveDB();
-            renderAdminApp();
-        }
-
-        function addPaymentMethod() {
-            const name = document.getElementById('pay-name')?.value;
-            const account = document.getElementById('pay-account')?.value;
-            const qrImage = document.getElementById('pay-qr')?.value;
-
-            if (name && account) {
-                if(!DB.paymentMethods) DB.paymentMethods = [];
-                DB.paymentMethods.push({ id: Date.now(), name, account, qrImage, active: true });
-                saveDB();
-                alert('Metode Pembayaran Berhasil Ditambahkan!');
-                renderAdminApp();
-            }
-        }
-
-        function removePaymentMethod(idx) {
-            DB.paymentMethods.splice(idx, 1);
-            saveDB();
+            alert(lock ? 'Semua Tombol Donasi Dikunci!' : 'Tombol Donasi Dibuka!');
             renderAdminApp();
         }
 
         function approveDonation(idx) {
             if (DB.pendingConfirmations && DB.pendingConfirmations[idx]) {
-                DB.pendingConfirmations[idx].status = 'Berhasil (Terverifikasi)';
-                DB.stats.totalInfaq += DB.pendingConfirmations[idx].amount;
-                DB.stats.totalDonatur += 1;
+                DB.pendingConfirmations[idx].status = 'Berhasil Terverifikasi';
                 saveDB();
-                alert('Donasi berhasil diverifikasi dan ditambahkan ke saldo terkumpul!');
+                alert('Donasi telah disetujui!');
                 renderAdminApp();
             }
         }
 
         function rejectDonation(idx) {
             if (DB.pendingConfirmations && DB.pendingConfirmations[idx]) {
-                DB.pendingConfirmations[idx].status = 'Ditolak (Tidak Valid)';
+                DB.pendingConfirmations[idx].status = 'Ditolak';
                 saveDB();
                 alert('Donasi ditolak.');
                 renderAdminApp();
@@ -841,84 +736,214 @@
             const ip = document.getElementById('ip-to-block')?.value.trim();
             if (ip) {
                 if (!DB.blockedIPs) DB.blockedIPs = [];
-                if (!DB.blockedIPs.includes(ip)) {
-                    DB.blockedIPs.push(ip);
-                    saveDB();
-                    alert(`Alamat IP ${ip} berhasil diblokir!`);
-                    renderAdminApp();
-                }
+                if (!DB.blockedIPs.includes(ip)) DB.blockedIPs.push(ip);
+                saveDB();
+                alert(`IP ${ip} Diblokir!`);
+                renderAdminApp();
             }
         }
 
         function blockSpecificIP(ip) {
-            if (ip && ip !== 'N/A') {
+            if (ip) {
                 if (!DB.blockedIPs) DB.blockedIPs = [];
-                if (!DB.blockedIPs.includes(ip)) {
-                    DB.blockedIPs.push(ip);
-                    saveDB();
-                    alert(`Alamat IP ${ip} berhasil diblokir!`);
-                    renderAdminApp();
-                }
+                if (!DB.blockedIPs.includes(ip)) DB.blockedIPs.push(ip);
+                saveDB();
+                alert(`IP ${ip} Diblokir!`);
+                renderAdminApp();
             }
         }
 
         function unblockIP(idx) {
-            DB.blockedIPs.splice(idx, 1);
+            if (DB.blockedIPs) {
+                DB.blockedIPs.splice(idx, 1);
+                saveDB();
+                renderAdminApp();
+            }
+        }
+
+        function clearLogs() {
+            DB.logs = [];
             saveDB();
             renderAdminApp();
         }
 
-        function clearLogs() {
-            if (confirm('Yakin ingin membersihkan semua catatan log aktivitas?')) {
-                DB.logs = [];
-                saveDB();
-                renderAdminApp();
-            }
-        }
-
         function addProgram() {
             const judul = document.getElementById('prog-judul')?.value;
-            const kat = document.getElementById('prog-kat')?.value;
-            const desc = document.getElementById('prog-desc')?.value;
+            const kat = document.getElementById('prog-kategori')?.value || 'Umum';
+            const desc = document.getElementById('prog-deskripsi')?.value;
             const target = parseFloat(document.getElementById('prog-target')?.value || 0);
-            const terkumpul = parseFloat(document.getElementById('prog-terkumpul')?.value || 0);
-            const foto = document.getElementById('prog-foto')?.value;
+            const mode = document.getElementById('prog-calc-mode')?.value || 'auto';
+            const manual = parseFloat(document.getElementById('prog-terkumpul-manual')?.value || 0);
+            const foto = document.getElementById('prog-foto')?.value || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80';
 
             if (judul) {
-                DB.programs.unshift({
-                    id: Date.now(), judul, kategori: kat, deskripsi: desc, target, terkumpul, foto
+                DB.programs.push({
+                    id: Date.now(),
+                    judul: judul,
+                    kategori: kat,
+                    deskripsi: desc,
+                    target: target,
+                    calcMode: mode,
+                    terkumpulManual: manual,
+                    terkumpul: manual,
+                    foto: foto
                 });
                 saveDB();
-                alert('Program berhasil ditambahkan!');
+                alert('Program Ditambahkan!');
                 renderAdminApp();
             }
         }
 
-        function addNews() {
+        function updateProgram(idx) {
+            if (DB.programs && DB.programs[idx]) {
+                const j = document.getElementById(`prog-edit-judul-${idx}`)?.value;
+                const t = parseFloat(document.getElementById(`prog-edit-target-${idx}`)?.value || 0);
+                const m = document.getElementById(`prog-edit-mode-${idx}`)?.value;
+                const val = parseFloat(document.getElementById(`prog-edit-manual-${idx}`)?.value || 0);
+
+                if (j) DB.programs[idx].judul = j;
+                if (t) DB.programs[idx].target = t;
+                if (m) DB.programs[idx].calcMode = m;
+                DB.programs[idx].terkumpulManual = val;
+                DB.programs[idx].terkumpul = val;
+                saveDB();
+                alert('Program Diperbarui!');
+                renderAdminApp();
+            }
+        }
+
+        function removeProgram(idx) {
+            if (confirm('Hapus program ini?')) {
+                DB.programs.splice(idx, 1);
+                saveDB();
+                renderAdminApp();
+            }
+        }
+
+        function addPengurus() {
+            const nama = document.getElementById('pengurus-nama')?.value;
+            const jabatan = document.getElementById('pengurus-jabatan')?.value;
+            const level = parseInt(document.getElementById('pengurus-level')?.value || 2);
+            const foto = document.getElementById('pengurus-foto')?.value;
+
+            if (nama && jabatan) {
+                DB.pengurusList.push({ id: Date.now(), nama: nama, jabatan: jabatan, level: level, foto: foto });
+                saveDB();
+                alert('Pengurus Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function updatePengurus(idx) {
+            if (DB.pengurusList && DB.pengurusList[idx]) {
+                const n = document.getElementById(`p-edit-nama-${idx}`)?.value;
+                const j = document.getElementById(`p-edit-jabatan-${idx}`)?.value;
+                const l = parseInt(document.getElementById(`p-edit-level-${idx}`)?.value || 2);
+
+                if (n) DB.pengurusList[idx].nama = n;
+                if (j) DB.pengurusList[idx].jabatan = j;
+                DB.pengurusList[idx].level = l;
+                saveDB();
+                alert('Pengurus Diperbarui!');
+                renderAdminApp();
+            }
+        }
+
+        function removePengurus(idx) {
+            if (confirm('Hapus pengurus ini?')) {
+                DB.pengurusList.splice(idx, 1);
+                saveDB();
+                renderAdminApp();
+            }
+        }
+
+        function addGalleryItem() {
+            const judul = document.getElementById('gal-judul')?.value;
+            const tanggal = document.getElementById('gal-tanggal')?.value || new Date().toISOString().split('T')[0];
+            const foto = document.getElementById('gal-foto')?.value;
+
+            if (judul && foto) {
+                DB.gallery.unshift({ id: Date.now(), judul: judul, tanggal: tanggal, foto: foto });
+                saveDB();
+                alert('Foto Galeri Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function removeGalleryItem(idx) {
+            DB.gallery.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
+
+        function addNewsItem() {
             const judul = document.getElementById('news-judul')?.value;
             const ringkasan = document.getElementById('news-ringkasan')?.value;
-            const embedUrl = document.getElementById('news-embed')?.value;
-            const foto = document.getElementById('news-foto')?.value;
+            const embed = document.getElementById('news-embed')?.value;
+            const foto = document.getElementById('news-foto')?.value || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80';
 
             if (judul) {
                 DB.news.unshift({
-                    id: Date.now(), judul, ringkasan, embedUrl, foto, tanggal: new Date().toISOString().split('T')[0]
+                    id: Date.now(),
+                    judul: judul,
+                    ringkasan: ringkasan,
+                    embedUrl: embed,
+                    foto: foto,
+                    tanggal: new Date().toISOString().split('T')[0]
                 });
                 saveDB();
-                alert('Berita berhasil ditambahkan!');
+                alert('Berita Diterbitkan!');
                 renderAdminApp();
             }
         }
 
-        function logoutAdmin() {
-            adminState.isLoggedIn = false;
-            sessionStorage.removeItem('NUHA_ADMIN_AUTH');
+        function removeNewsItem(idx) {
+            DB.news.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
+
+        function addPaymentMethod() {
+            const name = document.getElementById('pay-name')?.value;
+            const acc = document.getElementById('pay-account')?.value;
+            const qr = document.getElementById('pay-qr')?.value;
+
+            if (name && acc) {
+                DB.paymentMethods.push({ id: Date.now(), name: name, account: acc, qrImage: qr, active: true });
+                saveDB();
+                alert('Metode Pembayaran Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function removePaymentMethod(idx) {
+            DB.paymentMethods.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
+
+        function addHeroSlide() {
+            const judul = document.getElementById('slide-judul')?.value;
+            const sub = document.getElementById('slide-subjudul')?.value;
+            const foto = document.getElementById('slide-foto')?.value;
+
+            if (judul && foto) {
+                DB.heroSlides.push({ id: Date.now(), judul: judul, subjudul: sub, foto: foto });
+                saveDB();
+                alert('Hero Slide Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function removeHeroSlide(idx) {
+            DB.heroSlides.splice(idx, 1);
+            saveDB();
             renderAdminApp();
         }
 
         window.onload = function() {
             renderAdminApp();
-        }
+        };
     </script>
 </body>
 </html>
