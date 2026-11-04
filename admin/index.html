@@ -77,6 +77,9 @@
                     tiktok: "https://tiktok.com",
                     facebook: "https://facebook.com"
                 },
+                aboutText: "Lembaga Infaq NUHA hadir untuk berkhidmat dalam rangka membantu kesejahteraan dan kemandirian umat; mengangkat harkat sosial dengan mendayagunakan dana Zakat, Infak, Sedekah (ZIS), CSR, serta Dana Sosial Keagamaan Lainnya (DSKL) sesuai regulasi dan ketentuan syariah.",
+                visiText: "Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.",
+                misiText: "• Akses Pendidikan Layak bagi anak yatim & dhuafa\n• Pengembangan Fasilitas Sekolah & Asrama\n• Inovasi Keterampilan & Teknologi Santri\n• Pengelolaan Akuntabel & Transparan",
                 welcomeMessage: "Assalamu'alaikum. Ada yang bisa dibantu?"
             },
             paymentMethods: [
@@ -107,20 +110,22 @@
             gallery: [
                 { id: 1, judul: "Kajian Rutin Bersama Pengasuh", ket: "Kegiatan rutin santri bersama pembina utama", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80", tanggal: "2026-10-20" }
             ],
-            pengurusList: [
-                { id: 1, nama: "Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.", jabatan: "Pengasuh & Pembina Utama", foto: "" },
-                { id: 2, nama: "H. Ahmad Fauzi, M.Pd.", jabatan: "Ketua Pengurus Lembaga", foto: "" },
-                { id: 3, nama: "Siti Rahmah, S.E., Ak.", jabatan: "Bendahara & Keuangan", foto: "" }
-            ],
-            stats: { totalInfaq: 248500000, totalDonatur: 1420 },
-            heroSlides: [
+            pendingConfirmations: [
                 {
-                    foto: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1920&q=80",
-                    judul: "Bekali Pendidikan, Kuatkan Masa Depan Santri!",
-                    subjudul: "Mari raih keberkahan bersama Lembaga Infaq Nurul Hayah."
+                    id: 101,
+                    trxCode: "TRX-9821",
+                    donorName: "Ahmad Hidayat",
+                    amount: 250000,
+                    proofImage: "https://placehold.co/400x300/286B56/FFFFFF?text=Bukti+Transfer+BSI",
+                    status: "Menunggu Verifikasi Admin",
+                    timestamp: "2026-11-04 14:20",
+                    ip: "182.253.18.22"
                 }
             ],
-            gallery: [],
+            blockedIPs: ["114.122.35.10"],
+            logs: [
+                { id: 1, timestamp: "2026-11-04 14:20:05", action: "Klik Tombol Donasi", details: "Membuka modal infak dari tombol hero", ip: "182.253.18.22" }
+            ],
             programs: [],
             news: [],
             donations: []
@@ -202,6 +207,13 @@
                         </div>
                         <nav class="space-y-1 text-xs font-semibold">
                             <button onclick="setAdminTab('dashboard')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='dashboard'?'bg-white/20':''}">Dashboard & Stat</button>
+                            <button onclick="setAdminTab('verifikasi')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='verifikasi'?'bg-white/20':''} flex justify-between items-center">
+                                <span>Verifikasi Konfirmasi Donasi</span>
+                                ${(DB.pendingConfirmations||[]).filter(c=>c.status.includes('Menunggu')).length > 0 ? `
+                                    <span class="px-2 py-0.5 bg-amber-500 text-white text-[10px] rounded-full font-bold">${(DB.pendingConfirmations||[]).filter(c=>c.status.includes('Menunggu')).length}</span>
+                                `: ''}
+                            </button>
+                            <button onclick="setAdminTab('logs')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='logs'?'bg-white/20':''}">Log Aktivitas & Blokir IP</button>
                             <button onclick="setAdminTab('settings')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='settings'?'bg-white/20':''}">Pengaturan Website & Lock</button>
                             <button onclick="setAdminTab('heroSlides')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='heroSlides'?'bg-white/20':''}">Hero Slide & Teks</button>
                             <button onclick="setAdminTab('pengurus')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='pengurus'?'bg-white/20':''}">Susunan Pengurus</button>
@@ -220,6 +232,90 @@
                         <h1 class="text-2xl font-bold text-gray-900 capitalize">CMS Admin - ${adminState.adminSubTab}</h1>
                         <a href="index.html" target="_blank" class="text-xs bg-emerald-100 text-nuha-primary px-3 py-1.5 rounded-xl font-bold hover:bg-emerald-200">Lihat Live Website &rarr;</a>
                     </div>
+
+                    ${adminState.adminSubTab === 'verifikasi' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Daftar Konfirmasi Donasi Masuk Dari Donatur</h3>
+                            <div class="space-y-4">
+                                ${(DB.pendingConfirmations||[]).length === 0 ? '<p class="text-xs text-gray-500">Belum ada konfirmasi donasi masuk.</p>' : ''}
+                                ${(DB.pendingConfirmations||[]).map((c, idx) => `
+                                    <div class="p-5 border border-gray-200 rounded-2xl bg-white space-y-3 flex flex-col md:flex-row justify-between items-start md:items-center">
+                                        <div class="space-y-1">
+                                            <div class="flex items-center gap-2">
+                                                <span class="font-bold text-xs text-nuha-primary">${c.trxCode}</span>
+                                                <span class="px-2 py-0.5 text-[10px] rounded-full font-bold ${c.status.includes('Berhasil')?'bg-emerald-100 text-emerald-700':c.status.includes('Ditolak')?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700'}">${c.status}</span>
+                                            </div>
+                                            <h4 class="font-bold text-sm text-gray-900">${c.donorName}</h4>
+                                            <p class="text-xs text-gray-600">Nominal Transfer: <strong class="text-emerald-700">${formatRupiah(c.amount)}</strong></p>
+                                            <span class="text-[10px] text-gray-400 block">${c.timestamp} | IP: ${c.ip || 'N/A'}</span>
+                                        </div>
+                                        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                                            ${c.proofImage ? `<a href="${c.proofImage}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl text-center hover:bg-gray-200">Lihat Bukti</a>` : ''}
+                                            ${c.status.includes('Menunggu') ? `
+                                                <button onclick="approveDonation(${idx})" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">Setujui (Terverifikasi)</button>
+                                                <button onclick="rejectDonation(${idx})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl">Tolak</button>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'logs' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <div class="flex justify-between items-center border-b pb-3">
+                                <h3 class="font-bold text-sm text-gray-900">Log Aktivitas Pengunjung & Sistem</h3>
+                                <button onclick="clearLogs()" class="px-3 py-1 bg-red-100 text-red-600 hover:bg-red-200 font-bold text-xs rounded-xl">Bersihkan Log</button>
+                            </div>
+
+                            <!-- KELOLA DIBLOKIR IP -->
+                            <div class="p-4 bg-red-50 border border-red-100 rounded-2xl space-y-3">
+                                <h4 class="font-bold text-xs text-red-800">Manajemen Blokir Alamat IP (Blacklist)</h4>
+                                <div class="flex gap-2">
+                                    <input type="text" id="ip-to-block" placeholder="Masukkan Alamat IP (Contoh: 182.253.18.22)..." class="flex-1 p-2.5 border border-red-200 rounded-xl text-xs">
+                                    <button onclick="blockIP()" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl">Blokir IP Ini</button>
+                                </div>
+                                <div class="flex flex-wrap gap-2 pt-1">
+                                    ${(DB.blockedIPs||[]).map((ip, idx) => `
+                                        <span class="px-3 py-1 bg-white border border-red-200 text-red-700 rounded-lg text-xs font-mono font-bold flex items-center gap-2">
+                                            ${ip}
+                                            <button onclick="unblockIP(${idx})" class="text-gray-400 hover:text-red-800">&times;</button>
+                                        </span>
+                                    `).join('')}
+                                </div>
+                            </div>
+
+                            <!-- TABEL LOG AKTIVITAS -->
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left text-xs border-collapse">
+                                    <thead>
+                                        <tr class="bg-gray-100 text-gray-700 border-b">
+                                            <th class="p-3">Waktu</th>
+                                            <th class="p-3">Aksi/Aktivitas</th>
+                                            <th class="p-3">Detail Keterangan</th>
+                                            <th class="p-3">Alamat IP</th>
+                                            <th class="p-3 text-right">Opsi</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-100">
+                                        ${(DB.logs||[]).length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada rekaman aktivitas.</td></tr>' : ''}
+                                        ${(DB.logs||[]).map(log => `
+                                            <tr class="hover:bg-gray-50">
+                                                <td class="p-3 text-gray-500 whitespace-nowrap">${log.timestamp}</td>
+                                                <td class="p-3 font-bold text-nuha-primary">${log.action}</td>
+                                                <td class="p-3 text-gray-700">${log.details}</td>
+                                                <td class="p-3 font-mono text-gray-600">${log.ip || '127.0.0.1'}</td>
+                                                <td class="p-3 text-right">
+                                                    <button onclick="blockSpecificIP('${log.ip}')" class="px-2 py-1 bg-red-100 hover:bg-red-200 text-red-700 font-bold text-[10px] rounded-lg">Blokir IP</button>
+                                                </td>
+                                            </tr>
+                                        `).join('')}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    ` : ''}
 
                     ${adminState.adminSubTab === 'dashboard' ? `
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
@@ -240,7 +336,7 @@
 
                     ${adminState.adminSubTab === 'settings' ? `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6 max-w-3xl">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Pengaturan Identitas & Kontrol Akses</h3>
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Pengaturan Identitas, Halaman Profil & Akses</h3>
                             
                             <div class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -260,6 +356,25 @@
                                         <input type="text" id="set-logo-url" value="${DB.settings.siteLogo}" class="flex-1 p-3 border border-gray-200 rounded-xl text-xs">
                                         <input type="file" id="logo-file-input" onchange="uploadImageFile(this, 'set-logo-url')" class="hidden">
                                         <button onclick="document.getElementById('logo-file-input').click()" class="px-4 py-2 bg-gray-100 border text-xs font-bold rounded-xl hover:bg-gray-200">Upload Foto</button>
+                                    </div>
+                                </div>
+
+                                <!-- EDIT TENTANG LINUHA, VISI & MISI -->
+                                <div class="pt-4 border-t space-y-3">
+                                    <h4 class="font-bold text-xs text-nuha-primary">Edit Teks Tentang LINUHA, Visi, dan Misi</h4>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Teks Halaman "Tentang LINUHA"</label>
+                                        <textarea id="set-about-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.aboutText || ''}</textarea>
+                                    </div>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <div>
+                                            <label class="text-xs font-bold text-gray-700">Teks Visi Kami</label>
+                                            <textarea id="set-visi-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.visiText || ''}</textarea>
+                                        </div>
+                                        <div>
+                                            <label class="text-xs font-bold text-gray-700">Teks Misi & Fokus Gerakan</label>
+                                            <textarea id="set-misi-text" rows="3" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.misiText || ''}</textarea>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -576,6 +691,9 @@
             DB.settings.siteName = document.getElementById('set-site-name')?.value || DB.settings.siteName;
             DB.settings.phone = document.getElementById('set-phone')?.value || DB.settings.phone;
             DB.settings.siteLogo = document.getElementById('set-logo-url')?.value || DB.settings.siteLogo;
+            DB.settings.aboutText = document.getElementById('set-about-text')?.value || DB.settings.aboutText;
+            DB.settings.visiText = document.getElementById('set-visi-text')?.value || DB.settings.visiText;
+            DB.settings.misiText = document.getElementById('set-misi-text')?.value || DB.settings.misiText;
             DB.settings.isLocked = document.getElementById('set-is-locked')?.checked || false;
             DB.settings.disableDonations = document.getElementById('set-disable-donations')?.checked || false;
             DB.settings.lockMessage = document.getElementById('set-lock-msg')?.value || DB.settings.lockMessage;
@@ -589,7 +707,7 @@
             };
 
             saveDB();
-            alert('Pengaturan Website Berhasil Diperbarui!');
+            alert('Pengaturan Website & Halaman Profil Berhasil Diperbarui!');
             renderAdminApp();
         }
 
@@ -699,22 +817,63 @@
             renderAdminApp();
         }
 
-        function addPengurus() {
-            const nama = document.getElementById('pengurus-nama')?.value.trim();
-            const jabatan = document.getElementById('pengurus-jabatan')?.value.trim();
-            const foto = document.getElementById('pengurus-foto')?.value.trim();
-            if (nama && jabatan) {
-                if(!DB.pengurusList) DB.pengurusList = [];
-                DB.pengurusList.push({ id: Date.now(), nama: nama, jabatan: jabatan, foto: foto });
+        function approveDonation(idx) {
+            if (DB.pendingConfirmations && DB.pendingConfirmations[idx]) {
+                DB.pendingConfirmations[idx].status = 'Berhasil (Terverifikasi)';
+                DB.stats.totalInfaq += DB.pendingConfirmations[idx].amount;
+                DB.stats.totalDonatur += 1;
                 saveDB();
+                alert('Donasi berhasil diverifikasi dan ditambahkan ke saldo terkumpul!');
                 renderAdminApp();
             }
         }
 
-        function removePengurus(idx) {
-            DB.pengurusList.splice(idx, 1);
+        function rejectDonation(idx) {
+            if (DB.pendingConfirmations && DB.pendingConfirmations[idx]) {
+                DB.pendingConfirmations[idx].status = 'Ditolak (Tidak Valid)';
+                saveDB();
+                alert('Donasi ditolak.');
+                renderAdminApp();
+            }
+        }
+
+        function blockIP() {
+            const ip = document.getElementById('ip-to-block')?.value.trim();
+            if (ip) {
+                if (!DB.blockedIPs) DB.blockedIPs = [];
+                if (!DB.blockedIPs.includes(ip)) {
+                    DB.blockedIPs.push(ip);
+                    saveDB();
+                    alert(`Alamat IP ${ip} berhasil diblokir!`);
+                    renderAdminApp();
+                }
+            }
+        }
+
+        function blockSpecificIP(ip) {
+            if (ip && ip !== 'N/A') {
+                if (!DB.blockedIPs) DB.blockedIPs = [];
+                if (!DB.blockedIPs.includes(ip)) {
+                    DB.blockedIPs.push(ip);
+                    saveDB();
+                    alert(`Alamat IP ${ip} berhasil diblokir!`);
+                    renderAdminApp();
+                }
+            }
+        }
+
+        function unblockIP(idx) {
+            DB.blockedIPs.splice(idx, 1);
             saveDB();
             renderAdminApp();
+        }
+
+        function clearLogs() {
+            if (confirm('Yakin ingin membersihkan semua catatan log aktivitas?')) {
+                DB.logs = [];
+                saveDB();
+                renderAdminApp();
+            }
         }
 
         function addProgram() {
