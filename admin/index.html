@@ -1,2270 +1,765 @@
 <!DOCTYPE html>
-<html lang="id" class="scroll-smooth">
+<html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin Panel INFAQNUHA</title>
-  
-  <!-- Favicon Resmi -->
-  <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
-  <link rel="shortcut icon" type="image/jpeg" href="https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg">
-
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Google Font Inter -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-
-  <!-- React 18 & ReactDOM 18 & Babel Standalone CDN -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-
-  <!-- Supabase JS Client v2 CDN -->
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-
-  <style>
-    body {
-      font-family: 'Inter', sans-serif;
-    }
-    .animate-fade-in {
-      animation: fadeIn 0.25s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.98); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    ::-webkit-scrollbar {
-      width: 6px;
-      height: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #f1f5f9;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #cbd5e1;
-      border-radius: 9999px;
-    }
-    ::-webkit-scrollbar-thumb:hover {
-      background: #94a3b8;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINUHA Panel</title>
+    <!-- Favicon Website -->
+    <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19930797/Primary_Logo_1.jpg">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nuha: { primary: '#286B56', dark: '#144e36', gold: '#B99A62' }
+                    },
+                    fontFamily: { sans: ['Inter', 'sans-serif'], poppins: ['Poppins', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Gold Shimmer Button Animation */
+        @keyframes shimmerSlide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-shimmer::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 215, 0, 0.45) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-20deg);
+            animation: shimmerSlide 2.5s infinite;
+        }
+    </style>
 </head>
-<body class="bg-[#f4f7f6] text-slate-800 antialiased selection:bg-[#1F5946] selection:text-white">
+<body class="bg-gray-100 text-gray-800 antialiased min-h-screen">
 
-  <div id="root">
-    <div class="min-h-screen flex flex-col items-center justify-center bg-[#f4f7f6] text-slate-600">
-      <div class="w-10 h-10 border-4 border-[#1F5946] border-t-transparent rounded-full animate-spin mb-4"></div>
-      <p class="text-xs font-bold tracking-wide uppercase text-slate-500">Memuat Admin Panel INFAQNUHA...</p>
+    <div id="admin-root" class="w-full min-h-screen flex">
+        <!-- Admin App Rendered via JS -->
     </div>
-  </div>
 
-  <script type="text/babel">
-    const DEFAULT_SUPABASE_URL = "https://dxtuadkxzzcwyhwnatdt.supabase.co";
-    const DEFAULT_SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dHVhZGt4enpjd3lod25hdGR0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzNTA0ODMsImV4cCI6MjEwMzkyNjQ4M30.XNxdbrFNcjDht97OAR3Mj4q2_AACjTvbHDCyIW8a7_0";
+    <script>
+        const OFFICIAL_LOGO = "https://www.upload.ee/image/19930797/Primary_Logo_1.jpg";
 
-    const { useState, useEffect, useMemo, useRef } = React;
-
-    const formatIDR = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(num || 0);
-
-    const formatThousand = (val) => {
-      if (!val && val !== 0) return '';
-      const numStr = String(val).replace(/\D/g, '');
-      if (!numStr) return '';
-      return new Intl.NumberFormat('id-ID').format(Number(numStr));
-    };
-
-    const parseCleanNumber = (val) => {
-      if (!val && val !== 0) return 0;
-      const numStr = String(val).replace(/\D/g, '');
-      return numStr ? Number(numStr) : 0;
-    };
-
-    const getFormattedDateString = (dateObj) => {
-      const year = dateObj.getFullYear();
-      const month = String(dateObj.getMonth() + 1).padStart(2, '0');
-      const day = String(dateObj.getDate()).padStart(2, '0');
-      return `${year}-${month}-${day}`;
-    };
-
-    const INITIAL_SETTINGS = {
-      orgName: "Nurul Hayah",
-      categoryTitle: "LEMBAGA INFAQ",
-      tagline: "Amanah Bersama, Sejahtera dan Berdaya",
-      subTagline: "Berbagi Kebaikan, Menebar Kebermanfaatan",
-      description: "Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional.",
-      address: "Jl. Lingkar Provinsi No.07, Sawah, Bulakelor, Ketanggungan, Brebes Regency",
-      whatsapp: "+62 823-3336-2299",
-      email: "infaqnuha@gmail.com",
-      logoUrl: "https://www.upload.ee/image/19709356/Primary_Logo_1.jpg.jpeg"
-    };
-
-    const DEFAULT_CATEGORIES = [
-      { id: 'cat-1', name: 'Pendidikan', description: 'Beasiswa dan fasilitas belajar santri' },
-      { id: 'cat-2', name: 'Santunan', description: 'Santunan anak yatim dan dhuafa' },
-      { id: 'cat-3', name: 'Wakaf & Pembangunan', description: 'Renovasi dan pembangunan sarana ibadah' },
-      { id: 'cat-4', name: 'Paket Sembako', description: 'Bantuan pangan pokok keluarga prasejahtera' },
-      { id: 'cat-5', name: 'Ramadhan', description: 'Program berkah berbuka dan bingkisan hari raya' }
-    ];
-
-    const DEFAULT_HERO_SLIDES = [
-      {
-        id: 1,
-        bg_image: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80",
-        overlay_opacity: 0.55,
-        title: "Membangun Masa Depan Umat Melalui Infaq & Pendidikan",
-        title_pos_x: 50,
-        title_pos_y: 38,
-        title_size: 28,
-        title_color: "#ffffff",
-        title_align: "center",
-        subtitle: "Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa.",
-        subtitle_pos_x: 50,
-        subtitle_pos_y: 62,
-        subtitle_size: 13,
-        subtitle_color: "#f1f5f9",
-        subtitle_align: "center"
-      },
-      {
-        id: 2,
-        bg_image: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1600&q=80",
-        overlay_opacity: 0.55,
-        title: "Amanah Bersama, Sejahtera & Berdaya",
-        title_pos_x: 50,
-        title_pos_y: 38,
-        title_size: 28,
-        title_color: "#ffffff",
-        title_align: "center",
-        subtitle: "Menyalurkan kepedulian Anda tepat sasaran kepada para santri, anak yatim, dan keluarga prasejahtera di seluruh penjuru pelosok.",
-        subtitle_pos_x: 50,
-        subtitle_pos_y: 62,
-        subtitle_size: 13,
-        subtitle_color: "#f1f5f9",
-        subtitle_align: "center"
-      }
-    ];
-
-    const SAMPLE_DONATIONS = [
-      { id: 'TRX-1001', donorName: 'H. Ahmad Subarkah', phone: '081234567890', amount: 500000, programTitle: 'Beasiswa Santri Hafiz Quran', paymentMethod: 'Transfer Bank', status: 'Terverifikasi', created_at: new Date(Date.now() - 1 * 86400000).toISOString(), notes: 'Semoga berkah untuk santri' },
-      { id: 'TRX-1002', donorName: 'Siti Aminah', phone: '082198765432', amount: 250000, programTitle: 'Santunan Yatim & Dhuafa', paymentMethod: 'QRIS', status: 'Terverifikasi', created_at: new Date(Date.now() - 2 * 86400000).toISOString(), notes: 'Untuk almarhum orang tua' }
-    ];
-
-    const SAMPLE_PROGRAMS = [
-      { id: 'PROG-1', title: 'Beasiswa Santri Hafiz Quran', category: 'Pendidikan', description: 'Bantuan biaya operasional dan pendidikan santri penghafal Al-Quran.', targetAmount: 15000000, currentAmount: 7200000, beneficiaries: 45, imageUrl: 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80', status: 'Aktif' },
-      { id: 'PROG-2', title: 'Santunan Yatim & Dhuafa', category: 'Santunan', description: 'Santunan rutin bulanan dan uang saku pendidikan bagi anak yatim.', targetAmount: 10000000, currentAmount: 5800000, beneficiaries: 30, imageUrl: 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80', status: 'Aktif' }
-    ];
-
-    const Icons = {
-      Dashboard: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>,
-      AiMagic: () => <svg className="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 24 24"><path d="M7.5 2L9 5.5 12.5 7 9 8.5 7.5 12 6 8.5 2.5 7 6 5.5 7.5 2zm11 8l1.25 2.75L22.5 14l-2.75 1.25L18.5 18l-1.25-2.75L14.5 14l2.75-1.25L18.5 10zm-6 3l1.5 3.5 3.5 1.5-3.5 1.5-1.5 3.5-1.5-3.5-3.5-1.5 3.5-1.5 1.5-3.5z"/></svg>,
-      Slide: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>,
-      Program: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>,
-      Category: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>,
-      Infaq: () => <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>,
-      Users: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>,
-      Media: () => <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>,
-      Plus: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/></svg>,
-      Trash: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>,
-      Sync: () => <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>,
-      Upload: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" /></svg>,
-      Copy: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>,
-      Sparkles: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>,
-      Send: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>,
-      UserAvatar: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>,
-      WhatsApp: () => <svg className="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>,
-      Calendar: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>,
-      Search: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>,
-      Save: () => <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
-    };
-
-    function App() {
-      const [activeTab, setActiveTab] = useState("dashboard");
-      const [settings] = useState(INITIAL_SETTINGS);
-      const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
-      const [programs, setPrograms] = useState(SAMPLE_PROGRAMS);
-      const [donations, setDonations] = useState(SAMPLE_DONATIONS);
-      const [gallery, setGallery] = useState([]);
-      const [slides, setSlides] = useState(DEFAULT_HERO_SLIDES);
-      const [activeSlideIdx, setActiveSlideIdx] = useState(0);
-
-      const [isSyncing, setIsSyncing] = useState(false);
-      const [toast, setToast] = useState(null);
-
-      // Modals State
-      const [showProgramModal, setShowProgramModal] = useState(false);
-      const [showCategoryModal, setShowCategoryModal] = useState(false);
-      const [showGalleryModal, setShowGalleryModal] = useState(false);
-
-      const [deleteModal, setDeleteModal] = useState({
-        isOpen: false,
-        type: null, // 'program', 'category', 'gallery', 'infaq'
-        id: null,
-        title: ''
-      });
-
-      // Forms State
-      const [programForm, setProgramForm] = useState({
-        title: '',
-        category: 'Pendidikan',
-        description: '',
-        fullContent: '',
-        targetAmount: '',
-        beneficiaries: '',
-        imageUrl: '',
-        status: 'Aktif'
-      });
-
-      const [categoryForm, setCategoryForm] = useState({
-        name: '',
-        description: ''
-      });
-
-      const [galleryForm, setGalleryForm] = useState({
-        title: '',
-        category: 'Pendidikan',
-        description: '',
-        imageUrl: ''
-      });
-
-      const supabaseRef = useRef(null);
-
-      const showNotification = (msg) => {
-        setToast(msg);
-        setTimeout(() => setToast(null), 3500);
-      };
-
-      const getSupabase = () => {
-        if (!supabaseRef.current && window.supabase && DEFAULT_SUPABASE_URL && DEFAULT_SUPABASE_KEY) {
-          try {
-            supabaseRef.current = window.supabase.createClient(DEFAULT_SUPABASE_URL, DEFAULT_SUPABASE_KEY);
-          } catch (e) {
-            console.error("Gagal createClient:", e);
-          }
-        }
-        return supabaseRef.current;
-      };
-
-      const syncFromSupabase = async (isManual = false) => {
-        setIsSyncing(true);
-        const client = getSupabase();
-
-        if (!client) {
-          setIsSyncing(false);
-          return;
-        }
-
-        try {
-          const [progRes, donRes, galRes, catRes, sliRes] = await Promise.all([
-            client.from('programs').select('*').order('created_at', { ascending: false }),
-            client.from('donations').select('*').order('created_at', { ascending: false }),
-            client.from('gallery').select('*').order('created_at', { ascending: false }),
-            client.from('categories').select('*').order('name', { ascending: true }),
-            client.from('hero_slides').select('*').order('id', { ascending: true })
-          ]);
-
-          if (!progRes.error && progRes.data && progRes.data.length > 0) {
-            setPrograms(progRes.data.map(p => ({
-              id: String(p.id),
-              title: p.title || 'Tanpa Judul',
-              category: p.category || 'Pendidikan',
-              description: p.description || '',
-              fullContent: p.full_content || p.description || '',
-              targetAmount: Number(p.target_amount || 0),
-              currentAmount: Number(p.current_amount || 0),
-              beneficiaries: Number(p.beneficiaries || 0),
-              imageUrl: p.image_url || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80',
-              status: p.status || 'Aktif'
-            })));
-          }
-
-          if (!catRes.error && catRes.data && catRes.data.length > 0) {
-            setCategories(catRes.data.map(c => ({
-              id: String(c.id),
-              name: c.name || '',
-              description: c.description || ''
-            })));
-          }
-
-          if (!donRes.error && donRes.data && donRes.data.length > 0) {
-            setDonations(donRes.data.map(d => ({
-              id: String(d.id),
-              donorName: d.donor_name || 'Hamba Allah',
-              phone: d.donor_phone || '',
-              amount: Number(d.amount || 0),
-              programTitle: d.program_title || 'Infaq Umum',
-              paymentMethod: d.payment_method || 'Transfer Bank',
-              status: d.status || 'Terverifikasi',
-              created_at: d.created_at || new Date().toISOString(),
-              notes: d.notes || ''
-            })));
-          }
-
-          if (!galRes.error && galRes.data && galRes.data.length > 0) {
-            setGallery(galRes.data.map(g => ({
-              id: String(g.id),
-              title: g.title || '',
-              category: g.category || 'Dokumentasi',
-              description: g.description || '',
-              imageUrl: g.image_url || ''
-            })));
-          }
-
-          if (!sliRes.error && sliRes.data && sliRes.data.length > 0) {
-            setSlides(sliRes.data.map(s => ({
-              id: s.id,
-              bg_image: s.bg_image || s.bg_url || s.bgImage || "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80",
-              overlay_opacity: Number(s.overlay_opacity ?? s.overlayOpacity ?? 0.55),
-              title: s.title || '',
-              title_pos_x: Number(s.title_pos_x ?? s.titlePos?.x ?? 50),
-              title_pos_y: Number(s.title_pos_y ?? s.titlePos?.y ?? 38),
-              title_size: Number(s.title_size ?? s.titleSize ?? 28),
-              title_color: s.title_color || s.titleColor || "#ffffff",
-              title_align: s.title_align || s.titleAlign || "center",
-              subtitle: s.subtitle || '',
-              subtitle_pos_x: Number(s.subtitle_pos_x ?? s.subtitlePos?.x ?? 50),
-              subtitle_pos_y: Number(s.subtitle_pos_y ?? s.subtitlePos?.y ?? 62),
-              subtitle_size: Number(s.subtitle_size ?? s.subtitleSize ?? 13),
-              subtitle_color: s.subtitle_color || s.subtitleColor || "#f1f5f9",
-              subtitle_align: s.subtitle_align || s.subtitleAlign || "center"
-            })));
-          }
-
-          if (isManual) showNotification("Data Supabase berhasil disinkronkan!");
-        } catch (e) {
-          console.warn("Sinkronisasi bermasalah:", e);
-        } finally {
-          setIsSyncing(false);
-        }
-      };
-
-      useEffect(() => {
-        getSupabase();
-        syncFromSupabase(false);
-      }, []);
-
-      const totalInfaq = useMemo(() => {
-        return donations
-          .filter(d => d.status === 'Terverifikasi')
-          .reduce((acc, curr) => acc + Number(curr.amount || 0), 0);
-      }, [donations]);
-
-      const activePrograms = useMemo(() => programs.filter(p => p.status === 'Aktif'), [programs]);
-
-      const uniqueDonorsList = useMemo(() => {
-        const map = new Map();
-        donations.forEach(d => {
-          const key = (d.donorName || 'Hamba Allah').trim();
-          const existing = map.get(key) || {
-            name: key,
-            phone: d.phone || '',
-            totalAmount: 0,
-            transactionCount: 0,
-            lastDate: d.created_at,
-            lastProgram: d.programTitle
-          };
-
-          existing.totalAmount += Number(d.amount || 0);
-          existing.transactionCount += 1;
-          if (d.phone && !existing.phone) existing.phone = d.phone;
-          if (new Date(d.created_at) > new Date(existing.lastDate)) {
-            existing.lastDate = d.created_at;
-            existing.lastProgram = d.programTitle;
-          }
-
-          map.set(key, existing);
-        });
-
-        return Array.from(map.values()).sort((a, b) => b.totalAmount - a.totalAmount);
-      }, [donations]);
-
-      // File upload handlers
-      const handleProgramImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setProgramForm(prev => ({ ...prev, imageUrl: reader.result }));
-          showNotification("Foto program berhasil diunggah!");
-        };
-        reader.readAsDataURL(file);
-      };
-
-      const handleGalleryImageUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setGalleryForm(prev => ({ ...prev, imageUrl: reader.result }));
-          showNotification("Foto galeri berhasil diunggah!");
-        };
-        reader.readAsDataURL(file);
-      };
-
-      // Create Handlers
-      const handleCreateProgram = async (e) => {
-        e.preventDefault();
-        const targetClean = parseCleanNumber(programForm.targetAmount);
-
-        const newProg = {
-          id: `PROG-${Date.now()}`,
-          title: programForm.title.trim(),
-          category: programForm.category || (categories[0]?.name || 'Pendidikan'),
-          description: programForm.description.trim(),
-          fullContent: programForm.fullContent || programForm.description,
-          targetAmount: targetClean,
-          currentAmount: 0,
-          beneficiaries: Number(programForm.beneficiaries) || 0,
-          imageUrl: programForm.imageUrl.trim() || "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80",
-          status: programForm.status
+        // Shared LocalStorage Database
+        let DB = JSON.parse(localStorage.getItem('NUHA_DATABASE')) || {
+            settings: {
+                siteName: "Lembaga Infaq Nurul Hayah",
+                siteLogo: OFFICIAL_LOGO,
+                phone: "+6282333362299",
+                isLocked: false,
+                lockMessage: "Website sedang dalam pemeliharaan sistem. Silakan kembali beberapa saat lagi.",
+                disableDonations: false,
+                socials: {
+                    whatsapp: "https://wa.me/6282333362299",
+                    instagram: "https://www.instagram.com/lembagainfaqnurulhayah",
+                    youtube: "https://youtube.com",
+                    tiktok: "https://tiktok.com",
+                    facebook: "https://facebook.com"
+                },
+                welcomeMessage: "Assalamu'alaikum. Ada yang bisa dibantu?"
+            },
+            paymentMethods: [
+                { id: 1, name: "Bank Syariah Indonesia (BSI)", account: "7123-4567-89 a.n NUHA", qrImage: "", active: true },
+                { id: 2, name: "Bank Muamalat", account: "345-00123-99 a.n NUHA", qrImage: "", active: true },
+                { id: 3, name: "QRIS All Payment Resmi NUHA", account: "Scan Barcode QRIS Sangat Mudah", qrImage: "https://placehold.co/400x400/286B56/FFFFFF?text=QRIS+NUHA", active: true }
+            ],
+            pengurusList: [
+                { id: 1, nama: "Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.", jabatan: "Pengasuh & Pembina Utama", foto: "", level: 1 },
+                { id: 2, nama: "H. Ahmad Fauzi, M.Pd.", jabatan: "Ketua Pengurus Lembaga", foto: "", level: 2 },
+                { id: 3, nama: "Siti Rahmah, S.E., Ak.", jabatan: "Bendahara & Keuangan", foto: "", level: 3 }
+            ],
+            stats: { totalInfaq: 248500000, totalDonatur: 1420 },
+            heroSlides: [
+                {
+                    id: 1,
+                    foto: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1920&q=80",
+                    judul: "Bekali Pendidikan, Kuatkan Masa Depan Santri!",
+                    subjudul: "Mari raih keberkahan bersama Lembaga Infaq Nurul Hayah."
+                },
+                {
+                    id: 2,
+                    foto: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1920&q=80",
+                    judul: "Pembangunan Gedung Asrama Santri",
+                    subjudul: "Fasilitas tempat tinggal yang layak, bersih, dan amanah bagi penghafal Al-Qur'an."
+                }
+            ],
+            gallery: [
+                { id: 1, judul: "Kajian Rutin Bersama Pengasuh", ket: "Kegiatan rutin santri bersama pembina utama", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80", tanggal: "2026-10-20" }
+            ],
+            pengurusList: [
+                { id: 1, nama: "Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.", jabatan: "Pengasuh & Pembina Utama", foto: "" },
+                { id: 2, nama: "H. Ahmad Fauzi, M.Pd.", jabatan: "Ketua Pengurus Lembaga", foto: "" },
+                { id: 3, nama: "Siti Rahmah, S.E., Ak.", jabatan: "Bendahara & Keuangan", foto: "" }
+            ],
+            stats: { totalInfaq: 248500000, totalDonatur: 1420 },
+            heroSlides: [
+                {
+                    foto: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1920&q=80",
+                    judul: "Bekali Pendidikan, Kuatkan Masa Depan Santri!",
+                    subjudul: "Mari raih keberkahan bersama Lembaga Infaq Nurul Hayah."
+                }
+            ],
+            gallery: [],
+            programs: [],
+            news: [],
+            donations: []
         };
 
-        setPrograms(prev => [newProg, ...prev]);
-        setShowProgramModal(false);
-        showNotification("Program baru berhasil dibuat!");
-
-        const client = getSupabase();
-        if (client) {
-          await client.from('programs').insert([{
-            id: newProg.id,
-            title: newProg.title,
-            category: newProg.category,
-            description: newProg.description,
-            full_content: newProg.fullContent,
-            target_amount: newProg.targetAmount,
-            current_amount: 0,
-            beneficiaries: newProg.beneficiaries,
-            image_url: newProg.imageUrl,
-            status: newProg.status
-          }]);
+        function saveDB() {
+            localStorage.setItem('NUHA_DATABASE', JSON.stringify(DB));
         }
 
-        setProgramForm({ title: '', category: categories[0]?.name || 'Pendidikan', description: '', fullContent: '', targetAmount: '', beneficiaries: '', imageUrl: '', status: 'Aktif' });
-      };
-
-      const handleCreateCategory = async (e) => {
-        e.preventDefault();
-        if (!categoryForm.name.trim()) return;
-
-        const newCat = {
-          id: `cat-${Date.now()}`,
-          name: categoryForm.name.trim(),
-          description: categoryForm.description.trim()
+        let adminState = {
+            adminSubTab: 'dashboard',
+            isLoggedIn: sessionStorage.getItem('NUHA_ADMIN_AUTH') === 'true'
         };
 
-        setCategories(prev => [...prev, newCat]);
-        setShowCategoryModal(false);
-        showNotification("Kategori baru berhasil ditambahkan!");
-
-        const client = getSupabase();
-        if (client) {
-          await client.from('categories').insert([{
-            id: newCat.id,
-            name: newCat.name,
-            description: newCat.description
-          }]);
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
         }
 
-        setCategoryForm({ name: '', description: '' });
-      };
+        function renderAdminApp() {
+            const root = document.getElementById('admin-root');
+            root.innerHTML = '';
 
-      const handleCreateGallery = async (e) => {
-        e.preventDefault();
-        if (!galleryForm.title.trim()) return;
+            if (!adminState.isLoggedIn) {
+                root.appendChild(renderAdminLoginPage());
+            } else {
+                root.appendChild(renderAdminDashboard());
+            }
 
-        const newGal = {
-          id: `gal-${Date.now()}`,
-          title: galleryForm.title.trim(),
-          category: galleryForm.category || (categories[0]?.name || 'Pendidikan'),
-          description: galleryForm.description.trim(),
-          imageUrl: galleryForm.imageUrl.trim() || 'https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80'
-        };
-
-        setGallery(prev => [newGal, ...prev]);
-        setShowGalleryModal(false);
-        showNotification("Foto galeri berhasil ditambahkan!");
-
-        const client = getSupabase();
-        if (client) {
-          await client.from('gallery').insert([{
-            id: newGal.id,
-            title: newGal.title,
-            category: newGal.category,
-            description: newGal.description,
-            image_url: newGal.imageUrl
-          }]);
+            if (window.lucide) lucide.createIcons();
         }
 
-        setGalleryForm({ title: '', category: categories[0]?.name || 'Pendidikan', description: '', imageUrl: '' });
-      };
-
-      const executeDelete = async () => {
-        const { type, id } = deleteModal;
-        const client = getSupabase();
-
-        if (type === 'program') {
-          setPrograms(prev => prev.filter(p => p.id !== id));
-          if (client) await client.from('programs').delete().eq('id', id);
-        } else if (type === 'category') {
-          setCategories(prev => prev.filter(c => c.id !== id));
-          if (client) await client.from('categories').delete().eq('id', id);
-        } else if (type === 'gallery') {
-          setGallery(prev => prev.filter(g => g.id !== id));
-          if (client) await client.from('gallery').delete().eq('id', id);
-        } else if (type === 'infaq') {
-          setDonations(prev => prev.filter(d => d.id !== id));
-          if (client) await client.from('donations').delete().eq('id', id);
-        }
-
-        showNotification("Data berhasil dihapus!");
-        setDeleteModal({ isOpen: false, type: null, id: null, title: '' });
-      };
-
-      return (
-        <div className="flex min-h-screen bg-[#f4f7f6]">
-          {/* Toast Notification */}
-          {toast && (
-            <div className="fixed top-5 right-5 z-[9999] bg-[#1F5946] text-white px-5 py-3 rounded-2xl shadow-xl flex items-center space-x-3 text-sm font-medium border border-[#B89355]/40 animate-fade-in">
-              <span className="w-2.5 h-2.5 rounded-full bg-[#B89355] animate-pulse"></span>
-              <span>{toast}</span>
-            </div>
-          )}
-
-          {/* Sidebar Left */}
-          <aside className="w-72 bg-[#1F5946] text-white flex flex-col flex-shrink-0 min-h-screen shadow-xl">
-            <div className="p-5 pb-5 border-b border-emerald-800/40">
-              <div className="flex items-center space-x-3.5">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center p-1.5 shadow-md flex-shrink-0 border border-emerald-200/20">
-                  <img 
-                    src={settings.logoUrl} 
-                    alt="Logo Nurul Hayah" 
-                    className="w-full h-full object-contain"
-                    onError={(e) => { e.target.src = "https://placehold.co/100x100/1F5946/FFFFFF?text=NH"; }}
-                  />
-                </div>
-
-                <div className="min-w-0 flex-1">
-                  <div className="text-[9px] font-extrabold tracking-[0.24em] text-emerald-200 uppercase leading-none mb-1">
-                    LEMBAGA INFAQ
-                  </div>
-                  <div className="text-lg font-black text-white tracking-tight leading-none mb-1">
-                    Nurul Hayah
-                  </div>
-                  <div className="text-[9.5px] font-semibold text-[#D4AF37] leading-tight tracking-tight">
-                    {settings.tagline}
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <nav className="flex-1 px-4 space-y-1.5 mt-3">
-              {[
-                { id: 'dashboard', label: 'Dashboard Utama', icon: Icons.Dashboard },
-                { id: 'ai_assistant', label: 'Amil AI Assistant', icon: Icons.AiMagic, badge: 'AI' },
-                { id: 'slides', label: 'Kelola Slide Hero', icon: Icons.Slide, badge: slides.length },
-                { id: 'program', label: 'Kelola Program', icon: Icons.Program, badge: programs.length },
-                { id: 'kategori', label: 'Kelola Kategori', icon: Icons.Category, badge: categories.length },
-                { id: 'infaq', label: 'Data Infaq & Transaksi', icon: Icons.Infaq, badge: donations.length },
-                { id: 'donatur', label: 'Data Donatur', icon: Icons.Users, badge: uniqueDonorsList.length },
-                { id: 'galeri', label: 'Galeri & Media', icon: Icons.Media, badge: gallery.length }
-              ].map(item => {
-                const IconComp = item.icon;
-                const active = activeTab === item.id;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-xs font-bold transition-all ${
-                      active
-                        ? 'bg-white text-[#1F5946] shadow-sm'
-                        : 'text-emerald-100/80 hover:bg-[#174435] hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-center space-x-3.5">
-                      <IconComp />
-                      <span>{item.label}</span>
+        // GREEN BACKGROUND LOGIN PAGE FOR ADMIN
+        function renderAdminLoginPage() {
+            const container = document.createElement('div');
+            container.className = "w-full min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#0f4e2b] via-[#146438] to-[#0a381e]";
+            container.innerHTML = `
+                <div class="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl space-y-6">
+                    <div class="text-center space-y-2">
+                        <img src="${DB.settings.siteLogo || OFFICIAL_LOGO}" class="h-14 mx-auto object-contain bg-emerald-50 p-1.5 rounded-2xl">
+                        <h2 class="text-xl font-bold font-poppins text-gray-900">${DB.settings.siteName || 'Lembaga Infaq Nurul Hayah'}</h2>
+                        <p class="text-xs text-gray-500 font-medium">Manage Website Infaq</p>
                     </div>
-                    {item.badge !== undefined && (
-                      <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                        active ? 'bg-[#1F5946] text-white' : 'bg-emerald-800/80 text-emerald-200'
-                      }`}>
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                );
-              })}
-            </nav>
 
-            <div className="p-4 border-t border-emerald-800/40 text-xs text-emerald-200/60 text-center">
-              Lembaga Infaq Nurul Hayah &copy; 2026
-            </div>
-          </aside>
-
-          {/* Area Konten Utama */}
-          <main className="flex-1 p-6 sm:p-10 overflow-y-auto min-w-0">
-            <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-              <div>
-                <h1 className="text-2xl font-black text-slate-900 tracking-tight flex items-center space-x-2">
-                  <span>
-                    {activeTab === 'dashboard' && "Dashboard Utama & Grafik Infaq"}
-                    {activeTab === 'ai_assistant' && "Amil AI Assistant"}
-                    {activeTab === 'slides' && "Kelola Slide Hero Visual"}
-                    {activeTab === 'program' && "Kelola Program Infaq"}
-                    {activeTab === 'kategori' && "Kelola Kategori Program"}
-                    {activeTab === 'infaq' && "Data Infaq & Transaksi Masuk"}
-                    {activeTab === 'donatur' && "Data Donatur Terdaftar"}
-                    {activeTab === 'galeri' && "Kelola Galeri Dokumentasi"}
-                  </span>
-                </h1>
-                <p className="text-xs text-slate-400 mt-0.5">Sistem Administrasi dan Penyaluran Infaq Nurul Hayah</p>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={() => syncFromSupabase(true)}
-                  disabled={isSyncing}
-                  className="bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-xs font-bold px-4 py-2 rounded-2xl shadow-sm flex items-center space-x-2 transition"
-                >
-                  <span className={isSyncing ? 'animate-spin' : ''}><Icons.Sync /></span>
-                  <span>{isSyncing ? 'Menyinkronkan...' : 'Sinkronkan Data'}</span>
-                </button>
-              </div>
-            </header>
-
-            {activeTab === 'dashboard' && (
-              <DashboardView 
-                totalInfaq={totalInfaq}
-                totalDonatur={uniqueDonorsList.length}
-                activeProgramsCount={activePrograms.length}
-                totalProgramsCount={programs.length}
-                donations={donations}
-              />
-            )}
-
-            {activeTab === 'ai_assistant' && (
-              <AiAssistantView 
-                programs={programs}
-                showNotification={showNotification}
-              />
-            )}
-
-            {activeTab === 'slides' && (
-              <HeroSlideEditorView 
-                slides={slides}
-                setSlides={setSlides}
-                activeSlideIdx={activeSlideIdx}
-                setActiveSlideIdx={setActiveSlideIdx}
-                showNotification={showNotification}
-                getSupabase={getSupabase}
-              />
-            )}
-
-            {/* TAB PROGRAM */}
-            {activeTab === 'program' && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900">Daftar Program Infaq</h2>
-                    <p className="text-xs text-slate-500">Kelola target, foto visual, dan publikasi program penggalangan dana.</p>
-                  </div>
-                  <button
-                    onClick={() => setShowProgramModal(true)}
-                    className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
-                  >
-                    <Icons.Plus />
-                    <span>Tambah Program Baru</span>
-                  </button>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {programs.map((prog) => {
-                    const percent = prog.targetAmount > 0 ? Math.min(Math.round((prog.currentAmount / prog.targetAmount) * 100), 100) : 0;
-                    return (
-                      <div key={prog.id} className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between">
+                    <form onsubmit="event.preventDefault(); processAdminLogin();" class="space-y-4">
                         <div>
-                          <div className="relative h-44 bg-slate-100">
-                            <img src={prog.imageUrl} alt={prog.title} className="w-full h-full object-cover" />
-                            <span className="absolute top-3 left-3 bg-white/90 text-[#1F5946] text-[11px] font-extrabold px-3 py-1 rounded-full shadow-sm">
-                              {prog.category}
-                            </span>
-                          </div>
-                          <div className="p-5">
-                            <h3 className="font-bold text-slate-900 text-base line-clamp-2 mb-2">{prog.title}</h3>
-                            <p className="text-xs text-slate-500 line-clamp-2 mb-4">{prog.description}</p>
-                            <div className="space-y-2">
-                              <div className="flex justify-between text-xs font-bold">
-                                <span className="text-[#1F5946]">{formatIDR(prog.currentAmount)}</span>
-                                <span className="text-[#B89355]">{percent}%</span>
-                              </div>
-                              <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                                <div className="bg-[#1F5946] h-full" style={{ width: `${percent}%` }}></div>
-                              </div>
-                            </div>
-                          </div>
+                            <label class="text-xs font-bold text-gray-700">Kode Akses / Kata Sandi Admin</label>
+                            <input type="password" id="admin-pass" placeholder="Masukkan password admin..." class="w-full mt-1 p-3.5 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none" required>
                         </div>
-
-                        <div className="p-4 bg-slate-50/80 border-t border-slate-100 flex justify-between items-center">
-                          <button onClick={() => setDeleteModal({ isOpen: true, type: 'program', id: prog.id, title: prog.title })} className="text-xs font-bold text-red-600 flex items-center space-x-1 hover:underline">
-                            <Icons.Trash />
-                            <span>Hapus Program</span>
-                          </button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {/* TAB KATEGORI */}
-            {activeTab === 'kategori' && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 mb-1">Kelola Kategori Program</h2>
-                    <p className="text-xs text-slate-500">Daftar kategori pengelompokkan program infaq.</p>
-                  </div>
-                  <button
-                    onClick={() => setShowCategoryModal(true)}
-                    className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
-                  >
-                    <Icons.Plus />
-                    <span>Tambah Kategori Baru</span>
-                  </button>
-                </div>
-
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {categories.map((cat) => (
-                    <div key={cat.id} className="p-5 bg-white rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
-                      <div>
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="font-bold text-slate-900 text-sm">{cat.name}</div>
-                          <span className="w-2.5 h-2.5 rounded-full bg-[#1F5946]"></span>
-                        </div>
-                        <div className="text-xs text-slate-500">{cat.description || "Tanpa deskripsi"}</div>
-                      </div>
-                      <div className="mt-4 pt-3 border-t border-slate-100 flex justify-end">
-                        <button
-                          onClick={() => setDeleteModal({ isOpen: true, type: 'category', id: cat.id, title: cat.name })}
-                          className="text-xs font-bold text-red-600 hover:underline flex items-center space-x-1"
-                        >
-                          <Icons.Trash />
-                          <span>Hapus</span>
+                        <button type="submit" class="btn-shimmer w-full py-3.5 bg-[#146438] hover:bg-[#0f4e2b] text-white font-bold text-sm rounded-2xl transition shadow-lg flex items-center justify-center gap-2">
+                            <span>Masuk</span> &rarr;
                         </button>
-                      </div>
-                    </div>
-                  ))}
+                    </form>
                 </div>
-              </div>
-            )}
-
-            {/* TAB GALERI */}
-            {activeTab === 'galeri' && (
-              <div className="space-y-6 animate-fade-in">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-                  <div>
-                    <h2 className="text-lg font-bold text-slate-900 mb-1">Galeri Dokumentasi</h2>
-                    <p className="text-xs text-slate-500">Dokumentasi foto kegiatan dan penyaluran infaq.</p>
-                  </div>
-                  <button
-                    onClick={() => setShowGalleryModal(true)}
-                    className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
-                  >
-                    <Icons.Plus />
-                    <span>Tambah Foto Galeri Baru</span>
-                  </button>
-                </div>
-
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {gallery.length === 0 ? (
-                    <div className="col-span-full text-center py-12 bg-white rounded-3xl text-slate-400 text-xs border border-dashed border-slate-200">
-                      Belum ada dokumentasi galeri. Klik tombol "Tambah Foto Galeri Baru" untuk menambahkan.
-                    </div>
-                  ) : (
-                    gallery.map(g => (
-                      <div key={g.id} className="bg-white rounded-3xl border border-slate-100 overflow-hidden shadow-sm flex flex-col justify-between">
-                        <div>
-                          <div className="relative h-44 bg-slate-100">
-                            <img src={g.imageUrl} alt={g.title} className="w-full h-full object-cover" />
-                            <span className="absolute top-3 left-3 bg-white/90 text-[#1F5946] text-[10px] font-bold px-2.5 py-0.5 rounded-full shadow-sm">
-                              {g.category}
-                            </span>
-                          </div>
-                          <div className="p-4">
-                            <h4 className="font-bold text-slate-800 text-sm mb-1">{g.title}</h4>
-                            <p className="text-xs text-slate-500 line-clamp-2">{g.description}</p>
-                          </div>
-                        </div>
-
-                        <div className="p-3 bg-slate-50/80 border-t border-slate-100 flex justify-end">
-                          <button
-                            onClick={() => setDeleteModal({ isOpen: true, type: 'gallery', id: g.id, title: g.title })}
-                            className="text-xs font-bold text-red-600 hover:underline flex items-center space-x-1"
-                          >
-                            <Icons.Trash />
-                            <span>Hapus</span>
-                          </button>
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            )}
-
-            {activeTab === 'donatur' && (
-              <DonorsView uniqueDonors={uniqueDonorsList} showNotification={showNotification} />
-            )}
-
-            {activeTab === 'infaq' && (
-              <InfaqTransactionsView 
-                donations={donations} 
-                setDonations={setDonations}
-                programs={programs}
-                setPrograms={setPrograms}
-                setDeleteModal={setDeleteModal}
-                showNotification={showNotification}
-                getSupabase={getSupabase}
-              />
-            )}
-          </main>
-
-          {/* Modal Program */}
-          {showProgramModal && (
-            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
-                  <h3 className="text-lg font-bold text-slate-900">Tambah Program Infaq Baru</h3>
-                  <button onClick={() => setShowProgramModal(false)} className="text-slate-400 hover:text-slate-600 text-sm font-bold">Tutup</button>
-                </div>
-
-                <form onSubmit={handleCreateProgram} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Judul Program</label>
-                    <input 
-                      type="text" 
-                      required 
-                      placeholder="Contoh: Beasiswa Santri Hafiz Quran"
-                      value={programForm.title}
-                      onChange={(e) => setProgramForm({ ...programForm, title: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori Program</label>
-                    <select
-                      value={programForm.category}
-                      onChange={(e) => setProgramForm({ ...programForm, category: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    >
-                      {categories.map(c => (
-                        <option key={c.id} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Upload Foto Program</label>
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={handleProgramImageUpload}
-                      className="w-full text-xs text-slate-500 mb-2 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#1F5946] hover:file:bg-emerald-100"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="Atau masukkan Link/URL Foto (https://...)"
-                      value={programForm.imageUrl}
-                      onChange={(e) => setProgramForm({ ...programForm, imageUrl: e.target.value })}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
-                    />
-                    {programForm.imageUrl && (
-                      <div className="mt-2 h-28 rounded-xl overflow-hidden border border-slate-200">
-                        <img src={programForm.imageUrl} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi Ringkas</label>
-                    <textarea 
-                      rows={3} 
-                      required
-                      placeholder="Penjelasan ringkas sasaran program..."
-                      value={programForm.description}
-                      onChange={(e) => setProgramForm({ ...programForm, description: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    ></textarea>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Target Dana (Rp)</label>
-                      <input 
-                        type="text" 
-                        placeholder="10.000.000"
-                        value={formatThousand(programForm.targetAmount)}
-                        onChange={(e) => setProgramForm({ ...programForm, targetAmount: e.target.value })}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Target Penerima (Jiwa)</label>
-                      <input 
-                        type="number" 
-                        placeholder="50"
-                        value={programForm.beneficiaries}
-                        onChange={(e) => setProgramForm({ ...programForm, beneficiaries: e.target.value })}
-                        className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="flex justify-end space-x-3 pt-3">
-                    <button type="button" onClick={() => setShowProgramModal(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold">Batal</button>
-                    <button type="submit" className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold">Simpan Program</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Modal Category */}
-          {showCategoryModal && (
-            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100">
-                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
-                  <h3 className="text-lg font-bold text-slate-900">Tambah Kategori Program Baru</h3>
-                  <button onClick={() => setShowCategoryModal(false)} className="text-slate-400 hover:text-slate-600 text-sm font-bold">Tutup</button>
-                </div>
-
-                <form onSubmit={handleCreateCategory} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Kategori</label>
-                    <input 
-                      type="text" 
-                      required 
-                      placeholder="Contoh: Operasional Santri"
-                      value={categoryForm.name}
-                      onChange={(e) => setCategoryForm({ ...categoryForm, name: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi Ringkas</label>
-                    <textarea 
-                      rows={3} 
-                      placeholder="Keterangan singkat kategori..."
-                      value={categoryForm.description}
-                      onChange={(e) => setCategoryForm({ ...categoryForm, description: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    ></textarea>
-                  </div>
-
-                  <div className="flex justify-end space-x-3 pt-3">
-                    <button type="button" onClick={() => setShowCategoryModal(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold">Batal</button>
-                    <button type="submit" className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold">Simpan Kategori</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Modal Gallery */}
-          {showGalleryModal && (
-            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-white w-full max-w-lg rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
-                  <h3 className="text-lg font-bold text-slate-900">Tambah Dokumentasi Galeri</h3>
-                  <button onClick={() => setShowGalleryModal(false)} className="text-slate-400 hover:text-slate-600 text-sm font-bold">Tutup</button>
-                </div>
-
-                <form onSubmit={handleCreateGallery} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Judul Dokumentasi</label>
-                    <input 
-                      type="text" 
-                      required 
-                      placeholder="Contoh: Penyaluran Paket Sembako Brebes"
-                      value={galleryForm.title}
-                      onChange={(e) => setGalleryForm({ ...galleryForm, title: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Kategori Kegiatan</label>
-                    <select
-                      value={galleryForm.category}
-                      onChange={(e) => setGalleryForm({ ...galleryForm, category: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    >
-                      {categories.map(c => (
-                        <option key={c.id} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Upload Foto Galeri</label>
-                    <input 
-                      type="file" 
-                      accept="image/*"
-                      onChange={handleGalleryImageUpload}
-                      className="w-full text-xs text-slate-500 mb-2 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#1F5946] hover:file:bg-emerald-100"
-                    />
-                    <input 
-                      type="text" 
-                      placeholder="Atau masukkan Link/URL Gambar (https://...)"
-                      value={galleryForm.imageUrl}
-                      onChange={(e) => setGalleryForm({ ...galleryForm, imageUrl: e.target.value })}
-                      className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none"
-                    />
-                    {galleryForm.imageUrl && (
-                      <div className="mt-2 h-28 rounded-xl overflow-hidden border border-slate-200">
-                        <img src={galleryForm.imageUrl} alt="Preview Galeri" className="w-full h-full object-cover" />
-                      </div>
-                    )}
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Deskripsi Singkat</label>
-                    <textarea 
-                      rows={3} 
-                      placeholder="Keterangan singkat lokasi / momen kegiatan..."
-                      value={galleryForm.description}
-                      onChange={(e) => setGalleryForm({ ...galleryForm, description: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    ></textarea>
-                  </div>
-
-                  <div className="flex justify-end space-x-3 pt-3">
-                    <button type="button" onClick={() => setShowGalleryModal(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold">Batal</button>
-                    <button type="submit" className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold">Simpan Galeri</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-
-          {/* Modal Hapus Global */}
-          {deleteModal.isOpen && (
-            <div className="fixed inset-0 z-[9999] bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl text-center">
-                <h3 className="text-base font-bold text-slate-900 mb-2">Hapus Data Ini?</h3>
-                <p className="text-xs text-slate-500 mb-6">Data "{deleteModal.title}" akan dihapus dari sistem.</p>
-                <div className="flex space-x-3">
-                  <button onClick={() => setDeleteModal({ isOpen: false, type: null, id: null, title: '' })} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold">Batal</button>
-                  <button onClick={executeDelete} className="flex-1 py-2.5 bg-red-600 text-white rounded-xl text-xs font-bold shadow-md">Hapus</button>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    function DashboardView({ totalInfaq, totalDonatur, activeProgramsCount, totalProgramsCount, donations }) {
-      const today = new Date();
-      const thirtyDaysAgo = new Date(today.getTime() - 29 * 86400000);
-
-      const [startDate, setStartDate] = useState(getFormattedDateString(thirtyDaysAgo));
-      const [endDate, setEndDate] = useState(getFormattedDateString(today));
-      const [hoveredPoint, setHoveredPoint] = useState(null);
-
-      const chartData = useMemo(() => {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        end.setHours(23, 59, 59, 999);
-
-        const map = new Map();
-        let curr = new Date(start);
-        while (curr <= end) {
-          const key = getFormattedDateString(curr);
-          map.set(key, { dateKey: key, displayDate: curr.toLocaleDateString('id-ID', { day: '2-digit', month: 'short' }), total: 0, count: 0 });
-          curr.setDate(curr.getDate() + 1);
+            `;
+            return container;
         }
 
-        donations.forEach(d => {
-          if (d.status !== 'Terverifikasi') return;
-          const dDate = new Date(d.created_at);
-          const key = getFormattedDateString(dDate);
-          if (map.has(key)) {
-            const entry = map.get(key);
-            entry.total += Number(d.amount || 0);
-            entry.count += 1;
-          }
-        });
+        function processAdminLogin() {
+            const pass = document.getElementById('admin-pass')?.value;
+            if (pass === 'infaqnuha2025' || pass === 'adminnuha') {
+                adminState.isLoggedIn = true;
+                sessionStorage.setItem('NUHA_ADMIN_AUTH', 'true');
+                renderAdminApp();
+            } else {
+                alert('Sandi Admin Salah! Gunakan: infaqnuha2025');
+            }
+        }
 
-        return Array.from(map.values());
-      }, [donations, startDate, endDate]);
-
-      const maxChartValue = useMemo(() => {
-        const max = Math.max(...chartData.map(d => d.total), 0);
-        return max > 0 ? max : 1000000;
-      }, [chartData]);
-
-      const rangeTotal = useMemo(() => {
-        return chartData.reduce((acc, curr) => acc + curr.total, 0);
-      }, [chartData]);
-
-      const setQuickPreset = (days) => {
-        const e = new Date();
-        const s = new Date(e.getTime() - (days - 1) * 86400000);
-        setStartDate(getFormattedDateString(s));
-        setEndDate(getFormattedDateString(e));
-      };
-
-      return (
-        <div className="space-y-8 animate-fade-in">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Total Infaq Terkumpul</div>
-                <div className="text-2xl font-black text-slate-900 tracking-tight">{formatIDR(totalInfaq)}</div>
-              </div>
-              <div className="text-xs font-bold text-emerald-600 mt-4 flex items-center space-x-1">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>Terverifikasi di sistem</span>
-              </div>
-            </div>
-
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Total Donatur</div>
-                <div className="text-2xl font-black text-slate-900 tracking-tight">{totalDonatur} Donatur</div>
-              </div>
-              <div className="text-xs font-medium text-slate-400 mt-4">Donatur aktif terdaftar</div>
-            </div>
-
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between">
-              <div>
-                <div className="text-xs font-bold text-slate-400 mb-1 uppercase tracking-wider">Program Aktif</div>
-                <div className="text-2xl font-black text-[#B89355] tracking-tight">{activeProgramsCount} Program</div>
-              </div>
-              <div className="text-xs font-medium text-slate-400 mt-4">Dari total {totalProgramsCount} program</div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-sm space-y-6">
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-5">
-              <div>
-                <div className="flex items-center space-x-2">
-                  <span className="p-2 bg-emerald-50 text-[#1F5946] rounded-xl"><Icons.Calendar /></span>
-                  <h2 className="text-lg font-bold text-slate-900">Grafik Perkembangan Infaq Masuk</h2>
-                </div>
-                <p className="text-xs text-slate-400 mt-1">
-                  Total infaq periode terpilih: <span className="font-bold text-[#1F5946]">{formatIDR(rangeTotal)}</span>
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-3">
-                <div className="flex items-center space-x-2 bg-slate-50 p-2 rounded-2xl border border-slate-200 text-xs">
-                  <div className="flex items-center space-x-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">Dari:</span>
-                    <input 
-                      type="date" 
-                      value={startDate} 
-                      onChange={(e) => setStartDate(e.target.value)}
-                      className="bg-transparent font-semibold text-slate-800 outline-none cursor-pointer"
-                    />
-                  </div>
-                  <span className="text-slate-300">-</span>
-                  <div className="flex items-center space-x-1">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase">S/D:</span>
-                    <input 
-                      type="date" 
-                      value={endDate} 
-                      onChange={(e) => setEndDate(e.target.value)}
-                      className="bg-transparent font-semibold text-slate-800 outline-none cursor-pointer"
-                    />
-                  </div>
-                </div>
-
-                <div className="flex space-x-1 bg-slate-100 p-1 rounded-2xl text-[11px] font-bold">
-                  <button onClick={() => setQuickPreset(7)} className="px-3 py-1.5 rounded-xl hover:bg-white text-slate-700 transition">7 Hari</button>
-                  <button onClick={() => setQuickPreset(14)} className="px-3 py-1.5 rounded-xl hover:bg-white text-slate-700 transition">14 Hari</button>
-                  <button onClick={() => setQuickPreset(30)} className="px-3 py-1.5 rounded-xl hover:bg-white text-slate-700 transition">30 Hari</button>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative pt-4 pb-2">
-              <div className="h-64 w-full flex items-end justify-between space-x-1.5 sm:space-x-3 px-2 border-b border-slate-200">
-                {chartData.map((d, idx) => {
-                  const heightPercent = maxChartValue > 0 ? Math.max((d.total / maxChartValue) * 100, 4) : 4;
-                  const isHovered = hoveredPoint?.dateKey === d.dateKey;
-
-                  return (
-                    <div 
-                      key={d.dateKey || idx}
-                      onMouseEnter={() => setHoveredPoint(d)}
-                      onMouseLeave={() => setHoveredPoint(null)}
-                      className="flex-1 flex flex-col items-center h-full justify-end group cursor-pointer relative"
-                    >
-                      {isHovered && (
-                        <div className="absolute -top-14 z-20 bg-slate-900 text-white px-3 py-1.5 rounded-xl text-[10.5px] font-bold shadow-xl whitespace-nowrap animate-fade-in pointer-events-none">
-                          <div>{d.displayDate} ({d.count} transaksi)</div>
-                          <div className="text-[#D4AF37]">{formatIDR(d.total)}</div>
+        function renderAdminDashboard() {
+            const container = document.createElement('div');
+            container.className = "flex w-full min-h-screen";
+            container.innerHTML = `
+                <!-- Sidebar -->
+                <div class="w-64 bg-nuha-dark text-white p-6 space-y-8 flex flex-col justify-between shrink-0">
+                    <div class="space-y-6">
+                        <div class="bg-white/10 p-3 rounded-2xl flex items-center gap-3">
+                            <img src="${DB.settings.siteLogo || OFFICIAL_LOGO}" class="h-8 w-8 bg-white p-1 rounded-xl object-contain">
+                            <span class="font-bold text-xs line-clamp-1">${DB.settings.siteName}</span>
                         </div>
-                      )}
-
-                      <div 
-                        className={`w-full rounded-t-lg transition-all duration-300 ${
-                          d.total > 0 
-                            ? (isHovered ? 'bg-[#B89355] shadow-lg scale-105' : 'bg-[#1F5946] hover:bg-[#174435]')
-                            : 'bg-slate-100 hover:bg-slate-200'
-                        }`}
-                        style={{ height: `${heightPercent}%` }}
-                      ></div>
+                        <nav class="space-y-1 text-xs font-semibold">
+                            <button onclick="setAdminTab('dashboard')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='dashboard'?'bg-white/20':''}">Dashboard & Stat</button>
+                            <button onclick="setAdminTab('settings')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='settings'?'bg-white/20':''}">Pengaturan Website & Lock</button>
+                            <button onclick="setAdminTab('heroSlides')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='heroSlides'?'bg-white/20':''}">Hero Slide & Teks</button>
+                            <button onclick="setAdminTab('pengurus')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='pengurus'?'bg-white/20':''}">Susunan Pengurus</button>
+                            <button onclick="setAdminTab('program')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='program'?'bg-white/20':''}">Kelola Program Unggulan</button>
+                            <button onclick="setAdminTab('gallery')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='gallery'?'bg-white/20':''}">Kelola Galeri Foto</button>
+                            <button onclick="setAdminTab('berita')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='berita'?'bg-white/20':''}">Berita & Embed Media</button>
+                            <button onclick="setAdminTab('pembayaran')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='pembayaran'?'bg-white/20':''}">Metode Pembayaran</button>
+                        </nav>
                     </div>
-                  );
-                })}
-              </div>
+                    <button onclick="logoutAdmin()" class="w-full p-3 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2">Keluar Admin</button>
+                </div>
 
-              <div className="flex justify-between text-[10px] font-bold text-slate-400 mt-3 px-1">
-                <span>{chartData[0]?.displayDate}</span>
-                <span>{chartData[Math.floor(chartData.length / 2)]?.displayDate}</span>
-                <span>{chartData[chartData.length - 1]?.displayDate}</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
+                <!-- Content Area -->
+                <div class="flex-1 p-8 space-y-6 overflow-y-auto max-h-screen bg-gray-50">
+                    <div class="flex justify-between items-center border-b pb-4">
+                        <h1 class="text-2xl font-bold text-gray-900 capitalize">CMS Admin - ${adminState.adminSubTab}</h1>
+                        <a href="index.html" target="_blank" class="text-xs bg-emerald-100 text-nuha-primary px-3 py-1.5 rounded-xl font-bold hover:bg-emerald-200">Lihat Live Website &rarr;</a>
+                    </div>
 
-    function DonorsView({ uniqueDonors, showNotification }) {
-      const [searchTerm, setSearchTerm] = useState('');
-
-      const filteredDonors = useMemo(() => {
-        if (!searchTerm.trim()) return uniqueDonors;
-        const q = searchTerm.toLowerCase();
-        return uniqueDonors.filter(d => 
-          d.name.toLowerCase().includes(q) || 
-          (d.phone && d.phone.includes(q))
-        );
-      }, [uniqueDonors, searchTerm]);
-
-      return (
-        <div className="space-y-6 animate-fade-in">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Direktori Data Donatur</h2>
-              <p className="text-xs text-slate-500">Daftar donatur terdaftar yang telah menyalurkan infaq.</p>
-            </div>
-
-            <div className="relative w-full sm:w-64">
-              <span className="absolute left-3.5 top-3 text-slate-400"><Icons.Search /></span>
-              <input 
-                type="text" 
-                placeholder="Cari nama atau WhatsApp..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#1F5946]"
-              />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                    <th className="py-4 px-6">Nama Donatur</th>
-                    <th className="py-4 px-6">Kontak WhatsApp</th>
-                    <th className="py-4 px-6 text-right">Total Akumulasi Infaq</th>
-                    <th className="py-4 px-6 text-center">Jumlah Transaksi</th>
-                    <th className="py-4 px-6">Infaq Terakhir</th>
-                    <th className="py-4 px-6 text-center">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                  {filteredDonors.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="py-12 text-center text-slate-400 italic">
-                        Tidak ada data donatur yang ditemukan.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredDonors.map((donor, idx) => (
-                      <tr key={idx} className="hover:bg-slate-50/80 transition">
-                        <td className="py-4 px-6">
-                          <div className="flex items-center space-x-3">
-                            <div className="w-8 h-8 rounded-full bg-emerald-100 text-[#1F5946] font-bold flex items-center justify-center text-xs">
-                              {donor.name.charAt(0).toUpperCase()}
+                    ${adminState.adminSubTab === 'dashboard' ? `
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                                <span class="text-xs text-gray-400">Total Donasi Terkumpul</span>
+                                <h3 class="text-2xl font-bold text-nuha-primary mt-1">${formatRupiah(DB.stats.totalInfaq)}</h3>
                             </div>
-                            <span className="font-bold text-slate-900">{donor.name}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 px-6 font-mono text-slate-600">
-                          {donor.phone || '-'}
-                        </td>
-                        <td className="py-4 px-6 text-right font-bold text-[#1F5946] text-sm">
-                          {formatIDR(donor.totalAmount)}
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <span className="px-2.5 py-1 bg-amber-50 text-amber-800 font-bold rounded-full text-[10px] border border-amber-200">
-                            {donor.transactionCount} kali
-                          </span>
-                        </td>
-                        <td className="py-4 px-6 text-slate-500">
-                          <div>{new Date(donor.lastDate).toLocaleDateString('id-ID')}</div>
-                          <div className="text-[10px] text-slate-400 truncate max-w-[150px]">{donor.lastProgram}</div>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          {donor.phone ? (
-                            <a 
-                              href={`https://wa.me/${donor.phone.replace(/\D/g, '')}?text=${encodeURIComponent(`Assalamualaikum Bapak/Ibu ${donor.name}, terima kasih atas kepercayaan berinfaq melalui Lembaga Infaq Nurul Hayah.`)}`}
-                              target="_blank" 
-                              rel="noopener noreferrer"
-                              className="inline-flex items-center space-x-1 px-3 py-1.5 bg-emerald-50 text-[#1F5946] hover:bg-emerald-100 rounded-xl font-bold transition text-[11px]"
-                            >
-                              <Icons.WhatsApp />
-                              <span>Sapa Donatur</span>
-                            </a>
-                          ) : (
-                            <span className="text-slate-300 text-[10px]">Tanpa No. WA</span>
-                          )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-      );
-    }
+                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                                <span class="text-xs text-gray-400">Total Donatur</span>
+                                <h3 class="text-2xl font-bold text-gray-900 mt-1">${DB.stats.totalDonatur} Orang</h3>
+                            </div>
+                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
+                                <span class="text-xs text-gray-400">Status Akses Website</span>
+                                <h3 class="text-lg font-bold ${DB.settings.isLocked?'text-red-600':'text-emerald-600'} mt-1">${DB.settings.isLocked ? 'Terkunci (Maintenance)' : 'Aktif Publik'}</h3>
+                            </div>
+                        </div>
+                    ` : ''}
 
-    function InfaqTransactionsView({ donations, setDonations, programs, setPrograms, setDeleteModal, showNotification, getSupabase }) {
-      const [searchQuery, setSearchQuery] = useState('');
-      const [showAddModal, setShowAddModal] = useState(false);
+                    ${adminState.adminSubTab === 'settings' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6 max-w-3xl">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Pengaturan Identitas & Kontrol Akses</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Nama Website</label>
+                                        <input type="text" id="set-site-name" value="${DB.settings.siteName}" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Nomor Telepon / WA</label>
+                                        <input type="text" id="set-phone" value="${DB.settings.phone}" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">
+                                    </div>
+                                </div>
 
-      const getCurrentDateTimeLocal = () => {
-        const now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        return now.toISOString().slice(0, 16);
-      };
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">URL Logo Website</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="set-logo-url" value="${DB.settings.siteLogo}" class="flex-1 p-3 border border-gray-200 rounded-xl text-xs">
+                                        <input type="file" id="logo-file-input" onchange="uploadImageFile(this, 'set-logo-url')" class="hidden">
+                                        <button onclick="document.getElementById('logo-file-input').click()" class="px-4 py-2 bg-gray-100 border text-xs font-bold rounded-xl hover:bg-gray-200">Upload Foto</button>
+                                    </div>
+                                </div>
 
-      const [form, setForm] = useState({
-        donorName: '',
-        programTitle: programs && programs[0] ? programs[0].title : 'Infaq Umum',
-        amount: '',
-        transactionDate: getCurrentDateTimeLocal()
-      });
+                                <div class="pt-4 border-t space-y-3">
+                                    <h4 class="font-bold text-xs text-gray-800">Link Sosial Media</h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                        <input type="text" id="soc-wa" placeholder="WhatsApp Link" value="${DB.settings.socials?.whatsapp || ''}" class="p-3 border rounded-xl text-xs">
+                                        <input type="text" id="soc-ig" placeholder="Instagram Link" value="${DB.settings.socials?.instagram || ''}" class="p-3 border rounded-xl text-xs">
+                                        <input type="text" id="soc-yt" placeholder="YouTube Link" value="${DB.settings.socials?.youtube || ''}" class="p-3 border rounded-xl text-xs">
+                                        <input type="text" id="soc-tiktok" placeholder="TikTok Link" value="${DB.settings.socials?.tiktok || ''}" class="p-3 border rounded-xl text-xs">
+                                        <input type="text" id="soc-fb" placeholder="Facebook Link" value="${DB.settings.socials?.facebook || ''}" class="p-3 border rounded-xl text-xs">
+                                    </div>
+                                </div>
 
-      const handleOpenModal = () => {
-        setForm({
-          donorName: '',
-          programTitle: programs && programs[0] ? programs[0].title : 'Infaq Umum',
-          amount: '',
-          transactionDate: getCurrentDateTimeLocal()
-        });
-        setShowAddModal(true);
-      };
+                                <div class="pt-4 border-t space-y-4">
+                                    <h4 class="font-bold text-xs text-gray-800">Kontrol Kunci Website & Tombol</h4>
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                                        <div>
+                                            <span class="font-bold text-xs text-gray-900 block">Kunci Seluruh Website (Maintenance Mode)</span>
+                                            <span class="text-[10px] text-gray-500">Pengunjung tidak bisa membuka website saat ini</span>
+                                        </div>
+                                        <input type="checkbox" id="set-is-locked" ${DB.settings.isLocked?'checked':''} class="w-5 h-5 accent-nuha-primary">
+                                    </div>
 
-      const handleAddManualInfaq = async (e) => {
-        e.preventDefault();
-        const cleanAmount = parseCleanNumber(form.amount);
-        if (!cleanAmount || cleanAmount <= 0) {
-          showNotification("Nominal infaq harus lebih besar dari 0!");
-          return;
+                                    <div class="flex items-center justify-between p-4 bg-gray-50 rounded-2xl">
+                                        <div>
+                                            <span class="font-bold text-xs text-gray-900 block">Kunci Tombol Program & Donasi</span>
+                                            <span class="text-[10px] text-gray-500">Mencegah pengunjung menekan tombol berdonasi</span>
+                                        </div>
+                                        <input type="checkbox" id="set-disable-donations" ${DB.settings.disableDonations?'checked':''} class="w-5 h-5 accent-nuha-primary">
+                                    </div>
+
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Pesan Pemeliharaan Website</label>
+                                        <textarea id="set-lock-msg" rows="2" class="w-full mt-1 p-3 border border-gray-200 rounded-xl text-xs">${DB.settings.lockMessage}</textarea>
+                                    </div>
+                                </div>
+
+                                <button onclick="saveWebsiteSettings()" class="w-full py-3 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark transition shadow-md">Simpan Semua Pengaturan &rarr;</button>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'heroSlides' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Tambah & Kelola Semua Foto Slide Hero</h3>
+                            
+                            <!-- FORM TAMBAH / EDIT SLIDE -->
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Form Tambah Slide Banner</h4>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">URL Foto Slide / File Upload</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="new-slide-url" placeholder="Paste Link Foto URL..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="slide-file-input" onchange="uploadImageFile(this, 'new-slide-url')" class="hidden">
+                                        <button onclick="document.getElementById('slide-file-input').click()" class="px-4 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload Foto</button>
+                                    </div>
+                                </div>
+                                <input type="text" id="new-slide-title" placeholder="Judul Teks Slide Hero..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="text" id="new-slide-sub" placeholder="Sub-Judul Teks Slide..." class="w-full p-3 border rounded-xl text-xs">
+                                <button onclick="addHeroSlide()" class="w-full py-3 bg-nuha-primary hover:bg-nuha-dark text-white rounded-xl text-xs font-bold transition">Simpan Slide Banner Baru</button>
+                            </div>
+
+                            <!-- DISPLAY ALL SLIDES FOR EDITING & MANAGE -->
+                            <div class="space-y-4 pt-4">
+                                <h4 class="font-bold text-xs text-gray-800">Daftar Seluruh Slide Aktif (${(DB.heroSlides||[]).length} Foto Slide)</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    ${(DB.heroSlides||[]).map((slide, idx) => {
+                                        const imgUrl = typeof slide === 'string' ? slide : slide.foto;
+                                        const title = slide.judul || 'Tanpa Judul';
+                                        const sub = slide.subjudul || '';
+                                        return `
+                                            <div class="p-4 border border-gray-200 rounded-2xl bg-white space-y-3 shadow-xs">
+                                                <img src="${imgUrl}" class="w-full h-40 object-cover rounded-xl border">
+                                                <div class="space-y-2">
+                                                    <input type="text" id="slide-edit-title-${idx}" value="${title}" class="w-full p-2 border rounded-lg text-xs font-bold">
+                                                    <input type="text" id="slide-edit-sub-${idx}" value="${sub}" class="w-full p-2 border rounded-lg text-xs text-gray-600">
+                                                    <input type="text" id="slide-edit-foto-${idx}" value="${imgUrl}" class="w-full p-2 border rounded-lg text-xs font-mono">
+                                                    <div class="flex gap-2 pt-1">
+                                                        <button onclick="updateHeroSlide(${idx})" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold">Update Text/Foto</button>
+                                                        <button onclick="removeHeroSlide(${idx})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold">Hapus</button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+                                    }).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'pengurus' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola & Atur Level Hirarki Susunan Pengurus</h3>
+                            
+                            <!-- FORM TAMBAH PENGURUS -->
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Jabatan Pengurus Baru</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <input type="text" id="pengurus-nama" placeholder="Nama Lengkap & Gelar Pengurus..." class="p-3 border rounded-xl text-xs">
+                                    <input type="text" id="pengurus-jabatan" placeholder="Jabatan (Contoh: Pengasuh/Ketua/Bendahara)..." class="p-3 border rounded-xl text-xs">
+                                </div>
+                                
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Level Hirarki Jabatan</label>
+                                        <select id="pengurus-level" class="w-full mt-1 p-3 border rounded-xl text-xs font-bold bg-white">
+                                            <option value="1">Level 1 - Pengasuh / Pembina Utama (Paling Tinggi)</option>
+                                            <option value="2" selected>Level 2 - Pimpinan / Ketua Pengurus (Menengah)</option>
+                                            <option value="3">Level 3 - Bendahara / Anggota / Staf (Bawah)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="text-xs font-bold text-gray-700">Foto Pengurus (Upload / Link URL)</label>
+                                        <div class="flex gap-2 mt-1">
+                                            <input type="text" id="pengurus-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                            <input type="file" id="p-file" onchange="uploadImageFile(this, 'pengurus-foto')" class="hidden">
+                                            <button onclick="document.getElementById('p-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button onclick="addPengurus()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark transition">Simpan Pengurus Baru</button>
+                            </div>
+
+                            <!-- DAFTAR PENGURUS DENGAN EDITING FITUR -->
+                            <div class="space-y-4 pt-4">
+                                <h4 class="font-bold text-xs text-gray-800">Daftar Susunan Pengurus Aktif (Bisa Langsung Edit)</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    ${(DB.pengurusList||[]).map((p, idx) => `
+                                        <div class="p-4 border border-gray-200 rounded-2xl bg-white space-y-3">
+                                            <div class="space-y-2">
+                                                <label class="text-[10px] font-bold text-gray-400">Nama</label>
+                                                <input type="text" id="p-edit-nama-${idx}" value="${p.nama}" class="w-full p-2 border rounded-xl text-xs font-bold">
+                                                <label class="text-[10px] font-bold text-gray-400">Jabatan</label>
+                                                <input type="text" id="p-edit-jabatan-${idx}" value="${p.jabatan}" class="w-full p-2 border rounded-xl text-xs text-nuha-primary font-semibold">
+                                                <label class="text-[10px] font-bold text-gray-400">Level Hirarki</label>
+                                                <select id="p-edit-level-${idx}" class="w-full p-2 border rounded-xl text-xs font-bold bg-gray-50">
+                                                    <option value="1" ${p.level===1?'selected':''}>Level 1 (Utama)</option>
+                                                    <option value="2" ${p.level===2||!p.level?'selected':''}>Level 2 (Ketua)</option>
+                                                    <option value="3" ${p.level===3?'selected':''}>Level 3 (Staf)</option>
+                                                </select>
+                                            </div>
+                                            <div class="flex gap-2">
+                                                <button onclick="updatePengurus(${idx})" class="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Simpan Update</button>
+                                                <button onclick="removePengurus(${idx})" class="px-3 py-2 bg-red-600 text-white rounded-xl text-xs font-bold">Hapus</button>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'gallery' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Galeri Foto & Kegiatan</h3>
+                            
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Foto Galeri Baru</h4>
+                                <input type="text" id="gal-judul" placeholder="Judul Foto Kegiatan..." class="w-full p-3 border rounded-xl text-xs">
+                                <textarea id="gal-ket" placeholder="Keterangan Teks Singkat..." class="w-full p-3 border rounded-xl text-xs" rows="2"></textarea>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">Foto (Upload File / Link Foto)</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="gal-foto" placeholder="Paste Link Foto URL..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="gal-file" onchange="uploadImageFile(this, 'gal-foto')" class="hidden">
+                                        <button onclick="document.getElementById('gal-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload</button>
+                                    </div>
+                                </div>
+                                <button onclick="addGalleryItem()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark transition">Tambah ke Galeri</button>
+                            </div>
+
+                            <!-- DISPLAY GALERI DENGAN DOKUMEN FOTO BEBERAPA -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                                ${(DB.gallery||[]).map((item, idx) => `
+                                    <div class="p-4 border rounded-2xl bg-white space-y-2">
+                                        <img src="${item.foto}" class="h-32 w-full object-cover rounded-xl">
+                                        <h4 class="font-bold text-xs text-gray-900">${item.judul}</h4>
+                                        <p class="text-[10px] text-gray-500">${item.ket || ''}</p>
+                                        <button onclick="removeGallery(${idx})" class="w-full py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold">Hapus Foto</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'pembayaran' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Metode Pembayaran & QRIS</h3>
+                            
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Rekening / QRIS Baru</h4>
+                                <input type="text" id="pay-name" placeholder="Nama Bank / QRIS (Contoh: Bank BSI / QRIS All Payment)..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="text" id="pay-account" placeholder="Nomor Rekening & Atas Nama..." class="w-full p-3 border rounded-xl text-xs">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">Gambar Kode QRIS (Jika Metode QRIS)</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="pay-qr" placeholder="Paste Link Foto QRIS..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="pay-file" onchange="uploadImageFile(this, 'pay-qr')" class="hidden">
+                                        <button onclick="document.getElementById('pay-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl hover:bg-gray-300">Upload QR</button>
+                                    </div>
+                                </div>
+                                <button onclick="addPaymentMethod()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark transition">Simpan Metode Pembayaran</button>
+                            </div>
+
+                            <div class="space-y-3 pt-2">
+                                <h4 class="font-bold text-xs text-gray-800">Metode Pembayaran Aktif di Website</h4>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                    ${(DB.paymentMethods||[]).map((m, idx) => `
+                                        <div class="p-4 border rounded-2xl bg-white space-y-2 flex flex-col justify-between">
+                                            <div>
+                                                <h4 class="font-bold text-xs text-gray-900">${m.name}</h4>
+                                                <p class="text-xs text-nuha-primary font-semibold">${m.account}</p>
+                                                ${m.qrImage ? `<img src="${m.qrImage}" class="h-24 w-24 object-contain mt-2 border p-1 rounded-lg">` : ''}
+                                            </div>
+                                            <button onclick="removePaymentMethod(${idx})" class="w-full py-1.5 bg-red-600 text-white rounded-lg text-xs font-bold">Hapus Rekening</button>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'pengurus' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm">Tambah / Ubah Susunan Pengurus</h3>
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <input type="text" id="pengurus-nama" placeholder="Nama Lengkap & Gelar Pengurus..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="text" id="pengurus-jabatan" placeholder="Jabatan (Contoh: Pengasuh Utama)..." class="w-full p-3 border rounded-xl text-xs">
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">Foto Pengurus (Opsional)</label>
+                                    <div class="flex gap-2">
+                                        <input type="text" id="pengurus-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="p-file" onchange="uploadImageFile(this, 'pengurus-foto')" class="hidden">
+                                        <button onclick="document.getElementById('p-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload Foto</button>
+                                    </div>
+                                </div>
+                                <button onclick="addPengurus()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Tambah Pengurus Baru</button>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                                ${(DB.pengurusList||[]).map((p, idx) => `
+                                    <div class="p-4 border rounded-2xl text-center space-y-2 bg-white">
+                                        <h4 class="font-bold text-xs">${p.nama}</h4>
+                                        <span class="text-[10px] text-emerald-700 font-semibold block">${p.jabatan}</span>
+                                        <button onclick="removePengurus(${idx})" class="text-xs text-red-600 font-bold hover:underline">Hapus</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'program' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm">Kelola Program Unggulan</h3>
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <input type="text" id="prog-judul" placeholder="Judul Program..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="text" id="prog-kat" placeholder="Kategori (Pendidikan/Infrastruktur)..." class="w-full p-3 border rounded-xl text-xs">
+                                <textarea id="prog-desc" placeholder="Deskripsi Singkat..." class="w-full p-3 border rounded-xl text-xs"></textarea>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <input type="number" id="prog-target" placeholder="Target Dana (Rp)..." class="p-3 border rounded-xl text-xs">
+                                    <input type="number" id="prog-terkumpul" placeholder="Terkumpul (Rp)..." class="p-3 border rounded-xl text-xs">
+                                </div>
+                                <div class="flex gap-2">
+                                    <input type="text" id="prog-foto" placeholder="URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                    <input type="file" id="prog-file" onchange="uploadImageFile(this, 'prog-foto')" class="hidden">
+                                    <button onclick="document.getElementById('prog-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload Foto</button>
+                                </div>
+                                <button onclick="addProgram()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Simpan Program</button>
+                            </div>
+                        </div>
+                    ` : ''}
+
+                    ${adminState.adminSubTab === 'berita' ? `
+                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
+                            <h3 class="font-bold text-sm">Kelola Berita & Embed Media (TikTok/YT/IG/FB)</h3>
+                            <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
+                                <input type="text" id="news-judul" placeholder="Judul Berita..." class="w-full p-3 border rounded-xl text-xs">
+                                <textarea id="news-ringkasan" placeholder="Ringkasan Berita..." class="w-full p-3 border rounded-xl text-xs"></textarea>
+                                <input type="text" id="news-embed" placeholder="Link Media Embed (TikTok, YouTube, IG, FB)..." class="w-full p-3 border rounded-xl text-xs">
+                                <div class="flex gap-2">
+                                    <input type="text" id="news-foto" placeholder="URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                    <input type="file" id="news-file" onchange="uploadImageFile(this, 'news-foto')" class="hidden">
+                                    <button onclick="document.getElementById('news-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload Foto</button>
+                                </div>
+                                <button onclick="addNews()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Simpan Berita</button>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+            return container;
         }
 
-        const newId = `TRX-${Math.floor(10000 + Math.random() * 90000)}`;
-        const donorName = form.donorName.trim() || 'Hamba Allah';
-        const progTitle = form.programTitle || 'Infaq Umum';
-        const selectedDateISO = form.transactionDate ? new Date(form.transactionDate).toISOString() : new Date().toISOString();
-
-        const newDonation = {
-          id: newId,
-          donorName: donorName,
-          phone: '',
-          amount: cleanAmount,
-          programTitle: progTitle,
-          paymentMethod: 'Manual / Tunai',
-          status: 'Terverifikasi',
-          created_at: selectedDateISO,
-          notes: 'Input Manual Admin'
-        };
-
-        setDonations(prev => [newDonation, ...prev].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)));
-
-        if (setPrograms) {
-          setPrograms(prev => prev.map(p => {
-            if (p.title === progTitle) {
-              return { ...p, currentAmount: (p.currentAmount || 0) + cleanAmount };
+        // HELPER READ FILE TO BASE64 DATA URL
+        function uploadImageFile(inputEl, targetId) {
+            if (inputEl.files && inputEl.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const target = document.getElementById(targetId);
+                    if (target) target.value = e.target.result;
+                };
+                reader.readAsDataURL(inputEl.files[0]);
             }
-            return p;
-          }));
         }
 
-        setShowAddModal(false);
-        setForm({ 
-          donorName: '', 
-          programTitle: programs && programs[0] ? programs[0].title : 'Infaq Umum', 
-          amount: '', 
-          transactionDate: getCurrentDateTimeLocal() 
-        });
-        showNotification("Data infaq manual berhasil ditambahkan!");
+        function setAdminTab(tab) {
+            adminState.adminSubTab = tab;
+            renderAdminApp();
+        }
 
-        const client = getSupabase ? getSupabase() : null;
-        if (client) {
-          try {
-            await client.from('donations').insert([{
-              id: newId,
-              donor_name: donorName,
-              amount: cleanAmount,
-              program_title: progTitle,
-              payment_method: 'Manual / Tunai',
-              status: 'Terverifikasi',
-              created_at: selectedDateISO,
-              notes: 'Input Manual Admin'
-            }]);
+        function saveWebsiteSettings() {
+            DB.settings.siteName = document.getElementById('set-site-name')?.value || DB.settings.siteName;
+            DB.settings.phone = document.getElementById('set-phone')?.value || DB.settings.phone;
+            DB.settings.siteLogo = document.getElementById('set-logo-url')?.value || DB.settings.siteLogo;
+            DB.settings.isLocked = document.getElementById('set-is-locked')?.checked || false;
+            DB.settings.disableDonations = document.getElementById('set-disable-donations')?.checked || false;
+            DB.settings.lockMessage = document.getElementById('set-lock-msg')?.value || DB.settings.lockMessage;
+            
+            DB.settings.socials = {
+                whatsapp: document.getElementById('soc-wa')?.value || '',
+                instagram: document.getElementById('soc-ig')?.value || '',
+                youtube: document.getElementById('soc-yt')?.value || '',
+                tiktok: document.getElementById('soc-tiktok')?.value || '',
+                facebook: document.getElementById('soc-fb')?.value || ''
+            };
 
-            const { data: currentProg } = await client
-              .from('programs')
-              .select('id, current_amount')
-              .eq('title', progTitle)
-              .maybeSingle();
+            saveDB();
+            alert('Pengaturan Website Berhasil Diperbarui!');
+            renderAdminApp();
+        }
 
-            if (currentProg) {
-              await client
-                .from('programs')
-                .update({ current_amount: (Number(currentProg.current_amount) || 0) + cleanAmount })
-                .eq('id', currentProg.id);
+        function addHeroSlide() {
+            const url = document.getElementById('new-slide-url')?.value.trim();
+            const title = document.getElementById('new-slide-title')?.value.trim();
+            const sub = document.getElementById('new-slide-sub')?.value.trim();
+            if (url) {
+                if(!DB.heroSlides) DB.heroSlides = [];
+                DB.heroSlides.push({ id: Date.now(), foto: url, judul: title, subjudul: sub });
+                saveDB();
+                alert('Foto Slide Hero berhasil ditambahkan!');
+                renderAdminApp();
             }
-          } catch (err) {
-            console.warn("Gagal simpan transaksi manual ke Supabase:", err);
-          }
         }
-      };
 
-      const filteredDonations = useMemo(() => {
-        if (!searchQuery.trim()) return donations;
-        const q = searchQuery.toLowerCase();
-        return donations.filter(d => 
-          d.donorName.toLowerCase().includes(q) || 
-          d.programTitle.toLowerCase().includes(q) ||
-          d.id.toLowerCase().includes(q)
-        );
-      }, [donations, searchQuery]);
-
-      return (
-        <div className="space-y-6 animate-fade-in">
-          <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Riwayat Transaksi Infaq</h2>
-              <p className="text-xs text-slate-500">Seluruh data donasi masuk yang tercatat pada sistem.</p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="relative w-full sm:w-64">
-                <span className="absolute left-3.5 top-3 text-slate-400"><Icons.Search /></span>
-                <input 
-                  type="text" 
-                  placeholder="Cari ID, Nama, atau Program..." 
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#1F5946]"
-                />
-              </div>
-
-              <button
-                onClick={handleOpenModal}
-                className="inline-flex items-center space-x-2 bg-[#1F5946] text-white px-4 py-2.5 rounded-2xl text-xs font-bold shadow-md hover:bg-[#174435] transition"
-              >
-                <Icons.Plus />
-                <span>Tambah Infaq Manual</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100 text-slate-500 font-bold uppercase tracking-wider text-[10px]">
-                    <th className="py-4 px-6">ID TRX</th>
-                    <th className="py-4 px-6">TANGGAL & WAKTU</th>
-                    <th className="py-4 px-6">DONATUR</th>
-                    <th className="py-4 px-6">PROGRAM TUJUAN</th>
-                    <th className="py-4 px-6 text-right">NOMINAL</th>
-                    <th className="py-4 px-6">METODE</th>
-                    <th className="py-4 px-6 text-center">STATUS</th>
-                    <th className="py-4 px-6 text-center">AKSI</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                  {filteredDonations.length === 0 ? (
-                    <tr>
-                      <td colSpan="8" className="py-12 text-center text-slate-400 italic">
-                        Belum ada riwayat transaksi infaq.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredDonations.map((d) => (
-                      <tr key={d.id} className="hover:bg-slate-50/80 transition">
-                        <td className="py-4 px-6 font-mono font-bold text-[#1F5946]">{d.id}</td>
-                        <td className="py-4 px-6 text-slate-500 text-[11px]">
-                          {d.created_at ? new Date(d.created_at).toLocaleString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'}
-                        </td>
-                        <td className="py-4 px-6 font-bold text-slate-900">{d.donorName}</td>
-                        <td className="py-4 px-6 text-slate-600">{d.programTitle}</td>
-                        <td className="py-4 px-6 text-right font-bold text-[#1F5946] text-sm">{formatIDR(d.amount)}</td>
-                        <td className="py-4 px-6 text-slate-500">{d.paymentMethod}</td>
-                        <td className="py-4 px-6 text-center">
-                          <span className="px-2.5 py-1 bg-emerald-50 text-emerald-800 font-bold rounded-full text-[10px] border border-emerald-200">
-                            {d.status}
-                          </span>
-                        </td>
-                        <td className="py-4 px-6 text-center">
-                          <button 
-                            onClick={() => setDeleteModal({ isOpen: true, type: 'infaq', id: d.id, title: `Transaksi ${d.id}` })}
-                            className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg transition"
-                          >
-                            <Icons.Trash />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          {/* Modal Tambah Infaq Manual */}
-          {showAddModal && (
-            <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
-              <div className="bg-white w-full max-w-md rounded-3xl p-6 sm:p-8 shadow-2xl border border-slate-100">
-                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
-                  <h3 className="text-lg font-bold text-slate-900">Tambah Data Infaq Manual</h3>
-                  <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 text-sm font-bold">Tutup</button>
-                </div>
-
-                <form onSubmit={handleAddManualInfaq} className="space-y-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Tanggal & Waktu Transaksi</label>
-                    <input 
-                      type="datetime-local" 
-                      required
-                      value={form.transactionDate}
-                      onChange={(e) => setForm({ ...form, transactionDate: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    />
-                    <p className="text-[10px] text-slate-400 mt-1">Anda dapat menyesuaikan tanggal dan jam transaksi (bisa untuk pencatatan infaq lampau).</p>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nama Donatur</label>
-                    <input 
-                      type="text" 
-                      placeholder="Contoh: H. Ahmad Subarkah (Kosongkan = Hamba Allah)"
-                      value={form.donorName}
-                      onChange={(e) => setForm({ ...form, donorName: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Program Tujuan</label>
-                    <select
-                      value={form.programTitle}
-                      onChange={(e) => setForm({ ...form, programTitle: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    >
-                      {programs && programs.length > 0 ? (
-                        programs.map(p => (
-                          <option key={p.id} value={p.title}>{p.title}</option>
-                        ))
-                      ) : (
-                        <option value="Infaq Umum">Infaq Umum</option>
-                      )}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Nominal Infaq (Rp)</label>
-                    <input 
-                      type="text" 
-                      required
-                      placeholder="Contoh: 100.000"
-                      value={formatThousand(form.amount)}
-                      onChange={(e) => setForm({ ...form, amount: e.target.value })}
-                      className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                    />
-                  </div>
-
-                  <div className="flex justify-end space-x-3 pt-3">
-                    <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-xs font-bold">Batal</button>
-                    <button type="submit" className="px-6 py-2.5 bg-[#1F5946] text-white rounded-xl text-xs font-bold shadow-md">Simpan Data</button>
-                  </div>
-                </form>
-              </div>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    function AiAssistantView({ programs, showNotification }) {
-      const [aiTopic, setAiTopic] = useState("");
-      const [selectedProgTitle, setSelectedProgTitle] = useState(programs[0]?.title || "");
-      const [inputInstruction, setInputInstruction] = useState("");
-      const [isGenerating, setIsGenerating] = useState(false);
-      const chatEndRef = useRef(null);
-
-      const [chatMessages, setChatMessages] = useState([
-        {
-          id: 'welcome-msg',
-          sender: 'ai',
-          text: 'Assalamu\'alaikum! Saya adalah Asisten Amil AI Lembaga Infaq Nurul Hayah. Silakan pilih program atau tuliskan instruksi pembuatan konten promosi, pesan broadcast WA, caption medsos, atau laporan penyaluran infaq tanpa emoji.',
-          timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+        function updateHeroSlide(idx) {
+            const title = document.getElementById(`slide-edit-title-${idx}`)?.value;
+            const sub = document.getElementById(`slide-edit-sub-${idx}`)?.value;
+            const foto = document.getElementById(`slide-edit-foto-${idx}`)?.value;
+            if (DB.heroSlides && DB.heroSlides[idx]) {
+                DB.heroSlides[idx] = { id: Date.now(), foto: foto, judul: title, subjudul: sub };
+                saveDB();
+                alert('Slide Hero berhasil di-update!');
+                renderAdminApp();
+            }
         }
-      ]);
 
-      useEffect(() => {
-        chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-      }, [chatMessages, isGenerating]);
-
-      const copyToClipboard = (textToCopy) => {
-        const textarea = document.createElement('textarea');
-        textarea.value = textToCopy;
-        document.body.appendChild(textarea);
-        textarea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textarea);
-        showNotification("Teks disalin ke clipboard!");
-      };
-
-      const handleSendInstruction = async (overridePrompt) => {
-        const promptToUse = overridePrompt || inputInstruction.trim() || (aiTopic ? `Buat tulisan ajakan infaq untuk program ${aiTopic}` : `Buat pesan ajakan infaq umum untuk Lembaga Infaq Nurul Hayah`);
-        if (!promptToUse) return;
-
-        const userMsg = {
-          id: `usr-${Date.now()}`,
-          sender: 'user',
-          text: promptToUse,
-          timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-        };
-
-        setChatMessages(prev => [...prev, userMsg]);
-        setInputInstruction("");
-        setIsGenerating(true);
-
-        try {
-          const targetProgram = programs.find(p => p.title === (aiTopic || selectedProgTitle));
-          const progDetails = targetProgram 
-            ? `\nDetail Program:\n- Judul: ${targetProgram.title}\n- Kategori: ${targetProgram.category}\n- Deskripsi: ${targetProgram.description}\n- Target Dana: ${formatIDR(targetProgram.targetAmount)}\n- Penerima Manfaat: ${targetProgram.beneficiaries} Jiwa` 
-            : '';
-
-          const systemPrompt = `Anda adalah Asisten Amil AI resmi Lembaga Infaq Nurul Hayah.
-Tugas Anda: Membuat narasi, ajakan infaq, broadcast WhatsApp, caption media sosial (IG/Facebook/TikTok), atau deskripsi program yang islami, santun, transparan, akuntabel, dan sangat persuasif.
-ATURAN KHUSUS (MANDATORI):
-1. JANGAN PERNAH MENGGUNAKAN EMOJI SAMA SEKALI dalam seluruh teks hasil karya Anda. Gunakan Bahasa Indonesia yang baku, indah, serta menyentuh hati.
-2. Cantumkan nama lembaga: Lembaga Infaq Nurul Hayah.
-3. Gunakan sapaan islami (Assalamu'alaikum Warahmatullahi Wabarakatuh, Semoga Allah memberkahi, dsb).`;
-
-          const fullQuery = `${promptToUse}${progDetails}`;
-          const apiKey = ""; // API key managed automatically in runtime
-          const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
-
-          const payload = {
-            contents: [{ parts: [{ text: fullQuery }] }],
-            systemInstruction: { parts: [{ text: systemPrompt }] }
-          };
-
-          const response = await fetch(apiUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-          });
-
-          const result = await response.json();
-          const candidateText = result?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-          const aiReply = candidateText || "Mohon maaf, sistem Amil AI sedang sibuk. Silakan ulangi permintaan Anda.";
-
-          setChatMessages(prev => [...prev, {
-            id: `ai-${Date.now()}`,
-            sender: 'ai',
-            text: aiReply,
-            timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-          }]);
-        } catch (err) {
-          console.error("AI Generation error:", err);
-          setChatMessages(prev => [...prev, {
-            id: `err-${Date.now()}`,
-            sender: 'ai',
-            text: "Mohon maaf, terjadi kendala koneksi ke server Amil AI. Silakan periksa jaringan Anda dan coba lagi.",
-            timestamp: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
-          }]);
-        } finally {
-          setIsGenerating(false);
+        function removeHeroSlide(index) {
+            DB.heroSlides.splice(index, 1);
+            saveDB();
+            renderAdminApp();
         }
-      };
 
-      const handleQuickPrompt = (type) => {
-        const topic = aiTopic || selectedProgTitle || "Infaq Santri & Dhuafa";
-        let prompt = "";
-        if (type === 'wa_broadcast') {
-          prompt = `Buatlah teks Broadcast WhatsApp ajakan berinfaq untuk program "${topic}". Format dengan ucapan salam, poin penting keberkahan, penjelasan singkat program, serta nomor kontak layanan amil WhatsApp.`;
-        } else if (type === 'social_caption') {
-          prompt = `Buatlah Caption Media Sosial (Instagram/Facebook) yang inspiratif untuk program "${topic}". Sertakan hashtag islami yang relevan tanpa emoji.`;
-        } else if (type === 'program_desc') {
-          prompt = `Buatlah Deskripsi Lengkap & Narasi Penggalangan Dana untuk ditaruh pada halaman website program "${topic}".`;
-        } else if (type === 'report_summary') {
-          prompt = `Buatlah teks Laporan Singkat Penyaluran Infaq untuk disampaikan kepada donatur sebagai bentuk transparansi dan akuntabilitas.`;
+        function addPengurus() {
+            const nama = document.getElementById('pengurus-nama')?.value.trim();
+            const jabatan = document.getElementById('pengurus-jabatan')?.value.trim();
+            const level = parseInt(document.getElementById('pengurus-level')?.value || 2);
+            const foto = document.getElementById('pengurus-foto')?.value.trim();
+            if (nama && jabatan) {
+                if(!DB.pengurusList) DB.pengurusList = [];
+                DB.pengurusList.push({ id: Date.now(), nama: nama, jabatan: jabatan, foto: foto, level: level });
+                saveDB();
+                renderAdminApp();
+            }
         }
-        handleSendInstruction(prompt);
-      };
 
-      return (
-        <div className="space-y-6 animate-fade-in">
-          <div className="bg-white p-5 rounded-3xl border border-slate-100 shadow-sm space-y-4">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center">
-                <Icons.AiMagic />
-              </div>
-              <div>
-                <h2 className="text-base font-bold text-slate-900">Amil AI Generator</h2>
-                <p className="text-xs text-slate-400">Pilih program & buat konten promosi infaq dengan mudah.</p>
-              </div>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Pilih Program Terdaftar</label>
-                <select
-                  value={selectedProgTitle}
-                  onChange={(e) => { setSelectedProgTitle(e.target.value); setAiTopic(e.target.value); }}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                >
-                  <option value="">-- Pilih Program --</option>
-                  {programs.map(p => (
-                    <option key={p.id} value={p.title}>{p.title}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Atau Tuliskan Topik Kustom</label>
-                <input 
-                  type="text" 
-                  placeholder="Misal: Sedekah Subuh Santri Hafiz"
-                  value={aiTopic}
-                  onChange={(e) => setAiTopic(e.target.value)}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                />
-              </div>
-            </div>
-
-            <div className="pt-2 border-t border-slate-100">
-              <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">Instruksi Cepat (Quick Action)</label>
-              <div className="flex flex-wrap gap-2">
-                <button onClick={() => handleQuickPrompt('wa_broadcast')} className="px-3 py-1.5 bg-emerald-50 text-[#1F5946] hover:bg-emerald-100 rounded-xl text-xs font-bold border border-emerald-200 transition">
-                  Pesan Broadcast WA
-                </button>
-                <button onClick={() => handleQuickPrompt('social_caption')} className="px-3 py-1.5 bg-amber-50 text-amber-800 hover:bg-amber-100 rounded-xl text-xs font-bold border border-amber-200 transition">
-                  Caption Medsos (IG/FB)
-                </button>
-                <button onClick={() => handleQuickPrompt('program_desc')} className="px-3 py-1.5 bg-blue-50 text-blue-800 hover:bg-blue-100 rounded-xl text-xs font-bold border border-blue-200 transition">
-                  Deskripsi Detail Program
-                </button>
-                <button onClick={() => handleQuickPrompt('report_summary')} className="px-3 py-1.5 bg-purple-50 text-purple-800 hover:bg-purple-100 rounded-xl text-xs font-bold border border-purple-200 transition">
-                  Laporan Penyaluran
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden flex flex-col h-[520px]">
-            <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center text-xs font-bold text-slate-700">
-              <span>Ruang Diskusi Amil AI</span>
-              <span className="text-[10px] text-slate-400 font-normal">Bebas Emoji • Bahasa Amanah</span>
-            </div>
-
-            <div className="flex-1 p-4 sm:p-6 overflow-y-auto space-y-4">
-              {chatMessages.map(msg => (
-                <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-                  <div className={`max-w-[85%] rounded-2xl p-4 text-xs font-medium leading-relaxed shadow-sm ${
-                    msg.sender === 'user' ? 'bg-[#1F5946] text-white rounded-br-none' : 'bg-slate-100 text-slate-800 rounded-bl-none border border-slate-200'
-                  }`}>
-                    <div className="whitespace-pre-wrap">{msg.text}</div>
-                    {msg.sender === 'ai' && (
-                      <button onClick={() => copyToClipboard(msg.text)} className="mt-3 inline-flex items-center space-x-1 px-2.5 py-1 bg-white border border-slate-200 text-slate-700 text-[10px] font-bold rounded-lg hover:bg-slate-50 transition">
-                        <Icons.Copy />
-                        <span>Salin Teks</span>
-                      </button>
-                    )}
-                  </div>
-                  <span className="text-[9.5px] text-slate-400 mt-1 px-1">{msg.timestamp}</span>
-                </div>
-              ))}
-
-              {isGenerating && (
-                <div className="flex items-center space-x-2 text-xs font-semibold text-[#1F5946] bg-emerald-50 p-3 rounded-2xl w-max border border-emerald-200 animate-pulse">
-                  <span className="w-2 h-2 rounded-full bg-[#1F5946] animate-ping"></span>
-                  <span>Amil AI sedang menyusun teks...</span>
-                </div>
-              )}
-              <div ref={chatEndRef} />
-            </div>
-
-            <div className="p-3 bg-slate-50 border-t border-slate-100">
-              <form onSubmit={(e) => { e.preventDefault(); handleSendInstruction(); }} className="flex items-center space-x-2">
-                <input 
-                  type="text" 
-                  placeholder="Ketik instruksi khusus untuk Amil AI (misal: 'Buat ajakan infaq singkat 2 paragraf')..." 
-                  value={inputInstruction}
-                  onChange={(e) => setInputInstruction(e.target.value)}
-                  disabled={isGenerating}
-                  className="flex-1 px-4 py-2.5 bg-white border border-slate-200 rounded-2xl text-xs font-medium outline-none focus:ring-2 focus:ring-[#1F5946] disabled:opacity-50"
-                />
-                <button
-                  type="submit"
-                  disabled={isGenerating || !inputInstruction.trim()}
-                  className="px-5 py-2.5 bg-[#1F5946] hover:bg-[#174435] text-white rounded-2xl text-xs font-bold shadow-md transition disabled:opacity-50 flex items-center space-x-1.5"
-                >
-                  <Icons.Send />
-                  <span>Kirim</span>
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    function HeroSlideEditorView({ slides, setSlides, activeSlideIdx, setActiveSlideIdx, showNotification, getSupabase }) {
-      const currentSlide = slides[activeSlideIdx] || slides[0] || {};
-
-      const updateCurrentSlide = (fields) => {
-        setSlides(prev => prev.map((s, idx) => idx === activeSlideIdx ? { ...s, ...fields } : s));
-      };
-
-      const handleAddSlide = () => {
-        const newSlide = {
-          id: slides.length + 1,
-          bg_image: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1600&q=80",
-          overlay_opacity: 0.55,
-          title: "Judul Slide Baru",
-          title_pos_x: 50,
-          title_pos_y: 38,
-          title_size: 28,
-          title_color: "#ffffff",
-          title_align: "center",
-          subtitle: "Deskripsi singkat untuk slide baru ini.",
-          subtitle_pos_x: 50,
-          subtitle_pos_y: 62,
-          subtitle_size: 13,
-          subtitle_color: "#f1f5f9",
-          subtitle_align: "center"
-        };
-        setSlides(prev => [...prev, newSlide]);
-        setActiveSlideIdx(slides.length);
-        showNotification("Slide baru berhasil ditambahkan!");
-      };
-
-      const handleDeleteSlide = () => {
-        if (slides.length <= 1) {
-          showNotification("Minimal harus ada 1 slide hero!");
-          return;
+        function updatePengurus(idx) {
+            const nama = document.getElementById(`p-edit-nama-${idx}`)?.value;
+            const jabatan = document.getElementById(`p-edit-jabatan-${idx}`)?.value;
+            const level = parseInt(document.getElementById(`p-edit-level-${idx}`)?.value || 2);
+            if (DB.pengurusList && DB.pengurusList[idx]) {
+                DB.pengurusList[idx].nama = nama;
+                DB.pengurusList[idx].jabatan = jabatan;
+                DB.pengurusList[idx].level = level;
+                saveDB();
+                alert('Pengurus berhasil diperbarui!');
+                renderAdminApp();
+            }
         }
-        const updated = slides.filter((_, idx) => idx !== activeSlideIdx);
-        setSlides(updated);
-        setActiveSlideIdx(Math.max(0, activeSlideIdx - 1));
-        showNotification("Slide berhasil dihapus!");
-      };
 
-      const handleFileUpload = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          updateCurrentSlide({ bg_image: reader.result });
-          showNotification("Gambar background berhasil diunggah!");
-        };
-        reader.readAsDataURL(file);
-      };
-
-      const handleSaveAllSlides = async () => {
-        showNotification("Menyimpan slide hero ke database...");
-        const client = getSupabase();
-        if (client) {
-          try {
-            await client.from('hero_slides').delete().neq('id', 0);
-            await client.from('hero_slides').insert(slides.map((s, i) => ({
-              id: i + 1,
-              bg_image: s.bg_image,
-              overlay_opacity: s.overlay_opacity,
-              title: s.title,
-              title_pos_x: s.title_pos_x,
-              title_pos_y: s.title_pos_y,
-              title_size: s.title_size,
-              title_color: s.title_color,
-              title_align: s.title_align,
-              subtitle: s.subtitle,
-              subtitle_pos_x: s.subtitle_pos_x,
-              subtitle_pos_y: s.subtitle_pos_y,
-              subtitle_size: s.subtitle_size,
-              subtitle_color: s.subtitle_color,
-              subtitle_align: s.subtitle_align
-            })));
-          } catch (e) {
-            console.warn("Gagal simpan ke Supabase:", e);
-          }
+        function removePengurus(idx) {
+            DB.pengurusList.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
         }
-        showNotification("Slide Hero berhasil dikunci & disimpan!");
-      };
 
-      return (
-        <div className="space-y-6 animate-fade-in">
-          {/* Bar Kontrol Navigasi Slide */}
-          <div className="bg-white p-4 rounded-3xl border border-slate-100 shadow-sm flex flex-wrap items-center justify-between gap-3">
-            <div className="flex flex-wrap items-center gap-2">
-              {slides.map((s, idx) => (
-                <button 
-                  key={idx} 
-                  onClick={() => setActiveSlideIdx(idx)} 
-                  className={`px-4 py-2 rounded-2xl text-xs font-bold transition flex items-center space-x-1.5 ${
-                    idx === activeSlideIdx ? 'bg-[#1F5946] text-white shadow-md' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                  }`}
-                >
-                  <span>Slide #{idx + 1}</span>
-                </button>
-              ))}
-              
-              <button
-                onClick={handleAddSlide}
-                className="px-3.5 py-2 rounded-2xl text-xs font-bold bg-emerald-50 text-[#1F5946] hover:bg-emerald-100 transition flex items-center space-x-1 border border-emerald-200"
-              >
-                <Icons.Plus />
-                <span>Tambah Slide</span>
-              </button>
-            </div>
+        function addGalleryItem() {
+            const judul = document.getElementById('gal-judul')?.value;
+            const ket = document.getElementById('gal-ket')?.value;
+            const foto = document.getElementById('gal-foto')?.value;
 
-            <div className="flex items-center space-x-2">
-              {slides.length > 1 && (
-                <button
-                  onClick={handleDeleteSlide}
-                  className="px-4 py-2 bg-red-50 hover:bg-red-100 text-red-600 rounded-2xl text-xs font-bold transition flex items-center space-x-1 border border-red-200"
-                >
-                  <Icons.Trash />
-                  <span>Hapus Slide Ini</span>
-                </button>
-              )}
+            if (judul && foto) {
+                if(!DB.gallery) DB.gallery = [];
+                DB.gallery.unshift({
+                    id: Date.now(), judul, ket, foto, tanggal: new Date().toISOString().split('T')[0]
+                });
+                saveDB();
+                alert('Foto galeri berhasil disimpan!');
+                renderAdminApp();
+            }
+        }
 
-              <button
-                onClick={handleSaveAllSlides}
-                className="px-5 py-2.5 bg-[#B89355] hover:bg-[#a37e43] text-white rounded-2xl text-xs font-extrabold shadow-md flex items-center space-x-2 transition"
-              >
-                <Icons.Save />
-                <span>Simpan Semua Slide</span>
-              </button>
-            </div>
-          </div>
+        function removeGallery(idx) {
+            DB.gallery.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
 
-          {/* Pratinjau Langsung (Live Preview) */}
-          <div className="bg-slate-900 rounded-3xl overflow-hidden shadow-2xl relative border-4 border-slate-800">
-            <div className="p-3 bg-slate-950 text-slate-400 text-[10.5px] font-bold flex justify-between items-center border-b border-slate-800">
-              <span>Pratinjau Langsung Slide #{activeSlideIdx + 1}</span>
-              <span className="text-emerald-400 font-mono">16:9 Aspect Preview</span>
-            </div>
+        function addPaymentMethod() {
+            const name = document.getElementById('pay-name')?.value;
+            const account = document.getElementById('pay-account')?.value;
+            const qrImage = document.getElementById('pay-qr')?.value;
 
-            <div className="relative h-72 sm:h-96 w-full overflow-hidden bg-slate-950 select-none">
-              <img 
-                src={currentSlide.bg_image} 
-                alt="Slide Preview"
-                className="w-full h-full object-cover"
-                onError={(e) => { e.target.src = "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1600&q=80"; }}
-              />
-              <div 
-                className="absolute inset-0 bg-black pointer-events-none transition-opacity"
-                style={{ opacity: currentSlide.overlay_opacity ?? 0.55 }}
-              ></div>
+            if (name && account) {
+                if(!DB.paymentMethods) DB.paymentMethods = [];
+                DB.paymentMethods.push({ id: Date.now(), name, account, qrImage, active: true });
+                saveDB();
+                alert('Metode Pembayaran Berhasil Ditambahkan!');
+                renderAdminApp();
+            }
+        }
 
-              <div className="absolute inset-0 pointer-events-none">
-                {/* Judul Live */}
-                {currentSlide.title && (
-                  <div
-                    className="absolute transform -translate-x-1/2 -translate-y-1/2 p-2 w-11/12 max-w-2xl"
-                    style={{
-                      left: `${currentSlide.title_pos_x ?? 50}%`,
-                      top: `${currentSlide.title_pos_y ?? 38}%`,
-                      textAlign: currentSlide.title_align || 'center'
-                    }}
-                  >
-                    <h2 
-                      className="font-black drop-shadow-md leading-tight"
-                      style={{
-                        fontSize: `${Math.max(14, (currentSlide.title_size || 28) * 0.8)}px`,
-                        color: currentSlide.title_color || '#ffffff'
-                      }}
-                    >
-                      {currentSlide.title}
-                    </h2>
-                  </div>
-                )}
+        function removePaymentMethod(idx) {
+            DB.paymentMethods.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
 
-                {/* Subtitle Live */}
-                {currentSlide.subtitle && (
-                  <div
-                    className="absolute transform -translate-x-1/2 -translate-y-1/2 p-2 w-11/12 max-w-xl"
-                    style={{
-                      left: `${currentSlide.subtitle_pos_x ?? 50}%`,
-                      top: `${currentSlide.subtitle_pos_y ?? 62}%`,
-                      textAlign: currentSlide.subtitle_align || 'center'
-                    }}
-                  >
-                    <p 
-                      className="font-medium drop-shadow leading-relaxed"
-                      style={{
-                        fontSize: `${Math.max(10, (currentSlide.subtitle_size || 13) * 0.85)}px`,
-                        color: currentSlide.subtitle_color || '#f1f5f9'
-                      }}
-                    >
-                      {currentSlide.subtitle}
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+        function addPengurus() {
+            const nama = document.getElementById('pengurus-nama')?.value.trim();
+            const jabatan = document.getElementById('pengurus-jabatan')?.value.trim();
+            const foto = document.getElementById('pengurus-foto')?.value.trim();
+            if (nama && jabatan) {
+                if(!DB.pengurusList) DB.pengurusList = [];
+                DB.pengurusList.push({ id: Date.now(), nama: nama, jabatan: jabatan, foto: foto });
+                saveDB();
+                renderAdminApp();
+            }
+        }
 
-          {/* Form Editor Parameter Lengkap */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Background & Overlay */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
-              <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#1F5946]"></span>
-                <span>1. Background & Karakter Visual Slide</span>
-              </h3>
+        function removePengurus(idx) {
+            DB.pengurusList.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Unggah Gambar Background</label>
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="w-full text-xs text-slate-500 mb-2 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-[#1F5946] hover:file:bg-emerald-100 cursor-pointer"
-                />
-                <label className="block text-[11px] font-bold text-slate-500 uppercase mt-2 mb-1">Atau Gunakan Link / URL Gambar</label>
-                <input 
-                  type="text" 
-                  placeholder="https://images.unsplash.com/..."
-                  value={currentSlide.bg_image || ''}
-                  onChange={(e) => updateCurrentSlide({ bg_image: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                />
-              </div>
+        function addProgram() {
+            const judul = document.getElementById('prog-judul')?.value;
+            const kat = document.getElementById('prog-kat')?.value;
+            const desc = document.getElementById('prog-desc')?.value;
+            const target = parseFloat(document.getElementById('prog-target')?.value || 0);
+            const terkumpul = parseFloat(document.getElementById('prog-terkumpul')?.value || 0);
+            const foto = document.getElementById('prog-foto')?.value;
 
-              <div>
-                <div className="flex justify-between items-center mb-1">
-                  <label className="text-xs font-bold text-slate-700 uppercase">Kegelapan Overlay (Dimmer)</label>
-                  <span className="text-xs font-mono font-bold text-[#1F5946]">{Math.round((currentSlide.overlay_opacity ?? 0.55) * 100)}%</span>
-                </div>
-                <input 
-                  type="range" 
-                  min="0" 
-                  max="1" 
-                  step="0.05"
-                  value={currentSlide.overlay_opacity ?? 0.55}
-                  onChange={(e) => updateCurrentSlide({ overlay_opacity: parseFloat(e.target.value) })}
-                  className="w-full accent-[#1F5946] cursor-pointer"
-                />
-                <p className="text-[10.5px] text-slate-400 mt-1">Makin tinggi persentase, latar belakang makin gelap agar teks terbaca jelas.</p>
-              </div>
-            </div>
+            if (judul) {
+                DB.programs.unshift({
+                    id: Date.now(), judul, kategori: kat, deskripsi: desc, target, terkumpul, foto
+                });
+                saveDB();
+                alert('Program berhasil ditambahkan!');
+                renderAdminApp();
+            }
+        }
 
-            {/* Pengaturan Judul */}
-            <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
-              <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#B89355]"></span>
-                <span>2. Pengaturan Judul Utama (Title)</span>
-              </h3>
+        function addNews() {
+            const judul = document.getElementById('news-judul')?.value;
+            const ringkasan = document.getElementById('news-ringkasan')?.value;
+            const embedUrl = document.getElementById('news-embed')?.value;
+            const foto = document.getElementById('news-foto')?.value;
 
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Teks Judul</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Tuliskan judul utama slide..."
-                  value={currentSlide.title || ''}
-                  onChange={(e) => updateCurrentSlide({ title: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                ></textarea>
-              </div>
+            if (judul) {
+                DB.news.unshift({
+                    id: Date.now(), judul, ringkasan, embedUrl, foto, tanggal: new Date().toISOString().split('T')[0]
+                });
+                saveDB();
+                alert('Berita berhasil ditambahkan!');
+                renderAdminApp();
+            }
+        }
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi X (%)</label>
-                    <span className="text-xs font-mono text-slate-500">{currentSlide.title_pos_x ?? 50}%</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="90" 
-                    value={currentSlide.title_pos_x ?? 50}
-                    onChange={(e) => updateCurrentSlide({ title_pos_x: parseInt(e.target.value) })}
-                    className="w-full accent-[#1F5946] cursor-pointer"
-                  />
-                </div>
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi Y (%)</label>
-                    <span className="text-xs font-mono text-slate-500">{currentSlide.title_pos_y ?? 38}%</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="90" 
-                    value={currentSlide.title_pos_y ?? 38}
-                    onChange={(e) => updateCurrentSlide({ title_pos_y: parseInt(e.target.value) })}
-                    className="w-full accent-[#1F5946] cursor-pointer"
-                  />
-                </div>
-              </div>
+        function logoutAdmin() {
+            adminState.isLoggedIn = false;
+            sessionStorage.removeItem('NUHA_ADMIN_AUTH');
+            renderAdminApp();
+        }
 
-              <div className="grid grid-cols-3 gap-3 items-center">
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Ukuran Font (px)</label>
-                  <input 
-                    type="number" 
-                    min="14" 
-                    max="60"
-                    value={currentSlide.title_size || 28}
-                    onChange={(e) => updateCurrentSlide({ title_size: parseInt(e.target.value) || 28 })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Warna Teks</label>
-                  <div className="flex items-center space-x-2">
-                    <input 
-                      type="color" 
-                      value={currentSlide.title_color || '#ffffff'}
-                      onChange={(e) => updateCurrentSlide({ title_color: e.target.value })}
-                      className="w-9 h-9 rounded-xl border border-slate-200 cursor-pointer p-0.5 bg-white"
-                    />
-                    <span className="text-xs font-mono uppercase text-slate-600">{currentSlide.title_color || '#ffffff'}</span>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Rata Teks</label>
-                  <select
-                    value={currentSlide.title_align || 'center'}
-                    onChange={(e) => updateCurrentSlide({ title_align: e.target.value })}
-                    className="w-full px-2 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
-                  >
-                    <option value="left">Kiri</option>
-                    <option value="center">Tengah</option>
-                    <option value="right">Kanan</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            {/* Pengaturan Subtitle */}
-            <div className="lg:col-span-2 bg-white p-6 rounded-3xl border border-slate-100 shadow-sm space-y-5">
-              <h3 className="font-bold text-slate-900 text-sm border-b pb-2 flex items-center space-x-2">
-                <span className="w-2.5 h-2.5 rounded-full bg-slate-700"></span>
-                <span>3. Pengaturan Deskripsi / Subtitle</span>
-              </h3>
-
-              <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1">Teks Subtitle / Deskripsi</label>
-                <textarea 
-                  rows={2}
-                  placeholder="Tuliskan deskripsi penjelas untuk slide ini..."
-                  value={currentSlide.subtitle || ''}
-                  onChange={(e) => updateCurrentSlide({ subtitle: e.target.value })}
-                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-[#1F5946]"
-                ></textarea>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi X (%)</label>
-                    <span className="text-xs font-mono text-slate-500">{currentSlide.subtitle_pos_x ?? 50}%</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="90" 
-                    value={currentSlide.subtitle_pos_x ?? 50}
-                    onChange={(e) => updateCurrentSlide({ subtitle_pos_x: parseInt(e.target.value) })}
-                    className="w-full accent-[#1F5946] cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="text-[11px] font-bold text-slate-600 uppercase">Posisi Y (%)</label>
-                    <span className="text-xs font-mono text-slate-500">{currentSlide.subtitle_pos_y ?? 62}%</span>
-                  </div>
-                  <input 
-                    type="range" 
-                    min="10" 
-                    max="90" 
-                    value={currentSlide.subtitle_pos_y ?? 62}
-                    onChange={(e) => updateCurrentSlide({ subtitle_pos_y: parseInt(e.target.value) })}
-                    className="w-full accent-[#1F5946] cursor-pointer"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Ukuran Font (px)</label>
-                  <input 
-                    type="number" 
-                    min="10" 
-                    max="30"
-                    value={currentSlide.subtitle_size || 13}
-                    onChange={(e) => updateCurrentSlide({ subtitle_size: parseInt(e.target.value) || 13 })}
-                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-slate-600 uppercase mb-1">Warna & Alignment</label>
-                  <div className="flex items-center space-x-2">
-                    <input 
-                      type="color" 
-                      value={currentSlide.subtitle_color || '#f1f5f9'}
-                      onChange={(e) => updateCurrentSlide({ subtitle_color: e.target.value })}
-                      className="w-9 h-9 rounded-xl border border-slate-200 cursor-pointer p-0.5 bg-white"
-                    />
-                    <select
-                      value={currentSlide.subtitle_align || 'center'}
-                      onChange={(e) => updateCurrentSlide({ subtitle_align: e.target.value })}
-                      className="flex-1 px-2 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none"
-                    >
-                      <option value="left">Kiri</option>
-                      <option value="center">Tengah</option>
-                      <option value="right">Kanan</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
-
-    const rootElement = document.getElementById('root');
-    const root = ReactDOM.createRoot(rootElement);
-    root.render(<App />);
-  </script>
+        window.onload = function() {
+            renderAdminApp();
+        }
+    </script>
 </body>
 </html>
