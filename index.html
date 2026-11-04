@@ -3,31 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Infaq Nurul Hayah</title>
-    <!-- Favicon Website -->
+    <title>Lembaga Infaq Nurul Hayah</title>
     <link rel="icon" type="image/jpeg" href="https://www.upload.ee/image/19930797/Primary_Logo_1.jpg">
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Font Inter & Poppins -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- FontAwesome for Social Media Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        nuha: {
-                            primary: '#286B56',
-                            dark: '#205744',
-                            gold: '#B99A62',
-                            text: '#68756E',
-                            lightBg: '#FAFAFA'
-                        }
+                        nuha: { primary: '#286B56', dark: '#144e36', gold: '#B99A62' }
                     },
                     fontFamily: {
                         sans: ['Inter', 'Poppins', 'sans-serif'],
@@ -45,7 +32,6 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* Dark Mode Global Overrides */
         body.dark-mode {
             background-color: #0f172a !important;
             color: #f1f5f9 !important;
@@ -72,126 +58,131 @@
         body.dark-mode .border-gray-200 {
             border-color: #334155 !important;
         }
-        body.dark-mode .bg-gray-50,
-        body.dark-mode .bg-gray-100 {
-            background-color: #0f172a !important;
-        }
 
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
+        @keyframes shimmerSlide {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
         }
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .btn-shimmer {
+            position: relative;
+            overflow: hidden;
         }
-        ::-webkit-scrollbar-thumb {
-            background: #286B56;
-            border-radius: 4px;
-        }
-        .pillar-accent {
-            position: fixed;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 8px;
-            background-color: #286B56;
-            z-index: 99;
-        }
-        @media (max-width: 768px) {
-            .pillar-accent {
-                width: 4px;
-            }
-        }
-        .chat-bubble-shadow {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Cross-fade ultra smooth hero slider style */
-        .hero-slide-layer {
+        .btn-shimmer::after {
+            content: '';
             position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            transition: opacity 1.5s ease-in-out, transform 8s linear;
+            top: 0; left: 0; width: 50%; height: 100%;
+            background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,215,0,0.45) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-20deg);
+            animation: shimmerSlide 2.5s infinite;
         }
 
-        /* Floating Quick Infak Side Tab */
-        .quick-infak-btn {
-            position: fixed;
-            left: 0;
-            top: 45%;
-            transform: translateY(-50%);
-            z-index: 50;
-            background-color: #0f5435;
-            color: white;
-            border-top-right-radius: 18px;
-            border-bottom-right-radius: 18px;
-            padding: 14px 12px;
+        .program-card-track {
             display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: 6px;
-            box-shadow: 4px 0 15px rgba(0,0,0,0.15);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .quick-infak-btn:hover {
-            padding-left: 16px;
-            background-color: #0b4028;
+            gap: 1.5rem;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
         }
     </style>
 </head>
 <body class="bg-white text-gray-800 antialiased min-h-screen flex flex-col relative">
 
-    <!-- VERTICAL GREEN PILLAR ACCENT (MANDATORY BRAND IDENTIFIER) -->
-    <div class="pillar-accent" title="Lembaga Infaq Nurul Hayah"></div>
+    <div id="app-root" class="w-full min-h-screen flex flex-col"></div>
 
-    <!-- QUICK INFAK FLOATING SIDE BUTTON -->
-    <div onclick="openInfakCheckout('Infak-Umum')" class="quick-infak-btn" title="Quick Infak">
-        <i data-lucide="heart" class="w-6 h-6 text-white"></i>
-        <span class="text-xs font-bold leading-tight text-center">Quick<br>Infak</span>
+    <!-- MODAL POPUP LOGIN DONATUR -->
+    <div id="login-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4 transition-opacity duration-300">
+        <div class="max-w-md w-full bg-white rounded-[28px] p-8 shadow-2xl relative border border-gray-100 space-y-6">
+            <button onclick="closeLoginModal()" class="absolute top-6 right-6 text-gray-400 hover:text-gray-600 p-1">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+
+            <div class="text-left space-y-1">
+                <h2 id="modal-auth-title" class="text-2xl font-bold font-sans text-slate-900">Masuk ke Akun Anda</h2>
+                <p id="modal-auth-desc" class="text-sm text-gray-500 font-normal">Silakan masuk untuk melanjutkan</p>
+            </div>
+
+            <button onclick="loginWithGoogleModal()" class="w-full py-3.5 px-4 border border-gray-200 rounded-full text-sm font-semibold text-gray-700 bg-white hover:bg-gray-50 transition flex items-center justify-center gap-3">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                    <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                    <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                </svg>
+                <span>Masuk dengan Google</span>
+            </button>
+
+            <div class="relative flex py-1 items-center">
+                <div class="flex-grow border-t border-gray-200"></div>
+                <span class="flex-shrink mx-4 text-xs text-gray-400 font-normal">Atau masuk dengan email</span>
+                <div class="flex-grow border-t border-gray-200"></div>
+            </div>
+
+            <form onsubmit="event.preventDefault(); submitModalLogin();" class="space-y-4 text-left">
+                <div id="reg-extra-fields" class="hidden space-y-4">
+                    <div>
+                        <label class="text-sm font-semibold text-gray-800">Nama Lengkap <span class="text-rose-500">*</span></label>
+                        <input type="text" id="modal-reg-name" placeholder="Nama Lengkap" class="w-full mt-1.5 p-3.5 border border-gray-200 rounded-xl text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="text-sm font-semibold text-gray-800">Email <span class="text-rose-500">*</span></label>
+                    <input type="email" id="modal-email" placeholder="email@example.com" class="w-full mt-1.5 p-3.5 border border-gray-200 rounded-xl text-sm" required>
+                </div>
+
+                <div>
+                    <label class="text-sm font-semibold text-gray-800">Password <span class="text-rose-500">*</span></label>
+                    <div class="relative mt-1.5">
+                        <input type="password" id="modal-password" placeholder="Masukkan password" class="w-full p-3.5 pr-11 border border-gray-200 rounded-xl text-sm" required>
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400">
+                            <i data-lucide="eye" id="pass-eye-icon" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" id="modal-btn-submit" class="w-full py-3.5 bg-[#146438] text-white font-bold text-base rounded-full hover:bg-[#0f4e2b] transition shadow-md mt-2">
+                    Masuk
+                </button>
+            </form>
+
+            <div class="text-center pt-2 border-t border-gray-100">
+                <p id="modal-toggle-prompt" class="text-xs text-gray-500">
+                    Belum punya akun? 
+                    <button onclick="toggleModalAuthMode(true)" class="text-[#146438] font-bold hover:underline">Daftar Sekarang</button>
+                </p>
+            </div>
+        </div>
     </div>
 
-    <div id="app-root" class="pl-2 sm:pl-3 min-h-screen flex flex-col">
-        <!-- Content will be rendered dynamically via JS -->
-    </div>
-
-    <!-- MAIN APP SCRIPT -->
     <script>
-        // --- LOGO CONSTANT ---
         const OFFICIAL_LOGO = "https://www.upload.ee/image/19930797/Primary_Logo_1.jpg";
 
-        // --- DATABASE STATE (In-Memory Persistent Replica) ---
         const initialDB = {
             settings: {
-                aiActive: true,
-                aiName: "Linuha AI",
-                aiModel: "Sky 0.9.7",
-                aiDeveloper: "Sky Developer",
-                welcomeMessage: "Assalamu'alaikum. Selamat datang di Linuha AI.\nAda yang bisa saya bantu terkait donasi atau layanan NUHA hari ini?",
-                groqApiKey: "",
-                groqModel: "mixtral-8x7b-32768",
-                geminiApiKey: ""
+                siteName: "Lembaga Infaq Nurul Hayah",
+                siteLogo: OFFICIAL_LOGO,
+                phone: "+6282333362299",
+                isLocked: false,
+                lockMessage: "Website sedang dalam pemeliharaan sistem. Silakan kembali beberapa saat lagi.",
+                disableDonations: false,
+                socials: {
+                    whatsapp: "https://wa.me/6282333362299",
+                    instagram: "https://www.instagram.com/lembagainfaqnurulhayah",
+                    youtube: "https://youtube.com",
+                    tiktok: "https://tiktok.com",
+                    facebook: "https://facebook.com"
+                },
+                aboutText: "Lembaga Infaq NUHA hadir untuk berkhidmat dalam rangka membantu kesejahteraan dan kemandirian umat; mengangkat harkat sosial dengan mendayagunakan dana Zakat, Infak, Sedekah (ZIS), CSR, serta Dana Sosial Keagamaan Lainnya (DSKL) sesuai regulasi dan ketentuan syariah.",
+                visiText: "Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.",
+                misiText: "• Akses Pendidikan Layak bagi anak yatim & dhuafa\n• Pengembangan Fasilitas Sekolah & Asrama\n• Inovasi Keterampilan & Teknologi Santri\n• Pengelolaan Akuntabel & Transparan"
             },
-            stats: {
-                totalInfaq: 248500000,
-                totalDonatur: 1420,
-                totalProgram: 12,
-                totalPenerima: 3500
-            },
-            heroSlides: [
-                "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1920&q=80",
-                "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1920&q=80",
-                "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1920&q=80",
-                "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1920&q=80"
+            paymentMethods: [
+                { id: 1, name: "Bank Syariah Indonesia (BSI)", account: "7123-4567-89 a.n NUHA", qrImage: "", active: true },
+                { id: 2, name: "Bank Muamalat", account: "345-00123-99 a.n NUHA", qrImage: "", active: true },
+                { id: 3, name: "QRIS All Payment Resmi NUHA", account: "Scan Barcode QRIS Sangat Mudah", qrImage: "https://placehold.co/400x400/286B56/FFFFFF?text=QRIS+NUHA", active: true }
             ],
-            gallery: [
-                { id: 1, judul: "Kajian Rutin Bersama Dr. KH. Ja'far Ath-Thayyar", foto: "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=800&q=80", tanggal: "2026-10-20" },
-                { id: 2, judul: "Penyaluran Makanan Sehat Santri", foto: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80", tanggal: "2026-10-18" },
-                { id: 3, judul: "Kerja Bakti Pembangunan Asrama", foto: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=800&q=80", tanggal: "2026-10-10" }
-            ],
+            pengurusList: [],
+            stats: { totalInfaq: 0, totalDonatur: 0 },
+            heroSlides: [],
+            gallery: [],
             infaqCategories: [
                 { id: 'yatim', name: 'Infak Anak Yatim', icon: 'heart' },
                 { id: 'dakwah', name: 'Infak Dakwah & Kemanusiaan', icon: 'book-open' },
@@ -203,202 +194,78 @@
                 { id: 'subuh', name: 'Infak Subuh', icon: 'sunrise' },
                 { id: 'umum', name: 'Infak Umum', icon: 'coins' }
             ],
-            programs: [
-                {
-                    id: 1,
-                    judul: "Beasiswa Santri Yatim & Dhuafa NUHA",
-                    kategori: "Pendidikan",
-                    deskripsi: "Memberikan beasiswa pendidikan penuh, tempat tinggal, dan konsumsi untuk santri dhuafa penghafal Al-Qur'an.",
-                    target: 150000000,
-                    terkumpul: 112500000,
-                    foto: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80"
-                },
-                {
-                    id: 2,
-                    judul: "Pembangunan Gedung Asrama Santri",
-                    kategori: "Infrastruktur",
-                    deskripsi: "Pembangunan fasilitas tempat tinggal yang layak, bersih, dan memadai bagi santri putra Pondok Pesantren Nurul Hayah.",
-                    target: 500000000,
-                    terkumpul: 340000000,
-                    foto: "https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=800&q=80"
-                },
-                {
-                    id: 3,
-                    judul: "Digital Library & Laboratorium Komputer",
-                    kategori: "Teknologi",
-                    deskripsi: "Penyediaan sarana belajar berbasis digital dan akses laboratorium komputer untuk membekali keterampilan santri.",
-                    target: 100000000,
-                    terkumpul: 65000000,
-                    foto: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80"
-                }
-            ],
-            campaigns: [
-                {
-                    id: 101,
-                    judul: "Sedekah Subuh Pangan Santri Nurul Hayah",
-                    target: 50000000,
-                    terkumpul: 38500000,
-                    deadline: "2026-12-31",
-                    status: "Aktif",
-                    foto: "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=800&q=80"
-                },
-                {
-                    id: 102,
-                    judul: "Wakaf Al-Qur'an & Kitab Kuning",
-                    target: 30000000,
-                    terkumpul: 22100000,
-                    deadline: "2026-11-30",
-                    status: "Aktif",
-                    foto: "https://images.unsplash.com/photo-1609599006353-e629aaabfeae?auto=format&fit=crop&w=800&q=80"
-                }
-            ],
-            news: [
-                {
-                    id: 1,
-                    judul: "Penyaluran Beasiswa Tahfiz Semester Ganjil 2026",
-                    tanggal: "2026-10-15",
-                    ringkasan: "Lembaga Infaq NUHA menyalurkan dana bantuan beasiswa kepada 85 santri berprestasi di Pondok Pesantren Nurul Hayah.",
-                    foto: "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80",
-                    programId: 1
-                },
-                {
-                    id: 2,
-                    judul: "Peresmian Ruang Kelas Baru Didampingi Dr. KH. Ja'far Ath-Thayyar",
-                    tanggal: "2026-09-28",
-                    ringkasan: "Alhamdulillah, pembangunan gedung kelas baru telah selesai 100% dan siap digunakan santri mulai bulan ini.",
-                    foto: "https://images.unsplash.com/photo-1580582932707-520aed937b7b?auto=format&fit=crop&w=800&q=80",
-                    programId: 2
-                }
-            ],
-            testimonials: [
-                {
-                    id: 1,
-                    nama: "Ustadz Abdullah",
-                    peran: "Penerima Bantuan Modal Usaha",
-                    lokasi: "Cirebon",
-                    pesan: "Alhamdulillah berkat infaq dari Lembaga Infaq NUHA, usaha keripik saya bisa berkembang untuk menopang kebutuhan keluarga dan kebutuhan dakwah."
-                },
-                {
-                    id: 2,
-                    nama: "Irma Ariza Arfia",
-                    peran: "Mahasiswa Penerima Beasiswa NUHA",
-                    lokasi: "Surakarta",
-                    pesan: "Bantuan beasiswa pendidikan dari NUHA sangat membantu saya sehingga bisa fokus belajar tanpa khawatir kendala biaya perkuliahan."
-                },
-                {
-                    id: 3,
-                    nama: "Nailul Ahyar",
-                    peran: "Santri Penghafal Qur'an",
-                    lokasi: "Aceh",
-                    pesan: "Fasilitas asrama dan kitab yang diberikan sangat memotivasi kami para santri untuk menyelesaikan hafalan 30 Juz."
-                }
-            ],
-            faqs: [
-                {
-                    q: "Apa perbedaan infak dan zakat?",
-                    a: "Zakat adalah kewajiban bagi muslim yang memenuhi nisab dan haul. Sedangkan infak adalah sedekah sukarela tanpa batas nisab yang bisa diberikan kapan saja dalam jumlah berapa pun."
-                },
-                {
-                    q: "Apakah infak harus dalam jumlah tertentu?",
-                    a: "Tidak. Infak dapat diberikan dalam nominal berapa pun secara ikhlas sesuai kemampuan donatur."
-                },
-                {
-                    q: "Apakah infak bisa diniatkan untuk orang yang sudah meninggal?",
-                    a: "Bisa. Berinfaq atas nama orang tua atau kerabat yang telah meninggal dunia insyaAllah pahalanya akan terus mengalir sebagai amal jariyah."
-                },
-                {
-                    q: "Bagaimana cara mengetahui infak saya sudah tersalurkan?",
-                    a: "Lembaga Infaq NUHA menerbitkan Laporan Transparansi publik secara berkala pada website ini dan dapat diverifikasi langsung oleh donatur."
-                },
-                {
-                    q: "Apakah ada bukti untuk infak yang saya berikan?",
-                    a: "Ya, setiap donasi yang berhasil terverifikasi akan mendapatkan kode unik transaksi dan bukti donasi digital."
-                }
-            ],
-            bankAccounts: [
-                { bank: "Bank Syariah Indonesia (BSI)", noRek: "7123-4567-89", an: "Lembaga Infaq Nurul Hayah" },
-                { bank: "Bank Muamalat", noRek: "345-00123-99", an: "Lembaga Infaq Nurul Hayah" },
-                { bank: "BCA Syariah", noRek: "882-0192-111", an: "Lembaga Infaq Nurul Hayah" }
-            ],
-            donations: [
-                { id: "TRX-9821", nama: "Hamba Allah", nominal: 500000, metode: "Transfer BSI", status: "Berhasil", tanggal: "2026-11-01", programId: 1, anonim: true, doa: "Semoga berkah untuk para santri." },
-                { id: "TRX-9822", nama: "Ahmad Rifai", nominal: 1000000, metode: "QRIS", status: "Berhasil", tanggal: "2026-11-02", programId: 2, anonim: false, doa: "Semoga pembangunan cepat selesai." },
-                { id: "TRX-9823", nama: "Siti Rahma", nominal: 250000, metode: "Transfer Bank Muamalat", status: "Menunggu Verifikasi", tanggal: "2026-11-03", programId: 1, anonim: false, doa: "InsyaAllah bermanfaat." }
-            ],
-            auditLogs: [
-                { timestamp: "2026-11-04 08:30", action: "SYSTEM_BOOTSTRAP", detail: "Server bootstrap initialized administrator baseline account" },
-                { timestamp: "2026-11-04 09:00", action: "DONATION_RECEIVED", detail: "Transaction TRX-9823 created by donator Siti Rahma" }
-            ]
+            programs: [],
+            news: [],
+            pendingConfirmations: [],
+            blockedIPs: [],
+            logs: []
         };
 
-        // Persistent database in state
         let DB = JSON.parse(localStorage.getItem('NUHA_DATABASE')) || initialDB;
-        if (!DB.heroSlides) DB.heroSlides = initialDB.heroSlides;
-        if (!DB.gallery) DB.gallery = initialDB.gallery;
 
         function saveDB() {
             localStorage.setItem('NUHA_DATABASE', JSON.stringify(DB));
         }
 
-        // --- HERO BANNER AUTOMATIC SLIDER IMAGES ---
-        let currentSlideIndex = 0;
-        let heroSlideInterval = null;
-        let activeSlideLayer = 0;
-
-        function startHeroAutoSlide() {
-            if (heroSlideInterval) clearInterval(heroSlideInterval);
-            const slides = DB.heroSlides && DB.heroSlides.length ? DB.heroSlides : initialDB.heroSlides;
-            heroSlideInterval = setInterval(() => {
-                const nextIndex = (currentSlideIndex + 1) % slides.length;
-                const layerA = document.getElementById('hero-bg-layer-a');
-                const layerB = document.getElementById('hero-bg-layer-b');
-                
-                if (layerA && layerB) {
-                    if (activeSlideLayer === 0) {
-                        layerB.style.backgroundImage = `url('${slides[nextIndex]}')`;
-                        layerB.style.opacity = '1';
-                        layerA.style.opacity = '0';
-                        activeSlideLayer = 1;
-                    } else {
-                        layerA.style.backgroundImage = `url('${slides[nextIndex]}')`;
-                        layerA.style.opacity = '1';
-                        layerB.style.opacity = '0';
-                        activeSlideLayer = 0;
-                    }
-                }
-                currentSlideIndex = nextIndex;
-            }, 5000);
-        }
-
-        // STATE MANAGEMENT
         let state = {
-            currentTab: 'home', // 'home', 'about', 'visi-misi', 'pengurus', 'legalitas', 'program-pendidikan', 'program-infrastruktur', 'program-ekonomi', 'program-kesehatan', 'kalkulator-zakat', 'konfirmasi-donasi', 'edukasi', 'program', 'campaign', 'berita', 'laporan', 'infak', 'checkout', 'userLogin', 'adminLogin', 'admin'
+            currentTab: 'home',
             selectedCategorySlug: 'Infak-Umum',
-            adminSubTab: 'dashboard',
-            isAuthenticated: false,
-            isUserAuthenticated: false,
-            userProfile: null,
-            adminUser: null,
-            isDarkMode: localStorage.getItem('NUHA_THEME') === 'dark',
-            loginForm: { email: '', password: '', error: '' },
-            userLoginForm: { email: '', password: '', isRegister: false },
-            selectedProgramForDonation: null,
-            selectedInfakType: 'Infak Umum',
-            openFaqIndex: 0,
-            chatOpen: false,
-            chatView: 'menu', // 'menu' atau 'chatting'
-            chatMessages: [
-                { sender: 'ai', text: DB.settings.welcomeMessage, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }
-            ],
-            chatInput: '',
-            isAiTyping: false
+            isDarkMode: localStorage.getItem('NUHA_THEME') === 'dark'
         };
 
-        function toggleTheme() {
-            state.isDarkMode = !state.isDarkMode;
-            localStorage.setItem('NUHA_THEME', state.isDarkMode ? 'dark' : 'light');
-            applyTheme();
-            renderApp();
+        let currentProgramIndex = 0;
+        let programAutoSlideInterval = null;
+        let isProgramPaused = false;
+        let currentHeroSlideIndex = 0;
+
+        function startProgramAutoSlide() {
+            if (programAutoSlideInterval) clearInterval(programAutoSlideInterval);
+            programAutoSlideInterval = setInterval(() => {
+                if (!isProgramPaused) {
+                    moveProgramSlide(1, false);
+                }
+            }, 3500);
+        }
+
+        function pauseProgramAutoSlide() { isProgramPaused = true; }
+        function resumeProgramAutoSlide() { isProgramPaused = false; }
+
+        function moveProgramSlide(direction, isUserClick = true) {
+            const track = document.getElementById('program-card-track');
+            if (!track) return;
+            const totalItems = DB.programs ? DB.programs.length : 0;
+            if (totalItems === 0) return;
+
+            if (isUserClick) {
+                pauseProgramAutoSlide();
+                setTimeout(() => { resumeProgramAutoSlide(); }, 4000);
+            }
+
+            currentProgramIndex += direction;
+            if (currentProgramIndex >= totalItems) {
+                currentProgramIndex = 0;
+            } else if (currentProgramIndex < 0) {
+                currentProgramIndex = totalItems - 1;
+            }
+
+            const cardWidthWithGap = 344;
+            track.style.transform = `translateX(-${currentProgramIndex * cardWidthWithGap}px)`;
+        }
+
+        function getProgramRaisedAmount(prog) {
+            if (!prog) return 0;
+            if (prog.calcMode === 'manual') {
+                return prog.terkumpulManual !== undefined ? prog.terkumpulManual : (prog.terkumpul || 0);
+            }
+            const autoAmount = (DB.pendingConfirmations || [])
+                .filter(c => c.status && c.status.includes('Berhasil') && (c.programId === prog.id || (c.trxCode && c.trxCode.includes(prog.id))))
+                .reduce((sum, c) => sum + (c.amount || 0), prog.terkumpulAwal || 0);
+            
+            return autoAmount || prog.terkumpul || 0;
+        }
+
+        function formatRupiah(number) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number || 0);
         }
 
         function applyTheme() {
@@ -409,173 +276,99 @@
             }
         }
 
-        // Global Helper for format currency
-        function formatRupiah(number) {
-            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(number);
+        function toggleTheme() {
+            state.isDarkMode = !state.isDarkMode;
+            localStorage.setItem('NUHA_THEME', state.isDarkMode ? 'dark' : 'light');
+            renderApp();
         }
 
-        // ROUTER RENDERER
         function renderApp() {
             applyTheme();
             const root = document.getElementById('app-root');
             root.innerHTML = '';
+            document.title = DB.settings.siteName || "Lembaga Infaq Nurul Hayah";
 
-            // Access Control
-            if (state.currentTab === 'admin' && !state.isAuthenticated) {
-                state.currentTab = 'adminLogin';
+            if (DB.settings.isLocked) {
+                root.appendChild(renderLockedWebsiteView());
+                return;
             }
 
-            if (state.currentTab === 'admin') {
-                root.appendChild(renderAdminLayout());
-            } else if (state.currentTab === 'adminLogin') {
-                root.appendChild(renderAdminLoginPage());
-            } else if (state.currentTab === 'userLogin') {
-                root.appendChild(renderUserLoginPage());
-            } else {
-                // Public Website Layout
-                const wrapper = document.createElement('div');
-                wrapper.className = "flex flex-col min-h-screen justify-between";
-                
-                wrapper.appendChild(renderPublicNavbar());
+            const wrapper = document.createElement('div');
+            wrapper.className = "flex flex-col min-h-screen justify-between";
+            
+            wrapper.appendChild(renderPublicNavbar());
 
-                // BREADCRUMB BAR
-                if (state.currentTab !== 'home') {
-                    wrapper.appendChild(renderBreadcrumb());
-                }
+            const mainContent = document.createElement('main');
+            mainContent.className = "flex-grow";
 
-                const mainContent = document.createElement('main');
-                mainContent.className = "flex-grow";
-
-                switch(state.currentTab) {
-                    case 'home': mainContent.appendChild(renderHomepage()); break;
-                    case 'about': mainContent.appendChild(renderAboutPage()); break;
-                    case 'visi-misi': mainContent.appendChild(renderVisiMisiPage()); break;
-                    case 'pengurus': mainContent.appendChild(renderPengurusPage()); break;
-                    case 'legalitas': mainContent.appendChild(renderLegalitasPage()); break;
-                    
-                    case 'program-pendidikan': mainContent.appendChild(renderProgramSubPage('Pendidikan Santri & Beasiswa', 'Fasilitas beasiswa penuh, tempat tinggal, dan konsumsi untuk 100+ santri penghafal Al-Qur\'an.', 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1200&q=80')); break;
-                    case 'program-infrastruktur': mainContent.appendChild(renderProgramSubPage('Pembangunan Infrastruktur', 'Membangun gedung sekolah, asrama layak huni, perpustakaan, dan fasilitas air bersih.', 'https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1200&q=80')); break;
-                    case 'program-ekonomi': mainContent.appendChild(renderProgramSubPage('Pemberdayaan Ekonomi Umat', 'Bantuan modal usaha mikro tanpa riba dan pelatihan keterampilan mandiri santri & dhuafa.', 'https://images.unsplash.com/photo-1556742049-0a6746405b58?auto=format&fit=crop&w=1200&q=80')); break;
-                    case 'program-kesehatan': mainContent.appendChild(renderProgramSubPage('Kesehatan & Kemanusiaan', 'Layanan obat gratis, penanganan bencana, dan pos kesehatan santri gratis.', 'https://images.unsplash.com/photo-1584515979956-d9f6e5d09982?auto=format&fit=crop&w=1200&q=80')); break;
-                    
-                    case 'kalkulator-zakat': mainContent.appendChild(renderKalkulatorZakatPage()); break;
-                    case 'konfirmasi-donasi': mainContent.appendChild(renderKonfirmasiDonasiPage()); break;
-                    case 'edukasi': mainContent.appendChild(renderEdukasiPage()); break;
-
-                    case 'program': mainContent.appendChild(renderProgramPage()); break;
-                    case 'campaign': mainContent.appendChild(renderCampaignPage()); break;
-                    case 'berita': mainContent.appendChild(renderBeritaPage()); break;
-                    case 'laporan': mainContent.appendChild(renderLaporanPage()); break;
-                    case 'infak': mainContent.appendChild(renderInfakDedicatedPage()); break;
-                    case 'checkout': mainContent.appendChild(renderInfakCheckoutPage()); break;
-                    default: mainContent.appendChild(renderHomepage());
-                }
-
-                wrapper.appendChild(mainContent);
-                wrapper.appendChild(renderPublicFooter());
-
-                // Floating AI Assistant Button & Widget
-                if (DB.settings.aiActive) {
-                    wrapper.appendChild(renderLinuhaAiWidget());
-                }
-
-                root.appendChild(wrapper);
+            switch(state.currentTab) {
+                case 'home': mainContent.appendChild(renderHomepage()); break;
+                case 'about': mainContent.appendChild(renderAboutPage()); break;
+                case 'visi-misi': mainContent.appendChild(renderVisiMisiPage()); break;
+                case 'pengurus': mainContent.appendChild(renderPengurusPage()); break;
+                case 'program': mainContent.appendChild(renderProgramPage()); break;
+                case 'galeri': mainContent.appendChild(renderGaleriPage()); break;
+                case 'berita': mainContent.appendChild(renderBeritaPage()); break;
+                case 'infak': 
+                case 'checkout': mainContent.appendChild(renderInfakCheckoutPage()); break;
+                case 'konfirmasi-donasi': mainContent.appendChild(renderKonfirmasiDonasiPage()); break;
+                default: mainContent.appendChild(renderHomepage());
             }
 
-            // Re-bind icons
+            wrapper.appendChild(mainContent);
+            wrapper.appendChild(renderPublicFooter());
+
+            root.appendChild(wrapper);
+
             if (window.lucide) lucide.createIcons();
         }
 
-        // --- NAVBAR COMPONENT ---
+        function renderLockedWebsiteView() {
+            const container = document.createElement('div');
+            container.className = "w-full min-h-screen bg-emerald-950 text-white flex flex-col items-center justify-center p-6 text-center font-sans";
+            container.innerHTML = `
+                <div class="max-w-md w-full bg-emerald-900/40 border border-emerald-800 p-8 rounded-3xl space-y-4 backdrop-blur-md shadow-2xl">
+                    <div class="w-16 h-16 bg-emerald-800/80 rounded-2xl flex items-center justify-center mx-auto text-amber-400">
+                        <i data-lucide="lock" class="w-8 h-8"></i>
+                    </div>
+                    <img src="${DB.settings.siteLogo || OFFICIAL_LOGO}" class="h-12 mx-auto object-contain bg-white p-1 rounded-xl">
+                    <h2 class="text-2xl font-bold font-poppins">${DB.settings.siteName || 'Lembaga Infaq NUHA'}</h2>
+                    <p class="text-xs text-emerald-200 leading-relaxed">${DB.settings.lockMessage}</p>
+                </div>
+            `;
+            return container;
+        }
+
         function renderPublicNavbar() {
             const nav = document.createElement('nav');
             nav.className = "sticky top-0 z-40 bg-white border-b border-gray-100 shadow-sm font-sans";
+            const logo = DB.settings.siteLogo || OFFICIAL_LOGO;
+
             nav.innerHTML = `
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="flex justify-between h-20 items-center">
-                        <!-- Logo NUHA -->
                         <div class="flex items-center space-x-3 cursor-pointer" onclick="navigateTo('home')">
-                            <img src="${OFFICIAL_LOGO}" alt="NUHA Logo" class="h-11 sm:h-12 w-auto object-contain" onerror="this.onerror=null; this.src='https://placehold.co/200x80/286B56/FFFFFF?text=NUHA';">
+                            <img src="${logo}" class="h-11 sm:h-12 w-auto object-contain">
                         </div>
 
-                        <!-- Desktop Navigation Menu -->
                         <div class="hidden lg:flex items-center space-x-7 font-medium text-xs sm:text-sm text-gray-700">
-                            
-                            <!-- 1. Profil NUHA Dropdown -->
-                            <div class="relative group py-6 cursor-pointer">
-                                <button onclick="navigateTo('about')" class="flex items-center gap-1.5 hover:text-nuha-primary transition py-1 ${['about','visi-misi','pengurus','legalitas'].includes(state.currentTab)?'text-nuha-primary font-bold border-b-2 border-nuha-primary':''}">
-                                    Profil <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-hover:rotate-180"></i>
-                                </button>
-                                <div class="absolute left-0 top-full hidden group-hover:block w-56 bg-white border border-gray-100 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <a onclick="navigateTo('about')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='about'?'bg-emerald-50 text-nuha-primary':''}">Tentang NUHA</a>
-                                    <a onclick="navigateTo('visi-misi')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='visi-misi'?'bg-emerald-50 text-nuha-primary':''}">Visi dan Misi</a>
-                                    <a onclick="navigateTo('pengurus')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='pengurus'?'bg-emerald-50 text-nuha-primary':''}">Susunan Pengurus & Ulama</a>
-                                    <a onclick="navigateTo('legalitas')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='legalitas'?'bg-emerald-50 text-nuha-primary':''}">Legalitas & Transparansi</a>
-                                </div>
-                            </div>
-
-                            <!-- 2. Pilar Program Dropdown -->
-                            <div class="relative group py-6 cursor-pointer">
-                                <button onclick="navigateTo('program')" class="flex items-center gap-1.5 hover:text-nuha-primary transition py-1 ${['program','program-pendidikan','program-infrastruktur','program-ekonomi','program-kesehatan'].includes(state.currentTab)?'text-nuha-primary font-bold border-b-2 border-nuha-primary':''}">
-                                    Pilar Program <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-hover:rotate-180"></i>
-                                </button>
-                                <div class="absolute left-0 top-full hidden group-hover:block w-64 bg-white border border-gray-100 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <a onclick="navigateTo('program-pendidikan')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='program-pendidikan'?'bg-emerald-50 text-nuha-primary':''}">Pendidikan Santri & Beasiswa</a>
-                                    <a onclick="navigateTo('program-infrastruktur')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='program-infrastruktur'?'bg-emerald-50 text-nuha-primary':''}">Pembangunan Infrastruktur</a>
-                                    <a onclick="navigateTo('program-ekonomi')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='program-ekonomi'?'bg-emerald-50 text-nuha-primary':''}">Pemberdayaan Ekonomi Umat</a>
-                                    <a onclick="navigateTo('program-kesehatan')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='program-kesehatan'?'bg-emerald-50 text-nuha-primary':''}">Kesehatan & Kemanusiaan</a>
-                                </div>
-                            </div>
-
-                            <!-- 3. Infak & Ziswaf Dropdown -->
-                            <div class="relative group py-6 cursor-pointer">
-                                <button onclick="navigateTo('infak')" class="flex items-center gap-1.5 hover:text-nuha-primary transition py-1 ${['infak','checkout','kalkulator-zakat'].includes(state.currentTab)?'text-nuha-primary font-bold border-b-2 border-nuha-primary':''}">
-                                    Infak & Ziswaf <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-hover:rotate-180"></i>
-                                </button>
-                                <div class="absolute left-0 top-full hidden group-hover:block w-60 bg-white border border-gray-100 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <a onclick="openInfakCheckout('Infak-Anak-Yatim')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold">Infak Anak Yatim</a>
-                                    <a onclick="openInfakCheckout('Infak-Pendidikan')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold">Infak Pendidikan Santri</a>
-                                    <a onclick="openInfakCheckout('Infak-Subuh')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold">Infak Subuh & Jumat Berkah</a>
-                                    <a onclick="navigateTo('kalkulator-zakat')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='kalkulator-zakat'?'bg-emerald-50 text-nuha-primary':''}">Kalkulator Zakat & Infak</a>
-                                </div>
-                            </div>
-
-                            <!-- 4. Campaign -->
-                            <button onclick="navigateTo('campaign')" class="${state.currentTab==='campaign'?'text-nuha-primary font-bold border-b-2 border-nuha-primary pb-1':'hover:text-nuha-primary'} transition">Campaign</button>
-
-                            <!-- 5. Berita -->
-                            <button onclick="navigateTo('berita')" class="${state.currentTab==='berita'?'text-nuha-primary font-bold border-b-2 border-nuha-primary pb-1':'hover:text-nuha-primary'} transition">Berita</button>
-
-                            <!-- 6. Layanan Dropdown -->
-                            <div class="relative group py-6 cursor-pointer">
-                                <button onclick="navigateTo('laporan')" class="flex items-center gap-1.5 hover:text-nuha-primary transition py-1 ${['laporan','konfirmasi-donasi'].includes(state.currentTab)?'text-nuha-primary font-bold border-b-2 border-nuha-primary':''}">
-                                    Layanan <i data-lucide="chevron-down" class="w-3.5 h-3.5 transition group-hover:rotate-180"></i>
-                                </button>
-                                <div class="absolute left-0 top-full hidden group-hover:block w-56 bg-white border border-gray-100 rounded-2xl shadow-xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                                    <a onclick="navigateTo('laporan')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='laporan'?'bg-emerald-50 text-nuha-primary':''}">Laporan Transparansi</a>
-                                    <a onclick="navigateTo('konfirmasi-donasi')" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold ${state.currentTab==='konfirmasi-donasi'?'bg-emerald-50 text-nuha-primary':''}">Konfirmasi Donasi</a>
-                                    <a onclick="toggleChat(true)" class="block px-4 py-2.5 rounded-xl hover:bg-emerald-50 hover:text-nuha-primary transition text-xs font-semibold">Konsultasi Ziswaf (AI)</a>
-                                </div>
-                            </div>
-
-                            <!-- 7. Edukasi -->
-                            <button onclick="navigateTo('edukasi')" class="${state.currentTab==='edukasi'?'text-nuha-primary font-bold border-b-2 border-nuha-primary pb-1':'hover:text-nuha-primary'} transition">Edukasi</button>
+                            <button onclick="navigateTo('home')" class="hover:text-nuha-primary">Beranda</button>
+                            <button onclick="navigateTo('about')" class="hover:text-nuha-primary">Tentang LINUHA</button>
+                            <button onclick="navigateTo('visi-misi')" class="hover:text-nuha-primary">Visi & Misi</button>
+                            <button onclick="navigateTo('pengurus')" class="hover:text-nuha-primary">Pengurus</button>
+                            <button onclick="navigateTo('program')" class="hover:text-nuha-primary">Program LINUHA</button>
+                            <button onclick="navigateTo('galeri')" class="hover:text-nuha-primary">Galeri LINUHA</button>
+                            <button onclick="navigateTo('berita')" class="hover:text-nuha-primary">Berita</button>
+                            <button onclick="navigateTo('konfirmasi-donasi')" class="hover:text-nuha-primary">Konfirmasi Donasi</button>
                         </div>
-                        <!-- CTA Buttons, Dark Mode Toggle & Portal Login -->
-                        <div class="flex items-center space-x-3">
-                            <!-- Theme Toggle Button (Dark/Light Mode) -->
-                            <button onclick="toggleTheme()" title="Ganti Mode Tampilan" class="p-2.5 rounded-xl border border-gray-200 hover:bg-gray-100 text-gray-700 transition flex items-center justify-center">
-                                <i data-lucide="${state.isDarkMode ? 'sun' : 'moon'}" class="w-4 h-4 ${state.isDarkMode ? 'text-amber-400' : 'text-slate-700'}"></i>
-                            </button>
 
-                            ${state.isUserAuthenticated ? `
-                                <div class="flex items-center gap-2 bg-emerald-50 px-3 py-1.5 rounded-xl border border-emerald-100 text-xs font-semibold text-nuha-primary">
-                                    <i data-lucide="user-check" class="w-4 h-4"></i> ${state.userProfile?.nama || 'Donatur'}
-                                    <button onclick="logoutUser()" class="ml-1 text-gray-400 hover:text-red-500"><i data-lucide="log-out" class="w-3.5 h-3.5"></i></button>
-                                </div>
-                            ` : `
-                                <button onclick="navigateTo('userLogin')" class="px-4 py-2 text-sm font-medium text-nuha-primary border border-nuha-primary rounded-xl hover:bg-emerald-50 transition">Masuk</button>
-                            `}
+                        <div class="flex items-center space-x-3">
+                            <button onclick="toggleTheme()" class="p-2.5 rounded-xl border border-gray-200 hover:bg-gray-100">
+                                <i data-lucide="${state.isDarkMode ? 'sun' : 'moon'}" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="openLoginModal()" class="btn-shimmer px-6 py-2.5 text-sm font-bold text-white bg-[#146438] hover:bg-[#0f4e2b] rounded-full transition shadow-md">
+                                Masuk
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -583,243 +376,169 @@
             return nav;
         }
 
-        // --- BREADCRUMB COMPONENT ---
-        function renderBreadcrumb() {
-            const bc = document.createElement('div');
-            bc.className = "bg-white border-b border-gray-100 py-3 font-sans shadow-xs";
-
-            const titlesMap = {
-                'about': 'Tentang NUHA',
-                'visi-misi': 'Visi dan Misi',
-                'pengurus': 'Susunan Pengurus & Ulama',
-                'legalitas': 'Legalitas & Transparansi',
-                'program-pendidikan': 'Pendidikan Santri & Beasiswa',
-                'program-infrastruktur': 'Pembangunan Infrastruktur',
-                'program-ekonomi': 'Pemberdayaan Ekonomi Umat',
-                'program-kesehatan': 'Kesehatan & Kemanusiaan',
-                'kalkulator-zakat': 'Kalkulator Zakat & Infak',
-                'konfirmasi-donasi': 'Konfirmasi Donasi',
-                'edukasi': 'Edukasi Ziswaf',
-                'program': 'Program Unggulan',
-                'campaign': 'Campaign Aktif',
-                'berita': 'Berita & Kegiatan',
-                'laporan': 'Laporan Transparansi',
-                'infak': 'Infak Online',
-                'checkout': 'Form Infak Online',
-                'kebijakan-privasi': 'Kebijakan Privasi'
-            };
-
-            const pageTitle = titlesMap[state.currentTab] || state.selectedCategorySlug.replace(/-/g, ' ') || 'Halaman';
-
-            bc.innerHTML = `
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex items-center space-x-2 text-xs sm:text-sm text-gray-600">
-                        <button onclick="navigateTo('home')" class="hover:text-nuha-primary transition flex items-center">
-                            <i data-lucide="home" class="w-4 h-4 text-gray-500 hover:text-nuha-primary"></i>
-                        </button>
-                        <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-gray-400"></i>
-                        <span class="font-medium text-gray-900">${pageTitle}</span>
-                    </div>
-                </div>
-            `;
-            return bc;
-        }
-
-        // --- SUB-PAGES ---
-
         function renderHomepage() {
             const container = document.createElement('div');
-            container.className = "bg-white space-y-16 pb-16 font-sans";
+            container.className = "bg-white space-y-12 pb-16 font-sans overflow-hidden";
 
-            const slides = DB.heroSlides && DB.heroSlides.length ? DB.heroSlides : initialDB.heroSlides;
+            const slides = DB.heroSlides || [];
+            const hasSlides = slides.length > 0;
+            const currentSlide = hasSlides ? slides[currentHeroSlideIndex] : null;
 
             container.innerHTML = `
-                <section class="relative bg-gray-900 text-white min-h-[580px] sm:min-h-[640px] flex items-center overflow-hidden">
-                    <div id="hero-bg-layer-a" class="hero-slide-layer opacity-100" style="background-image: url('${slides[0]}'); opacity: 0.4;"></div>
-                    <div id="hero-bg-layer-b" class="hero-slide-layer opacity-0" style="background-image: url('${slides[1] || slides[0]}'); opacity: 0;"></div>
-                    <div class="absolute inset-0 bg-gradient-to-r from-gray-950/90 via-gray-950/70 to-transparent"></div>
-
-                    <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 w-full z-10">
-                        <div class="max-w-3xl space-y-6">
-                            <h1 class="text-3xl sm:text-5xl font-bold font-poppins leading-tight tracking-tight text-white">
-                                Membangun Masa Depan Umat Melalui Infaq & Pendidikan
-                            </h1>
-                            <p class="text-sm sm:text-base text-gray-200 leading-relaxed font-normal max-w-2xl">
-                                Lembaga Infaq Nurul Hayah mengelola dan menyalurkan dana infaq secara transparan, amanah, dan profesional demi menghadirkan pendidikan berkualitas serta kesejahteraan bagi santri dan dhuafa di seluruh Indonesia.
-                            </p>
-
-                            <div class="pt-4">
-                                <div class="bg-white/95 backdrop-blur-md p-5 sm:p-6 rounded-3xl border border-white/20 shadow-2xl max-w-xl text-gray-800 space-y-4">
-                                    <span class="text-[11px] font-bold tracking-wider text-gray-400 uppercase block">Pilih Jenis Infak Cepat:</span>
-                                    <div class="flex flex-col sm:flex-row gap-3">
-                                        <select id="hero-infak-select" class="flex-1 px-4 py-3 bg-gray-50 border border-gray-200 rounded-2xl text-xs sm:text-sm font-semibold focus:outline-none focus:ring-2 focus:ring-nuha-primary">
-                                            ${DB.infaqCategories.map(cat => `<option value="${cat.name}">${cat.name}</option>`).join('')}
-                                        </select>
-                                        <button onclick="triggerInfakCheckoutFromHero()" class="px-6 py-3 bg-nuha-gold hover:bg-amber-700 text-white font-bold text-xs sm:text-sm rounded-2xl transition shadow-sm flex items-center justify-center gap-2 shrink-0">
-                                            Pilih Infak &rarr;
-                                        </button>
-                                    </div>
-
-                                    <div class="flex items-center gap-3 pt-2">
-                                        <button onclick="openInfakCheckout('Infak-Umum')" class="flex-1 py-3 px-5 bg-nuha-primary hover:bg-nuha-dark text-white font-bold text-xs sm:text-sm rounded-2xl transition shadow-md flex items-center justify-center gap-2">
-                                            <i data-lucide="heart" class="w-4 h-4 text-nuha-gold"></i> Tunaikan Infaq
-                                        </button>
-                                        <button onclick="navigateTo('program')" class="flex-1 py-3 px-5 bg-white border border-gray-200 hover:bg-gray-50 text-nuha-primary font-bold text-xs sm:text-sm rounded-2xl transition flex items-center justify-center">
-                                            Jelajahi Program
-                                        </button>
-                                    </div>
-                                </div>
+                <!-- HERO SLIDE HEADER -->
+                <section class="relative bg-gray-900 text-white w-full h-[320px] sm:h-[400px] flex items-center overflow-hidden">
+                    ${hasSlides ? `
+                        <div class="absolute inset-0 bg-cover bg-center transition-all duration-700" style="background-image: url('${currentSlide.foto}');"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-gray-950/80 via-gray-950/50 to-transparent"></div>
+                        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10">
+                            <div class="max-w-2xl space-y-3">
+                                <h1 class="text-2xl sm:text-4xl font-bold font-poppins">${currentSlide.judul}</h1>
+                                <p class="text-xs sm:text-sm text-gray-100">${currentSlide.subjudul || ''}</p>
                             </div>
                         </div>
-                    </div>
+                    ` : `
+                        <div class="absolute inset-0 bg-gradient-to-br from-[#0f4e2b] to-[#146438]"></div>
+                        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full z-10 text-center">
+                            <h1 class="text-2xl sm:text-4xl font-bold font-poppins">${DB.settings.siteName}</h1>
+                            <p class="text-xs sm:text-sm text-emerald-100 mt-2">Mari raih keberkahan bersama Lembaga Infaq Nurul Hayah.</p>
+                        </div>
+                    `}
                 </section>
 
-                <!-- SECTION: PILIH PERUNTUKAN INFAK GRID -->
-                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pt-8">
-                    <div class="text-center max-w-2xl mx-auto">
+                <!-- PERUNTUKAN INFAK -->
+                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 pt-4">
+                    <div class="text-center">
                         <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-gray-900">Pilih Peruntukan Infak</h2>
-                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Pilih program infak spesifik yang ingin Anda dukung hari ini</p>
                     </div>
-
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 sm:gap-6">
-                        ${DB.infaqCategories.map(cat => `
-                            <div onclick="openInfakCheckout('${cat.name}')" class="p-5 border border-gray-100 rounded-3xl bg-white hover:border-nuha-primary hover:shadow-xl transition cursor-pointer flex flex-col justify-between group space-y-4">
-                                <div class="text-nuha-primary group-hover:text-emerald-700 transition">
-                                    <i data-lucide="${cat.icon}" class="w-6 h-6"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-xs sm:text-sm text-gray-900 group-hover:text-nuha-primary transition">${cat.name}</h3>
-                                    <span class="text-[10px] text-gray-400 block mt-1">Tunaikan Sekarang &rarr;</span>
-                                </div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                        ${(DB.infaqCategories||[]).map(cat => `
+                            <div onclick="openInfakCheckout('${cat.name}')" class="p-5 border border-gray-100 rounded-3xl bg-white hover:border-nuha-primary transition cursor-pointer space-y-3 shadow-xs hover:shadow-md">
+                                <i data-lucide="${cat.icon}" class="w-6 h-6 text-nuha-primary"></i>
+                                <h3 class="font-bold text-xs sm:text-sm text-gray-900">${cat.name}</h3>
                             </div>
                         `).join('')}
                     </div>
                 </section>
 
-                <!-- SECTION: PROGRAM, GALLERY, BERITA -->
-                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-                    
-                    <!-- 1. PROGRAM UNGGULAN -->
-                    <div class="space-y-8">
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-gray-900">Program Unggulan NUHA</h2>
+                <!-- PROGRAM LINUHA (CAROUSEL SLIDER) -->
+                <section class="space-y-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-gray-900">Program LINUHA</h2>
+                        ${(DB.programs||[]).length > 0 ? `
+                            <div class="flex items-center gap-2" onmouseenter="pauseProgramAutoSlide()" onmouseleave="resumeProgramAutoSlide()">
+                                <button onclick="moveProgramSlide(-1)" class="w-10 h-10 rounded-full border border-gray-200 bg-white hover:bg-emerald-50 flex items-center justify-center shadow-xs">
+                                    <i data-lucide="chevron-left" class="w-5 h-5"></i>
+                                </button>
+                                <button onclick="moveProgramSlide(1)" class="w-10 h-10 rounded-full border border-gray-200 bg-white hover:bg-emerald-50 flex items-center justify-center shadow-xs">
+                                    <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                                </button>
                             </div>
-                            <button onclick="navigateTo('program')" class="text-xs font-bold text-nuha-primary hover:underline flex items-center gap-1">Lihat Semua Program &rarr;</button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            ${DB.programs.slice(0, 3).map(prog => `
-                                <div class="border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm flex flex-col justify-between hover:shadow-lg transition">
-                                    <img src="${prog.foto}" class="h-44 w-full object-cover">
-                                    <div class="p-6 space-y-4">
-                                        <span class="text-xs font-bold text-nuha-primary block">${prog.kategori}</span>
-                                        <h3 class="font-bold text-base text-gray-900 line-clamp-1">${prog.judul}</h3>
-                                        <p class="text-xs text-gray-500 line-clamp-2">${prog.deskripsi}</p>
-                                        <div class="space-y-1">
-                                            <div class="flex justify-between text-xs font-semibold">
-                                                <span>Terkumpul: ${formatRupiah(prog.terkumpul)}</span>
-                                                <span>Target: ${formatRupiah(prog.target)}</span>
-                                            </div>
-                                            <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                                <div class="bg-nuha-primary h-full" style="width: ${Math.min(100, Math.round((prog.terkumpul/prog.target)*100))}%"></div>
-                                            </div>
-                                        </div>
-                                        <button onclick="openInfakCheckout('${prog.judul}')" class="w-full py-2.5 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark transition">Donasi Sekarang &rarr;</button>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
+                        ` : ''}
                     </div>
 
-                    <!-- 2. GALLERY KEGIATAN & DOKUMENTASI -->
-                    <div class="space-y-8 bg-gray-50/60 p-8 rounded-3xl border border-gray-100">
-                        <div class="text-center max-w-xl mx-auto">
-                            <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-gray-900">Galeri Kegiatan Santri</h2>
-                            <p class="text-xs text-gray-500 mt-1">Momen kebersamaan dan penyaluran manfaat di Pondok Pesantren Nurul Hayah</p>
+                    ${(DB.programs||[]).length === 0 ? `
+                        <div class="p-12 text-center border-2 border-dashed border-gray-200 rounded-3xl bg-gray-50/50">
+                            <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-gray-300"></i>
+                            <p class="text-sm font-semibold text-gray-500 mt-2">Belum ada program LINUHA yang diterbitkan.</p>
+                            <p class="text-xs text-gray-400">Silakan tambahkan program melalui CMS Panel Admin.</p>
                         </div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            ${DB.gallery.map(item => `
-                                <div class="rounded-2xl overflow-hidden bg-white border border-gray-100 shadow-sm group">
-                                    <div class="relative overflow-hidden h-48">
-                                        <img src="${item.foto}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-                                    </div>
-                                    <div class="p-4 space-y-1">
-                                        <span class="text-[10px] text-gray-400 font-semibold block">${item.tanggal}</span>
-                                        <h3 class="font-bold text-xs sm:text-sm text-gray-900 line-clamp-1">${item.judul}</h3>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-
-                    <!-- 3. BERITA & INTEGRASI PROGRAM -->
-                    <div class="space-y-8">
-                        <div class="flex justify-between items-end">
-                            <div>
-                                <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-gray-900">Berita & Penyaluran Manfaat</h2>
-                            </div>
-                            <button onclick="navigateTo('berita')" class="text-xs font-bold text-nuha-primary hover:underline flex items-center gap-1">Baca Berita Lainnya &rarr;</button>
-                        </div>
-
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            ${DB.news.map(n => {
-                                const attachedProgram = DB.programs.find(p => p.id === n.programId);
-                                return `
-                                    <div class="p-6 border border-gray-100 rounded-3xl bg-white space-y-4 shadow-sm flex flex-col justify-between">
-                                        <div class="space-y-3">
-                                            <img src="${n.foto}" class="h-48 w-full object-cover rounded-2xl">
-                                            <span class="text-[10px] text-gray-400 font-semibold block">${n.tanggal}</span>
-                                            <h3 class="font-bold text-lg text-gray-900">${n.judul}</h3>
-                                            <p class="text-xs text-gray-500 leading-relaxed">${n.ringkasan}</p>
-                                        </div>
-
-                                        ${attachedProgram ? `
-                                            <div class="p-4 bg-emerald-50/70 border border-emerald-100 rounded-2xl space-y-2 mt-2">
-                                                <div class="flex justify-between items-center">
-                                                    <span class="text-[10px] font-bold uppercase text-nuha-primary">Dukung Program Berita Ini:</span>
-                                                    <span class="text-[10px] font-bold text-gray-700">${attachedProgram.kategori}</span>
+                    ` : `
+                        <div class="relative w-full overflow-hidden py-2" onmouseenter="pauseProgramAutoSlide()" onmouseleave="resumeProgramAutoSlide()">
+                            <div id="program-card-track" class="program-card-track">
+                                ${DB.programs.map(prog => {
+                                    const amount = getProgramRaisedAmount(prog);
+                                    const pct = Math.min(100, Math.round((amount / (prog.target||1))*100));
+                                    return `
+                                        <div class="w-[320px] shrink-0 border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm flex flex-col justify-between">
+                                            <img src="${prog.foto || 'https://placehold.co/600x400/286B56/FFFFFF?text=Program+NUHA'}" class="h-44 w-full object-cover">
+                                            <div class="p-6 space-y-4">
+                                                <span class="text-xs font-bold text-nuha-primary block">${prog.kategori || 'Program'}</span>
+                                                <h3 class="font-bold text-base text-gray-900 line-clamp-1">${prog.judul}</h3>
+                                                <div class="space-y-1">
+                                                    <div class="flex justify-between text-xs font-semibold">
+                                                        <span>Terkumpul: ${formatRupiah(amount)}</span>
+                                                        <span>Target: ${formatRupiah(prog.target)}</span>
+                                                    </div>
+                                                    <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                                        <div class="bg-nuha-primary h-full" style="width: ${pct}%"></div>
+                                                    </div>
                                                 </div>
-                                                <h4 class="font-bold text-xs text-gray-900">${attachedProgram.judul}</h4>
-                                                <button onclick="openInfakCheckout('${attachedProgram.judul}')" class="w-full py-2 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark transition flex items-center justify-center gap-1">
-                                                    <i data-lucide="heart" class="w-3.5 h-3.5 text-nuha-gold"></i> Infak Sekarang untuk Program Ini
-                                                </button>
+                                                <button onclick="openInfakCheckout('${prog.judul}')" class="btn-shimmer w-full py-2.5 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark">Donasi Sekarang &rarr;</button>
                                             </div>
-                                        ` : ''}
-                                    </div>
-                                `;
-                            }).join('')}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
                         </div>
+                    `}
+                </section>
+
+                <!-- GALERI LINUHA HOMEPAGE PREVIEW -->
+                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-gray-900">Galeri LINUHA</h2>
+                        ${(DB.gallery||[]).length > 0 ? `<button onclick="navigateTo('galeri')" class="text-xs font-bold text-nuha-primary hover:underline">Lihat Semua Galeri &rarr;</button>` : ''}
                     </div>
 
+                    ${(DB.gallery||[]).length === 0 ? `
+                        <div class="p-8 text-center border border-gray-100 rounded-3xl bg-gray-50/50">
+                            <p class="text-xs text-gray-400">Belum ada foto galeri.</p>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            ${DB.gallery.slice(0, 3).map(item => `
+                                <div class="border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm space-y-3 p-3">
+                                    <img src="${item.foto}" class="h-48 w-full object-cover rounded-2xl">
+                                    <div class="px-2 pb-2">
+                                        <h3 class="font-bold text-sm text-gray-900">${item.judul}</h3>
+                                        <span class="text-[10px] text-gray-400 block mt-1">${item.tanggal || ''}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `}
+                </section>
+
+                <!-- BERITA HOMEPAGE PREVIEW -->
+                <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+                    <div class="flex justify-between items-center">
+                        <h2 class="text-2xl sm:text-3xl font-bold font-poppins text-gray-900">Berita & Penyaluran</h2>
+                        ${(DB.news||[]).length > 0 ? `<button onclick="navigateTo('berita')" class="text-xs font-bold text-nuha-primary hover:underline">Lihat Semua Berita &rarr;</button>` : ''}
+                    </div>
+
+                    ${(DB.news||[]).length === 0 ? `
+                        <div class="p-8 text-center border border-gray-100 rounded-3xl bg-gray-50/50">
+                            <p class="text-xs text-gray-400">Belum ada Berita atau Kegiatan diterbitkan.</p>
+                        </div>
+                    ` : `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            ${DB.news.slice(0, 2).map(n => `
+                                <div class="border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm p-6 space-y-3">
+                                    <img src="${n.foto}" class="h-48 w-full object-cover rounded-2xl">
+                                    <span class="text-[10px] text-gray-400 block">${n.tanggal || ''}</span>
+                                    <h3 class="font-bold text-base text-gray-900">${n.judul}</h3>
+                                    <p class="text-xs text-gray-600 line-clamp-2">${n.ringkasan || ''}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    `}
                 </section>
             `;
 
-            setTimeout(() => {
-                startHeroAutoSlide();
-            }, 50);
-
+            if ((DB.programs||[]).length > 0) {
+                setTimeout(() => { startProgramAutoSlide(); }, 100);
+            }
             return container;
         }
 
         function renderAboutPage() {
             const container = document.createElement('div');
-            container.className = "py-16 bg-white";
+            container.className = "py-16 bg-white font-sans";
             container.innerHTML = `
-                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-                    <div class="text-center max-w-3xl mx-auto">
-                        <h1 class="text-3xl sm:text-4xl font-bold font-poppins text-gray-900">Lembaga Infaq Nurul Hayah</h1>
-                    </div>
-
-                    <div class="p-8 border border-gray-100 rounded-3xl bg-white shadow-xl space-y-6">
-                        <p class="text-sm text-gray-700 leading-relaxed">
-                            Lembaga Infaq Nurul Hayah berdiri atas arahan dan bimbingan pengasuh Pondok Pesantren Nurul Hayah, 
-                            <strong class="text-nuha-primary">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</strong> Kami hadir sebagai penggerak sosial skala nasional yang berfokus pada penghimpunan dan penyaluran infaq untuk pembangunan infrastruktur pendidikan Islam serta pemberdayaan kesejahteraan umat.
-                        </p>
-                        <p class="text-sm text-gray-700 leading-relaxed">
-                            Kami percaya bahwa pendidikan adalah kunci utama untuk mencetak generasi muslim yang mandiri, berdaya saing, dan berakhlak mulia.
-                        </p>
+                <div class="max-w-4xl mx-auto px-4 space-y-6">
+                    <h1 class="text-3xl font-bold font-poppins text-gray-900 text-center">Tentang LINUHA</h1>
+                    <div class="p-8 border border-gray-100 rounded-3xl bg-white shadow-sm space-y-4">
+                        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">${DB.settings.aboutText}</p>
                     </div>
                 </div>
             `;
@@ -828,29 +547,18 @@
 
         function renderVisiMisiPage() {
             const container = document.createElement('div');
-            container.className = "py-16 bg-white";
+            container.className = "py-16 bg-white font-sans";
             container.innerHTML = `
-                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-                    <div class="p-2 bg-gray-50 rounded-xl text-[11px] text-gray-500 border border-gray-100 flex items-center gap-2">
-                        <i data-lucide="globe" class="w-3.5 h-3.5 text-nuha-primary"></i> infaqnurulhayah.or.id/visi-misi
-                    </div>
-                    <div class="text-center max-w-2xl mx-auto">
-                        <span class="px-3 py-1 bg-emerald-50 text-nuha-primary font-bold text-xs rounded-full">Visi & Misi</span>
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900 mt-2">Amanah Bersama, Sejahtera, dan Berdaya</h1>
-                    </div>
+                <div class="max-w-4xl mx-auto px-4 space-y-6">
+                    <h1 class="text-3xl font-bold font-poppins text-gray-900 text-center">Visi & Misi</h1>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="p-8 border border-emerald-100 rounded-3xl bg-emerald-50/50 space-y-3">
-                            <h3 class="text-lg font-bold text-nuha-primary">Visi Kami</h3>
-                            <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">Menjadi Lembaga Infaq terdepan dalam mewujudkan kesejahteraan sosial dan pendidikan yang merata, berkualitas, dan berkelanjutan bagi masyarakat kurang mampu.</p>
+                        <div class="p-6 border border-emerald-100 rounded-3xl bg-emerald-50/50 space-y-2">
+                            <h3 class="font-bold text-nuha-primary text-base">Visi Kami</h3>
+                            <p class="text-xs text-gray-700 leading-relaxed">${DB.settings.visiText}</p>
                         </div>
-                        <div class="p-8 border border-gray-100 rounded-3xl bg-white space-y-3">
-                            <h3 class="text-lg font-bold text-gray-900">Misi & Fokus Gerakan</h3>
-                            <ul class="text-xs sm:text-sm text-gray-600 space-y-2 list-disc pl-4">
-                                <li>Akses Pendidikan Layak bagi anak yatim & dhuafa</li>
-                                <li>Pengembangan Fasilitas Sekolah & Asrama</li>
-                                <li>Inovasi Keterampilan & Teknologi Santri</li>
-                                <li>Pengelolaan Akuntabel & Transparan</li>
-                            </ul>
+                        <div class="p-6 border border-gray-100 rounded-3xl bg-white space-y-2">
+                            <h3 class="font-bold text-gray-900 text-base">Misi & Fokus Gerakan</h3>
+                            <p class="text-xs text-gray-700 whitespace-pre-line leading-relaxed">${DB.settings.misiText}</p>
                         </div>
                     </div>
                 </div>
@@ -860,163 +568,29 @@
 
         function renderPengurusPage() {
             const container = document.createElement('div');
-            container.className = "py-16 bg-white";
-            container.innerHTML = `
-                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-                    <div class="p-2 bg-gray-50 rounded-xl text-[11px] text-gray-500 border border-gray-100 flex items-center gap-2">
-                        <i data-lucide="globe" class="w-3.5 h-3.5 text-nuha-primary"></i> infaqnurulhayah.or.id/susunan-pengurus
-                    </div>
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Susunan Pengurus & Dewan Pembina</h1>
-                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Para ulama dan profesional yang membimbing serta mengawal gerakan amanah NUHA</p>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
-                        <div class="p-6 border border-gray-100 rounded-3xl bg-white shadow-sm space-y-3">
-                            <div class="w-20 h-20 bg-emerald-100 rounded-full mx-auto flex items-center justify-center text-nuha-primary font-bold text-xl">JA</div>
-                            <h3 class="font-bold text-sm text-gray-900">Dr. KH. Ja'far Ath-Thayyar, Lc., M.A.</h3>
-                            <span class="text-xs text-nuha-primary font-semibold block">Pengasuh & Pembina Utama</span>
-                        </div>
-                        <div class="p-6 border border-gray-100 rounded-3xl bg-white shadow-sm space-y-3">
-                            <div class="w-20 h-20 bg-emerald-100 rounded-full mx-auto flex items-center justify-center text-nuha-primary font-bold text-xl">HA</div>
-                            <h3 class="font-bold text-sm text-gray-900">H. Ahmad Fauzi, M.Pd.</h3>
-                            <span class="text-xs text-nuha-primary font-semibold block">Ketua Pengurus Lembaga</span>
-                        </div>
-                        <div class="p-6 border border-gray-100 rounded-3xl bg-white shadow-sm space-y-3">
-                            <div class="w-20 h-20 bg-emerald-100 rounded-full mx-auto flex items-center justify-center text-nuha-primary font-bold text-xl">SR</div>
-                            <h3 class="font-bold text-sm text-gray-900">Siti Rahmah, S.E., Ak.</h3>
-                            <span class="text-xs text-nuha-primary font-semibold block">Bendahara & Keuangan</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            return container;
-        }
+            container.className = "py-16 bg-white font-sans";
+            const pengurus = DB.pengurusList || [];
 
-        function renderLegalitasPage() {
-            const container = document.createElement('div');
-            container.className = "py-16 bg-white";
             container.innerHTML = `
-                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="p-2 bg-gray-50 rounded-xl text-[11px] text-gray-500 border border-gray-100 flex items-center gap-2">
-                        <i data-lucide="globe" class="w-3.5 h-3.5 text-nuha-primary"></i> infaqnurulhayah.or.id/legalitas
-                    </div>
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Legalitas & Transparansi Lembaga</h1>
-                    </div>
-                    <div class="p-8 border border-gray-100 rounded-3xl bg-white space-y-4">
-                        <div class="flex items-center justify-between border-b pb-3 text-xs">
-                            <span class="text-gray-500">Izin Operasional Lembaga:</span>
-                            <span class="font-bold text-gray-900">SK Kemenag RI No. 912/2024</span>
+                <div class="max-w-5xl mx-auto px-4 space-y-8">
+                    <h1 class="text-3xl font-bold font-poppins text-gray-900 text-center">Susunan Pengurus</h1>
+                    ${pengurus.length === 0 ? `
+                        <div class="p-12 text-center border rounded-3xl bg-gray-50"><p class="text-xs text-gray-400">Data pengurus belum diisi.</p></div>
+                    ` : `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            ${pengurus.map(p => `
+                                <div class="p-6 border border-gray-100 rounded-3xl text-center space-y-3 bg-white shadow-xs">
+                                    ${p.foto ? `
+                                        <img src="${p.foto}" class="w-24 h-24 rounded-full object-cover mx-auto border-2 border-emerald-500">
+                                    ` : `
+                                        <div class="w-20 h-20 bg-emerald-100 text-nuha-primary rounded-full mx-auto flex items-center justify-center font-bold text-xl">${p.nama ? p.nama.substring(0,2) : 'PH'}</div>
+                                    `}
+                                    <h4 class="font-bold text-sm text-gray-900">${p.nama}</h4>
+                                    <span class="text-xs text-nuha-primary font-semibold block">${p.jabatan}</span>
+                                </div>
+                            `).join('')}
                         </div>
-                        <div class="flex items-center justify-between border-b pb-3 text-xs">
-                            <span class="text-gray-500">Akta Pendirian Notaris:</span>
-                            <span class="font-bold text-gray-900">No. 14 / Tgl 12 Januari 2024</span>
-                        </div>
-                        <div class="flex items-center justify-between border-b pb-3 text-xs">
-                            <span class="text-gray-500">NPWP Resmi Lembaga:</span>
-                            <span class="font-bold text-gray-900">84.192.381.2-401.000</span>
-                        </div>
-                        <div class="flex items-center justify-between text-xs">
-                            <span class="text-gray-500">Audit Keuangan Bulanan:</span>
-                            <span class="font-bold text-emerald-600">Opini WTP (Wajar Tanpa Pengecualian)</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            return container;
-        }
-
-        function renderProgramSubPage(title, desc, image) {
-            const container = document.createElement('div');
-            container.className = "py-16 bg-white space-y-8";
-            container.innerHTML = `
-                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="rounded-3xl overflow-hidden h-72 w-full bg-cover bg-center shadow-lg" style="background-image: url('${image}');">
-                        <div class="w-full h-full bg-gradient-to-t from-black/80 via-black/30 to-transparent p-8 flex flex-col justify-end text-white">
-                            <h1 class="text-3xl font-bold font-poppins">${title}</h1>
-                            <p class="text-sm text-gray-200 mt-1">${desc}</p>
-                        </div>
-                    </div>
-                    <div class="p-8 border border-gray-100 rounded-3xl bg-white space-y-4">
-                        <h3 class="font-bold text-base text-gray-900">Deskripsi Program & Target Manfaat</h3>
-                        <p class="text-xs sm:text-sm text-gray-600 leading-relaxed">Melalui pilar ini, Lembaga Infaq NUHA secara rutin menyalurkan donasi amanah dari para donatur untuk memastikan dampak positif jangka panjang bagi kesejahteraan santri dan penerima manfaat dhuafa.</p>
-                        <button onclick="openInfakCheckout('${title}')" class="px-6 py-3 bg-nuha-primary text-white font-bold text-xs rounded-2xl shadow-sm hover:bg-nuha-dark transition">Tunaikan Infak Program Ini &rarr;</button>
-                    </div>
-                </div>
-            `;
-            return container;
-        }
-
-        function renderKalkulatorZakatPage() {
-            const container = document.createElement('div');
-            container.className = "py-16 bg-white";
-            container.innerHTML = `
-                <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Kalkulator Zakat & Infak</h1>
-                        <p class="text-xs text-gray-500 mt-1">Hitung potensi kewajiban zakat dan rekomendasi infak harian Anda secara akurat</p>
-                    </div>
-                    <div class="p-8 border border-gray-100 rounded-3xl bg-white space-y-6 shadow-sm">
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-700">Penghasilan Per Bulan (Rp)</label>
-                            <input type="number" id="calc-income" placeholder="Contoh: 10000000" class="w-full p-3 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary">
-                        </div>
-                        <button onclick="calculateZakat()" class="w-full py-3 bg-nuha-primary text-white font-bold text-xs rounded-2xl hover:bg-nuha-dark transition">Hitung Zakat / Infak</button>
-                        <div id="calc-result" class="hidden p-4 bg-emerald-50 border border-emerald-100 rounded-2xl text-xs text-nuha-primary font-bold text-center"></div>
-                    </div>
-                </div>
-            `;
-            return container;
-        }
-
-        function calculateZakat() {
-            const val = parseFloat(document.getElementById('calc-income').value || 0);
-            const res = document.getElementById('calc-result');
-            if (val > 0) {
-                const zakat = val * 0.025;
-                res.innerHTML = `Potensi Zakat Penghasilan (2.5%): ${formatRupiah(zakat)} / bulan`;
-                res.classList.remove('hidden');
-            }
-        }
-
-        function renderKonfirmasiDonasiPage() {
-            const container = document.createElement('div');
-            container.className = "py-16 bg-white";
-            container.innerHTML = `
-                <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Konfirmasi Transfer Donasi</h1>
-                        <p class="text-xs text-gray-500 mt-1">Unggah bukti transfer infak Anda untuk diverifikasi oleh pengurus NUHA</p>
-                    </div>
-                    <div class="p-8 border border-gray-100 rounded-3xl bg-white space-y-4 shadow-sm">
-                        <input type="text" placeholder="Kode Transaksi (Contoh: TRX-9821)" class="w-full p-3 border border-gray-200 rounded-2xl text-xs">
-                        <input type="file" class="w-full p-2 border border-gray-200 rounded-2xl text-xs">
-                        <button onclick="alert('Bukti donasi berhasil dikirim! Pengurus akan melakukan verifikasi.')" class="w-full py-3 bg-nuha-primary text-white font-bold text-xs rounded-2xl hover:bg-nuha-dark transition">Kirim Konfirmasi &rarr;</button>
-                    </div>
-                </div>
-            `;
-            return container;
-        }
-
-        function renderEdukasiPage() {
-            const container = document.createElement('div');
-            container.className = "py-16 bg-white";
-            container.innerHTML = `
-                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Edukasi Ziswaf & Keislaman</h1>
-                        <p class="text-xs text-gray-500 mt-1">Artikel dan kajian fikih seputar keberkahan infak dan sedekah</p>
-                    </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                        <div class="p-6 border border-gray-100 rounded-3xl bg-white space-y-2">
-                            <h3 class="font-bold text-sm text-gray-900">Keutamaan Infak Subuh Bagi Pembuka Rezeki</h3>
-                            <p class="text-xs text-gray-500">Malaikat berdoa setiap pagi untuk orang yang menginfakkan hartanya di jalan Allah...</p>
-                        </div>
-                        <div class="p-6 border border-gray-100 rounded-3xl bg-white space-y-2">
-                            <h3 class="font-bold text-sm text-gray-900">Amal Jariyah Pendidikan Penghafal Qur'an</h3>
-                            <p class="text-xs text-gray-500">Pahala huruf demi huruf yang dibaca santri akan terus mengalir kepada para donatur...</p>
-                        </div>
-                    </div>
+                    `}
                 </div>
             `;
             return container;
@@ -1024,61 +598,72 @@
 
         function renderProgramPage() {
             const container = document.createElement('div');
-            container.className = "py-16 bg-white";
+            container.className = "py-16 bg-white font-sans";
+            const progs = DB.programs || [];
+
             container.innerHTML = `
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="text-center max-w-2xl mx-auto">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Program Unggulan NUHA</h1>
-                        <p class="text-xs sm:text-sm text-gray-500 mt-1">Daftar program kebaikan yang sedang berjalan dan membutuhkan dukungan Anda</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        ${DB.programs.map(prog => `
-                            <div class="border border-gray-100 rounded-3xl overflow-hidden bg-white shadow-sm flex flex-col justify-between">
-                                <img src="${prog.foto}" class="h-44 w-full object-cover">
-                                <div class="p-6 space-y-4">
-                                    <span class="text-xs font-bold text-nuha-primary block">${prog.kategori}</span>
-                                    <h3 class="font-bold text-base text-gray-900">${prog.judul}</h3>
-                                    <p class="text-xs text-gray-500 line-clamp-2">${prog.deskripsi}</p>
-                                    <div class="space-y-1">
-                                        <div class="flex justify-between text-xs font-semibold">
-                                            <span>Terkumpul: ${formatRupiah(prog.terkumpul)}</span>
-                                            <span>Target: ${formatRupiah(prog.target)}</span>
+                <div class="max-w-6xl mx-auto px-4 space-y-8">
+                    <h1 class="text-3xl font-bold font-poppins text-gray-900 text-center">Program LINUHA</h1>
+                    ${progs.length === 0 ? `
+                        <div class="p-12 text-center border-2 border-dashed rounded-3xl bg-gray-50"><p class="text-xs text-gray-400">Belum ada program LINUHA.</p></div>
+                    ` : `
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            ${progs.map(prog => {
+                                const amount = getProgramRaisedAmount(prog);
+                                const pct = Math.min(100, Math.round((amount / (prog.target||1))*100));
+                                return `
+                                    <div class="border border-gray-100 rounded-3xl overflow-hidden p-6 space-y-4 bg-white shadow-xs flex flex-col justify-between">
+                                        <div class="space-y-3">
+                                            <img src="${prog.foto || 'https://placehold.co/600x400/286B56/FFFFFF?text=Program'}" class="h-44 w-full object-cover rounded-2xl">
+                                            <span class="text-xs font-bold text-nuha-primary">${prog.kategori || 'Program'}</span>
+                                            <h3 class="font-bold text-base text-gray-900">${prog.judul}</h3>
+                                            <p class="text-xs text-gray-500 leading-relaxed">${prog.deskripsi || ''}</p>
                                         </div>
-                                        <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
-                                            <div class="bg-nuha-primary h-full" style="width: ${Math.min(100, Math.round((prog.terkumpul/prog.target)*100))}%"></div>
+                                        <div class="space-y-3 pt-2">
+                                            <div class="space-y-1">
+                                                <div class="flex justify-between text-xs font-semibold">
+                                                    <span>Terkumpul: ${formatRupiah(amount)}</span>
+                                                    <span>Target: ${formatRupiah(prog.target)}</span>
+                                                </div>
+                                                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                                                    <div class="bg-nuha-primary h-full" style="width: ${pct}%"></div>
+                                                </div>
+                                            </div>
+                                            <button onclick="openInfakCheckout('${prog.judul}')" class="btn-shimmer w-full py-2.5 bg-nuha-primary text-white rounded-xl font-bold text-xs hover:bg-nuha-dark">Infak Sekarang &rarr;</button>
                                         </div>
                                     </div>
-                                    <button onclick="openInfakCheckout('${prog.judul}')" class="w-full py-2.5 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark transition">Donasi Sekarang &rarr;</button>
-                                </div>
-                            </div>
-                        `).join('')}
-                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+                    `}
                 </div>
             `;
             return container;
         }
 
-        function renderCampaignPage() {
+        function renderGaleriPage() {
             const container = document.createElement('div');
-            container.className = "py-16 bg-white";
+            container.className = "py-16 bg-white font-sans";
+            const items = DB.gallery || [];
+
             container.innerHTML = `
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="text-center max-w-2xl mx-auto">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Campaign Aktif</h1>
-                        <p class="text-xs text-gray-500 mt-1">Mari bergotong-royong menyelesaikan target campaign sosial NUHA</p>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        ${DB.campaigns.map(cmp => `
-                            <div class="border border-gray-100 rounded-3xl p-6 bg-white shadow-sm flex flex-col sm:flex-row gap-6">
-                                <img src="${cmp.foto}" class="w-full sm:w-40 h-36 object-cover rounded-2xl">
-                                <div class="space-y-3 flex-1">
-                                    <h3 class="font-bold text-base text-gray-900">${cmp.judul}</h3>
-                                    <div class="text-xs text-gray-500">Target: <strong class="text-gray-900">${formatRupiah(cmp.target)}</strong></div>
-                                    <button onclick="openInfakCheckout('${cmp.judul}')" class="px-5 py-2 bg-nuha-gold text-white font-bold text-xs rounded-xl shadow-sm">Bantu Campaign &rarr;</button>
+                <div class="max-w-6xl mx-auto px-4 space-y-8">
+                    <h1 class="text-3xl font-bold font-poppins text-gray-900 text-center">Galeri LINUHA</h1>
+                    ${items.length === 0 ? `
+                        <div class="p-12 text-center border-2 border-dashed rounded-3xl bg-gray-50"><p class="text-xs text-gray-400">Belum ada foto galeri.</p></div>
+                    ` : `
+                        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                            ${items.map(item => `
+                                <div class="border border-gray-100 rounded-3xl overflow-hidden p-3 bg-white shadow-xs space-y-3">
+                                    <img src="${item.foto}" class="h-52 w-full object-cover rounded-2xl">
+                                    <div class="px-2 pb-2">
+                                        <h3 class="font-bold text-sm text-gray-900">${item.judul}</h3>
+                                        <span class="text-[10px] text-gray-400 block mt-1">${item.tanggal || ''}</span>
+                                    </div>
                                 </div>
-                            </div>
-                        `).join('')}
-                    </div>
+                            `).join('')}
+                        </div>
+                    `}
                 </div>
             `;
             return container;
@@ -1086,903 +671,224 @@
 
         function renderBeritaPage() {
             const container = document.createElement('div');
-            container.className = "py-16 bg-white";
+            container.className = "py-16 bg-white font-sans";
+            const newsList = DB.news || [];
+
             container.innerHTML = `
-                <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Berita & Kegiatan NUHA</h1>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        ${DB.news.map(n => `
-                            <div class="p-6 border border-gray-100 rounded-3xl bg-white space-y-3 shadow-sm">
-                                <img src="${n.foto}" class="h-48 w-full object-cover rounded-2xl">
-                                <span class="text-[10px] text-gray-400 font-semibold block">${n.tanggal}</span>
-                                <h3 class="font-bold text-lg text-gray-900">${n.judul}</h3>
-                                <p class="text-xs text-gray-500 leading-relaxed">${n.ringkasan}</p>
-                            </div>
-                        `).join('')}
-                    </div>
+                <div class="max-w-5xl mx-auto px-4 space-y-8">
+                    <h1 class="text-3xl font-bold font-poppins text-gray-900 text-center">Berita & Kegiatan</h1>
+                    ${newsList.length === 0 ? `
+                        <div class="p-12 text-center border-2 border-dashed rounded-3xl bg-gray-50"><p class="text-xs text-gray-400">Belum ada berita diterbitkan.</p></div>
+                    ` : `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            ${newsList.map(n => `
+                                <div class="p-6 border border-gray-100 rounded-3xl bg-white shadow-xs space-y-3">
+                                    <img src="${n.foto || 'https://placehold.co/600x400/286B56/FFFFFF?text=Berita'}" class="h-48 w-full object-cover rounded-2xl">
+                                    <span class="text-[10px] text-gray-400 block">${n.tanggal || ''}</span>
+                                    <h3 class="font-bold text-lg text-gray-900">${n.judul}</h3>
+                                    <p class="text-xs text-gray-600 leading-relaxed">${n.ringkasan || ''}</p>
+                                    ${n.embedUrl ? `
+                                        <div class="pt-2">
+                                            <a href="${n.embedUrl}" target="_blank" class="text-xs font-bold text-nuha-primary hover:underline flex items-center gap-1">
+                                                <i data-lucide="external-link" class="w-3.5 h-3.5"></i> Lihat Media Terkait
+                                            </a>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                        </div>
+                    `}
                 </div>
             `;
             return container;
-        }
-
-        function renderLaporanPage() {
-            const container = document.createElement('div');
-            container.className = "py-16 bg-white";
-            container.innerHTML = `
-                <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
-                    <div class="text-center">
-                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Laporan Transparansi Keuangan</h1>
-                        <p class="text-xs text-gray-500 mt-1">Audit pemasukan dan penyaluran infaq secara real-time</p>
-                    </div>
-                    <div class="p-8 border border-gray-100 rounded-3xl bg-white shadow-sm space-y-4">
-                        <div class="flex justify-between text-xs border-b pb-3 font-bold">
-                            <span>Total Infaq Diterima:</span>
-                            <span class="text-emerald-600">${formatRupiah(DB.stats.totalInfaq)}</span>
-                        </div>
-                        <div class="flex justify-between text-xs border-b pb-3 font-bold">
-                            <span>Total Penyaluran Program:</span>
-                            <span class="text-amber-600">${formatRupiah(185000000)}</span>
-                        </div>
-                        <div class="flex justify-between text-xs font-bold">
-                            <span>Saldo Kas Amanah:</span>
-                            <span class="text-nuha-primary">${formatRupiah(DB.stats.totalInfaq - 185000000)}</span>
-                        </div>
-                    </div>
-                </div>
-            `;
-            return container;
-        }
-
-        function renderInfakDedicatedPage() {
-            return renderInfakCheckoutPage();
         }
 
         function renderInfakCheckoutPage() {
             const container = document.createElement('div');
-            container.className = "py-12 bg-gray-50/50 min-h-[80vh] font-sans";
-            const categoryName = state.selectedCategorySlug.replace(/-/g, ' ');
+            container.className = "py-12 bg-gray-50 font-sans min-h-[70vh] flex items-center";
+            const methods = DB.paymentMethods || [];
 
             container.innerHTML = `
-                <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-                    <div class="bg-white p-2 rounded-xl text-[11px] text-gray-500 border border-gray-100 flex items-center gap-2 shadow-sm">
-                        <i data-lucide="globe" class="w-3.5 h-3.5 text-nuha-primary"></i> infaqnurulhayah.or.id/infaq/${state.selectedCategorySlug}
-                    </div>
-
-                    <div class="bg-white p-6 sm:p-10 rounded-3xl border border-gray-100 shadow-xl space-y-6">
+                <div class="max-w-2xl mx-auto px-4 w-full space-y-6">
+                    <div class="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm space-y-6">
                         <div class="border-b pb-4">
-                            <h1 class="text-2xl font-bold font-poppins text-gray-900">${categoryName}</h1>
-                            <p class="text-xs text-gray-500 mt-1">Infaq Anda akan disalurkan secara amanah untuk santri dan dhuafa NUHA</p>
+                            <h1 class="text-2xl font-bold text-gray-900">Form Infak Online</h1>
+                            <p class="text-xs text-gray-500">Tunaikan infak secara mudah dan amanah melalui pilihan rekening resmi LINUHA.</p>
                         </div>
-
-                        <!-- Nominals Quick Picker -->
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-700">Pilih Nominal Infak</label>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                                <button onclick="setCheckoutAmount(50000)" class="p-3 border border-gray-200 rounded-2xl text-xs font-bold hover:border-nuha-primary hover:bg-emerald-50 transition">Rp 50.000</button>
-                                <button onclick="setCheckoutAmount(100000)" class="p-3 border border-gray-200 rounded-2xl text-xs font-bold hover:border-nuha-primary hover:bg-emerald-50 transition">Rp 100.000</button>
-                                <button onclick="setCheckoutAmount(250000)" class="p-3 border border-gray-200 rounded-2xl text-xs font-bold hover:border-nuha-primary hover:bg-emerald-50 transition">Rp 250.000</button>
-                                <button onclick="setCheckoutAmount(500000)" class="p-3 border border-gray-200 rounded-2xl text-xs font-bold hover:border-nuha-primary hover:bg-emerald-50 transition">Rp 500.000</button>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-xs font-bold text-gray-700 block mb-1">Nominal Infak (Rp)</label>
+                                <input type="number" id="manual-checkout-amount" placeholder="Contoh: 50000" class="w-full p-3.5 border border-gray-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-nuha-primary focus:outline-none">
                             </div>
-                        </div>
 
-                        <!-- Manual Input -->
-                        <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-700">Atau Nominal Bebas (Rp)</label>
-                            <input type="number" id="manual-checkout-amount" placeholder="Masukkan jumlah nominal..." class="w-full p-3 border border-gray-200 rounded-2xl text-xs font-bold focus:ring-2 focus:ring-nuha-primary">
-                        </div>
+                            <div>
+                                <label class="text-xs font-bold text-gray-700 block mb-1">Nama Donatur / Pengirim</label>
+                                <input type="text" id="donor-name" placeholder="Nama Lengkap / Hamba Allah" class="w-full p-3.5 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none">
+                            </div>
 
-                        <!-- Donor Data -->
-                        <div class="space-y-4 pt-2">
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div class="space-y-1">
-                                    <label class="text-xs font-bold text-gray-700">Nama Lengkap</label>
-                                    <input type="text" id="donor-name" placeholder="Nama Donatur" class="w-full p-3 border border-gray-200 rounded-2xl text-xs">
-                                </div>
-                                <div class="space-y-1">
-                                    <label class="text-xs font-bold text-gray-700">No. WhatsApp</label>
-                                    <input type="text" id="donor-phone" placeholder="081234567..." class="w-full p-3 border border-gray-200 rounded-2xl text-xs">
+                            <div>
+                                <label class="text-xs font-bold text-gray-700 block mb-2">Pilih Rekening Tujuan Transfer</label>
+                                <div class="space-y-2">
+                                    ${methods.map(m => `
+                                        <div class="p-4 border border-gray-200 rounded-2xl flex justify-between items-center bg-gray-50/50">
+                                            <div>
+                                                <h4 class="font-bold text-xs text-gray-900">${m.name}</h4>
+                                                <p class="text-xs text-nuha-primary font-mono font-bold mt-0.5">${m.account}</p>
+                                            </div>
+                                            ${m.qrImage ? `<a href="${m.qrImage}" target="_blank" class="px-3 py-1.5 bg-emerald-100 text-nuha-primary font-bold text-[10px] rounded-lg">Lihat QRIS</a>` : ''}
+                                        </div>
+                                    `).join('')}
                                 </div>
                             </div>
 
-                            <div class="space-y-1">
-                                <label class="text-xs font-bold text-gray-700">Pesan & Doa (Opsional)</label>
-                                <textarea id="donor-message" rows="2" placeholder="Tuliskan hajat atau doa Anda..." class="w-full p-3 border border-gray-200 rounded-2xl text-xs"></textarea>
-                            </div>
-
-                            <!-- Payment Option -->
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-gray-700">Metode Pembayaran</label>
-                                <select id="payment-method-select" class="w-full p-3 border border-gray-200 rounded-2xl text-xs font-bold bg-white">
-                                    <option value="Transfer BSI">Bank Syariah Indonesia (BSI) - 7123-4567-89</option>
-                                    <option value="Transfer Muamalat">Bank Muamalat - 345-00123-99</option>
-                                    <option value="QRIS">QRIS All Payment (Gopay/OVO/Dana/BCA)</option>
-                                </select>
-                            </div>
+                            <button onclick="submitInfaqDonation()" class="btn-shimmer w-full py-4 bg-nuha-primary text-white font-bold text-sm rounded-2xl hover:bg-nuha-dark shadow-md transition">Tunaikan Infak Sekarang &rarr;</button>
                         </div>
-
-                        <button onclick="submitInfaqDonation()" class="w-full py-3.5 bg-nuha-primary text-white font-bold text-xs sm:text-sm rounded-2xl shadow-lg hover:bg-nuha-dark transition flex items-center justify-center gap-2">
-                            <i data-lucide="heart" class="w-4 h-4 text-nuha-gold"></i> Selesaikan Infak Sekarang &rarr;
-                        </button>
                     </div>
                 </div>
             `;
             return container;
-        }
-
-        function setCheckoutAmount(amt) {
-            const input = document.getElementById('manual-checkout-amount');
-            if (input) input.value = amt;
         }
 
         function submitInfaqDonation() {
             const amt = parseFloat(document.getElementById('manual-checkout-amount')?.value || 0);
             const name = document.getElementById('donor-name')?.value || 'Hamba Allah';
-            const method = document.getElementById('payment-method-select')?.value || 'QRIS';
 
-            if (amt < 10000) {
-                alert('Minimal infak adalah Rp 10.000');
-                return;
+            if (amt >= 10000) {
+                alert(`Terima kasih ${name}, infak sebesar ${formatRupiah(amt)} berhasil diinisiasi. Silakan lakukan transfer dan isi form konfirmasi!`);
+                navigateTo('konfirmasi-donasi');
+            } else {
+                alert('Nominal infak minimal adalah Rp 10.000');
             }
-
-            const newDonation = {
-                id: 'TRX-' + Math.floor(1000 + Math.random() * 9000),
-                nama: name,
-                nominal: amt,
-                metode: method,
-                status: 'Menunggu Verifikasi',
-                tanggal: new Date().toISOString().split('T')[0],
-                programId: 1,
-                anonim: name === 'Hamba Allah',
-                doa: document.getElementById('donor-message')?.value || 'Bismillah'
-            };
-
-            DB.donations.unshift(newDonation);
-            DB.stats.totalInfaq += amt;
-            DB.stats.totalDonatur += 1;
-            saveDB();
-
-            alert(`Jazakallah Khairan! Infak sebesar ${formatRupiah(amt)} berhasil dicatat. Silakan lakukan konfirmasi pembayaran.`);
-            navigateTo('konfirmasi-donasi');
         }
 
-        function openInfakCheckout(categoryName) {
-            state.selectedCategorySlug = categoryName.replace(/\s+/g, '-');
-            navigateTo('checkout');
-        }
-
-        function triggerInfakCheckoutFromHero() {
-            const val = document.getElementById('hero-infak-select')?.value || 'Infak Umum';
-            openInfakCheckout(val);
-        }
-
-        // --- AUTH & LOGIN PAGES ---
-        function renderUserLoginPage() {
+        function renderKonfirmasiDonasiPage() {
             const container = document.createElement('div');
-            container.className = "min-h-screen bg-white flex flex-col justify-center items-center p-4 font-sans";
-            
-            const isRegister = state.userLoginForm.isRegister;
-
+            container.className = "py-16 bg-white font-sans min-h-[70vh] flex items-center";
             container.innerHTML = `
-                <div class="max-w-md w-full p-8 border border-gray-100 rounded-3xl bg-white shadow-xl space-y-6">
+                <div class="max-w-xl mx-auto px-4 w-full space-y-6">
                     <div class="text-center space-y-2">
-                        <img src="${OFFICIAL_LOGO}" class="h-12 mx-auto object-contain" alt="NUHA Logo">
-                        <h2 class="text-xl font-bold font-poppins text-gray-900">${isRegister ? 'Daftar Akun Baru' : 'Masuk Akun NUHA'}</h2>
-                        <p class="text-xs text-gray-500">${isRegister ? 'Buat akun donatur untuk kemudahan berinfak' : 'Masuk donatur atau pengurus melalui Google atau Email'}</p>
+                        <h1 class="text-3xl font-bold font-poppins text-gray-900">Konfirmasi Transfer Donasi</h1>
+                        <p class="text-xs text-gray-500">Kirim bukti transfer Anda agar verifikator admin dapat segera memprosesnya.</p>
                     </div>
 
-                    <!-- SINGLE GOOGLE OAUTH LOGIN BUTTON -->
-                    <button onclick="loginWithGoogle()" class="w-full py-3 px-4 border border-gray-200 rounded-2xl text-xs font-bold text-gray-700 bg-white hover:bg-gray-50 transition flex items-center justify-center gap-3 shadow-sm">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24">
-                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
-                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
-                        </svg>
-                        ${isRegister ? 'Daftar dengan Akun Google' : 'Masuk dengan Akun Google'}
-                    </button>
-
-                    <div class="relative flex py-1 items-center">
-                        <div class="flex-grow border-t border-gray-200"></div>
-                        <span class="flex-shrink mx-4 text-[10px] text-gray-400 font-bold uppercase">Atau Email</span>
-                        <div class="flex-grow border-t border-gray-200"></div>
-                    </div>
-
-                    <form onsubmit="event.preventDefault(); ${isRegister ? 'registerUser()' : 'loginUser()'};" class="space-y-4">
-                        ${isRegister ? `
-                            <div>
-                                <input type="text" id="reg-name" placeholder="Nama Lengkap" class="w-full p-3 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none" required>
-                            </div>
-                            <div>
-                                <input type="tel" id="reg-phone" placeholder="Nomor WhatsApp" class="w-full p-3 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none" required>
-                            </div>
-                        ` : ''}
-
+                    <form onsubmit="event.preventDefault(); submitConfirmDonation();" class="p-8 border border-gray-100 rounded-3xl space-y-4 shadow-sm bg-white">
                         <div>
-                            <input type="email" id="login-email" placeholder="Masukkan Email Anda" class="w-full p-3 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none" required>
+                            <label class="text-xs font-bold text-gray-700 block mb-1">Kode / Ref Transaksi</label>
+                            <input type="text" id="confirm-trx" placeholder="Contoh: TRX-8812" class="w-full p-3.5 border border-gray-200 rounded-xl text-xs" required>
                         </div>
                         <div>
-                            <input type="password" id="login-password" placeholder="Masukkan Kata Sandi" class="w-full p-3 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none" required>
+                            <label class="text-xs font-bold text-gray-700 block mb-1">Nama Pemilik Rekening Pengirim</label>
+                            <input type="text" id="confirm-name" placeholder="Nama Anda / Hamba Allah" class="w-full p-3.5 border border-gray-200 rounded-xl text-xs" required>
                         </div>
-                        
-                        <div id="login-error-msg" class="hidden text-xs text-red-500 font-medium text-center"></div>
-
-                        <button type="submit" class="w-full py-3 bg-nuha-primary text-white font-bold text-xs rounded-2xl hover:bg-nuha-dark transition shadow-sm">
-                            ${isRegister ? 'Daftar Akun Baru &rarr;' : 'Masuk &rarr;'}
-                        </button>
+                        <div>
+                            <label class="text-xs font-bold text-gray-700 block mb-1">Nominal Transfer (Rp)</label>
+                            <input type="number" id="confirm-amount" placeholder="Nominal persis saat transfer..." class="w-full p-3.5 border border-gray-200 rounded-xl text-xs" required>
+                        </div>
+                        <button type="submit" class="btn-shimmer w-full py-3.5 bg-nuha-primary text-white font-bold text-xs rounded-xl hover:bg-nuha-dark shadow-md">Kirim Konfirmasi Ke Admin &rarr;</button>
                     </form>
-
-                    <div class="text-center pt-2 border-t border-gray-100">
-                        ${isRegister ? `
-                            <p class="text-xs text-gray-500">
-                                Sudah punya akun? 
-                                <button onclick="toggleAuthMode(false)" class="text-nuha-primary font-bold hover:underline">Masuk di sini</button>
-                            </p>
-                        ` : `
-                            <p class="text-xs text-gray-500">
-                                Belum punya akun? 
-                                <button onclick="toggleAuthMode(true)" class="text-nuha-primary font-bold hover:underline">Daftar Sekarang</button>
-                            </p>
-                        `}
-                    </div>
-
-                    <button onclick="navigateTo('home')" class="w-full text-center text-xs text-gray-400 hover:text-gray-600 block pt-1">Kembali ke Halaman Utama</button>
                 </div>
             `;
             return container;
         }
 
-        function toggleAuthMode(isRegister) {
-            state.userLoginForm.isRegister = isRegister;
-            renderApp();
-        }
+        function submitConfirmDonation() {
+            const trx = document.getElementById('confirm-trx')?.value;
+            const name = document.getElementById('confirm-name')?.value;
+            const amount = parseFloat(document.getElementById('confirm-amount')?.value || 0);
 
-        function registerUser() {
-            const name = document.getElementById('reg-name')?.value.trim();
-            const email = document.getElementById('login-email')?.value.trim();
-            const pass = document.getElementById('login-password')?.value.trim();
-
-            if (name && email && pass) {
-                state.isUserAuthenticated = true;
-                state.userProfile = { nama: name, email: email };
-                alert(`Pendaftaran berhasil! Selamat datang ${name}.`);
-                state.userLoginForm.isRegister = false;
+            if (trx && name && amount) {
+                if(!DB.pendingConfirmations) DB.pendingConfirmations = [];
+                DB.pendingConfirmations.unshift({
+                    id: Date.now(),
+                    trxCode: trx,
+                    donorName: name,
+                    amount: amount,
+                    status: 'Menunggu Verifikasi Admin',
+                    timestamp: new Date().toLocaleString('id-ID')
+                });
+                saveDB();
+                alert('Konfirmasi transfer berhasil dikirim ke Admin Panel!');
                 navigateTo('home');
             }
         }
 
-        function renderAdminLoginPage() {
-            return renderUserLoginPage();
-        }
-
-        function loginWithGoogle() {
-            const googleEmail = prompt("Simulasi Google Sign-In:\nMasukkan Email Google Anda:", "infaqnuha@gmail.com");
-            if (!googleEmail) return;
-
-            if (googleEmail.trim().toLowerCase() === 'infaqnuha@gmail.com') {
-                state.isAuthenticated = true;
-                state.adminUser = { name: "Pengurus NUHA (Admin)" };
-                alert("Login Google Berhasil! Selamat datang Pengurus NUHA.");
-                navigateTo('admin');
-            } else {
-                state.isUserAuthenticated = true;
-                state.userProfile = { nama: googleEmail.split('@')[0] };
-                alert("Login Google Berhasil sebagai Donatur.");
-                navigateTo('home');
-            }
-        }
-
-        function loginUser() {
-            const email = document.getElementById('login-email')?.value.trim();
-            const pass = document.getElementById('login-password')?.value.trim();
-            const errorBox = document.getElementById('login-error-msg');
-
-            if (email.toLowerCase() === 'infaqnuha@gmail.com' && pass === 'infaqnuha2025') {
-                state.isAuthenticated = true;
-                state.adminUser = { name: "Pengurus NUHA (Admin)" };
-                navigateTo('admin');
-            } else if (email && pass) {
-                state.isUserAuthenticated = true;
-                state.userProfile = { nama: email.split('@')[0] };
-                navigateTo('home');
-            } else {
-                if (errorBox) {
-                    errorBox.innerText = "Email dan kata sandi wajib diisi!";
-                    errorBox.classList.remove('hidden');
-                }
-            }
-        }
-
-        function loginAdmin() {
-            loginUser();
-        }
-
-        function logoutUser() {
-            state.isUserAuthenticated = false;
-            state.userProfile = null;
-            renderApp();
-        }
-
-        // --- LINUHA AI ASSISTANT WIDGET ---
-        function renderLinuhaAiWidget() {
-            const wrapper = document.createElement('div');
-            wrapper.className = "fixed bottom-6 right-6 z-50 font-sans";
-
-            if (!state.chatOpen) {
-                wrapper.innerHTML = `
-                    <button onclick="toggleChat(true)" class="w-14 h-14 bg-[#0f5435] hover:bg-[#0b4028] text-white rounded-full shadow-2xl flex items-center justify-center transition hover:scale-105">
-                        <i data-lucide="messages-square" class="w-7 h-7 text-white"></i>
-                    </button>
-                `;
-            } else {
-                if (state.chatView === 'menu') {
-                    wrapper.innerHTML = `
-                        <div class="w-80 sm:w-96 bg-white border border-gray-100 rounded-3xl shadow-2xl overflow-hidden flex flex-col transition-all">
-                            <!-- Header Hijau Dark NU Care / NUHA -->
-                            <div class="bg-[#0f5435] p-5 text-white flex items-center justify-between">
-                                <div class="flex items-center space-x-3">
-                                    <img src="${OFFICIAL_LOGO}" class="w-10 h-10 rounded-xl object-contain bg-white/20 p-1">
-                                    <div>
-                                        <h3 class="font-bold text-base leading-snug">Linuha AI</h3>
-                                        <p class="text-xs text-emerald-200">Asisten Cerdas NUHA</p>
-                                    </div>
-                                </div>
-                                <button onclick="toggleChat(false)" class="text-white/80 hover:text-white">
-                                    <i data-lucide="x" class="w-5 h-5"></i>
-                                </button>
-                            </div>
-
-                            <!-- Body Card Menu -->
-                            <div class="p-5 bg-white space-y-6">
-                                <div class="text-center space-y-1">
-                                    <div class="flex items-center justify-center gap-2 text-2xl font-bold text-gray-900">
-                                        Halo! <i data-lucide="messages-square" class="w-6 h-6 text-[#0f5435]"></i>
-                                    </div>
-                                    <p class="text-xs text-gray-600 font-medium">Ada yang bisa saya bantu?</p>
-                                </div>
-
-                                <!-- Opsi Pilihan Cepat -->
-                                <div class="space-y-2.5">
-                                    <button onclick="sendQuickAiPrompt('Saya ingin informasi tentang donasi')" class="w-full p-3.5 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-700 hover:border-[#0f5435] hover:bg-emerald-50/50 transition flex items-center gap-2 text-left">
-                                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
-                                        <span>Saya ingin informasi tentang donasi</span>
-                                    </button>
-
-                                    <button onclick="sendQuickAiPrompt('Saya ingin bertanya tentang layanan')" class="w-full p-3.5 border border-gray-200 rounded-2xl text-xs font-semibold text-gray-700 hover:border-[#0f5435] hover:bg-emerald-50/50 transition flex items-center gap-2 text-left">
-                                        <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400 shrink-0"></i>
-                                        <span>Saya ingin bertanya tentang layanan</span>
-                                    </button>
-                                </div>
-
-                                <hr class="border-gray-100">
-
-                                <!-- Action Buttons -->
-                                <div class="space-y-3">
-                                    <a href="https://wa.me/6282333362299?text=Assalamu'alaikum,%20saya%20ingin%20bertanya%20seputar%20infaq%20NUHA" target="_blank" class="w-full py-3.5 px-4 bg-[#0f5435] hover:bg-[#0b4028] text-white font-bold text-xs rounded-2xl transition flex items-center justify-center gap-2 shadow-sm">
-                                        <i data-lucide="message-circle" class="w-5 h-5"></i>
-                                        <span>Tanya Langsung via WhatsApp</span>
-                                    </a>
-
-                                    <button onclick="switchAiView('chatting')" class="w-full py-3.5 px-4 bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-800 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-2">
-                                        <i data-lucide="messages-square" class="w-5 h-5 text-[#0f5435]"></i>
-                                        <span>Tanya AI seputar NUHA</span>
-                                    </button>
-                                </div>
-
-                                <div class="text-center">
-                                    <span class="text-[10px] text-gray-400">Informasi dari AI mungkin tidak akurat</span>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    wrapper.innerHTML = `
-                        <div class="w-80 sm:w-96 bg-white border border-gray-100 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[480px]">
-                            <!-- Header -->
-                            <div class="bg-[#0f5435] p-4 text-white flex items-center justify-between">
-                                <div class="flex items-center space-x-2">
-                                    <button onclick="switchAiView('menu')" class="mr-1 text-white/80 hover:text-white">
-                                        <i data-lucide="arrow-left" class="w-5 h-5"></i>
-                                    </button>
-                                    <div>
-                                        <h3 class="font-bold text-xs">Linuha AI</h3>
-                                        <span class="text-[10px] text-emerald-200 block">Asisten Cerdas NUHA</span>
-                                    </div>
-                                </div>
-                                <button onclick="toggleChat(false)" class="text-white/80 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
-                            </div>
-
-                            <!-- Chat Messages -->
-                            <div class="flex-1 p-4 overflow-y-auto space-y-3 bg-gray-50/50" id="chat-box-messages">
-                                ${state.chatMessages.map(msg => `
-                                    <div class="flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}">
-                                        <div class="max-w-[82%] p-3 rounded-2xl text-xs leading-relaxed ${msg.sender === 'user' ? 'bg-[#0f5435] text-white rounded-br-none' : 'bg-white border border-gray-100 text-gray-800 rounded-bl-none shadow-sm'}">
-                                            ${msg.text}
-                                            <span class="text-[9px] opacity-60 block mt-1 text-right">${msg.time}</span>
-                                        </div>
-                                    </div>
-                                `).join('')}
-                            </div>
-
-                            <!-- Chat Input Bar -->
-                            <div class="p-3 bg-white border-t flex items-center gap-2">
-                                <input type="text" id="ai-chat-input" placeholder="Ketik pertanyaan Anda..." class="flex-1 p-2.5 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-1 focus:ring-[#0f5435]" onkeypress="if(event.key==='Enter') handleAiSend()">
-                                <button onclick="handleAiSend()" class="p-2.5 bg-[#0f5435] text-white rounded-xl hover:bg-[#0b4028]"><i data-lucide="send" class="w-4 h-4"></i></button>
-                            </div>
-                        </div>
-                    `;
-                }
-            }
-            return wrapper;
-        }
-
-        function toggleChat(open) {
-            state.chatOpen = open;
-            if (open) state.chatView = 'menu';
-            renderApp();
-        }
-
-        function switchAiView(view) {
-            state.chatView = view;
-            renderApp();
-        }
-
-        function sendQuickAiPrompt(text) {
-            switchAiView('chatting');
-            setTimeout(() => {
-                const input = document.getElementById('ai-chat-input');
-                if (input) input.value = text;
-                handleAiSend();
-            }, 100);
-        }
-
-        function handleAiSend() {
-            const input = document.getElementById('ai-chat-input');
-            const txt = input ? input.value.trim() : '';
-            if (!txt) return;
-
-            const time = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-            state.chatMessages.push({ sender: 'user', text: txt, time: time });
-
-            let reply = "Terima kasih telah bertanya. Untuk informasi lebih mendalam, Bapak/Ibu dapat menghubungi admin Lembaga Infaq NUHA melalui tombol WhatsApp yang tersedia.";
-            const lower = txt.toLowerCase();
-
-            if (lower.includes('donasi') || lower.includes('cara') || lower.includes('infaq')) {
-                reply = "Untuk berdonasi, Anda dapat memilih menu 'Infak & Ziswaf' atau memilih peruntukan infak di halaman utama, lalu transfer melalui QRIS atau Bank BSI/Muamalat.";
-            } else if (lower.includes('layanan') || lower.includes('program')) {
-                reply = "Layanan utama NUHA mencakup Beasiswa Santri Yatim, Pembangunan Infrastruktur Pesantren, dan Program Pemberdayaan Ekonomi Umat.";
-            }
-
-            setTimeout(() => {
-                state.chatMessages.push({ sender: 'ai', text: reply, time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
-                renderApp();
-            }, 500);
-
-            if (input) input.value = '';
-            renderApp();
-        }
-
-        // --- ADMIN DASHBOARD LAYOUT ---
-        function renderAdminLayout() {
-            const container = document.createElement('div');
-            container.className = "flex min-h-screen bg-gray-50 font-sans";
-            container.innerHTML = `
-                <!-- Admin Sidebar -->
-                <div class="w-64 bg-nuha-dark text-white p-6 space-y-8 flex flex-col justify-between shrink-0">
-                    <div class="space-y-6">
-                        <img src="${OFFICIAL_LOGO}" class="h-10 bg-white p-1 rounded-xl">
-                        <nav class="space-y-1 text-xs font-semibold">
-                            <button onclick="setAdminTab('dashboard')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${state.adminSubTab==='dashboard'?'bg-white/20':''}">Dashboard Overview</button>
-                            <button onclick="setAdminTab('heroSlides')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${state.adminSubTab==='heroSlides'?'bg-white/20':''}">Kelola Hero Slide Foto</button>
-                            <button onclick="setAdminTab('program')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${state.adminSubTab==='program'?'bg-white/20':''}">Kelola Program Unggulan</button>
-                            <button onclick="setAdminTab('gallery')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${state.adminSubTab==='gallery'?'bg-white/20':''}">Kelola Galeri Foto</button>
-                            <button onclick="setAdminTab('berita')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${state.adminSubTab==='berita'?'bg-white/20':''}">Kelola Berita & Link Program</button>
-                            <button onclick="setAdminTab('donasi')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${state.adminSubTab==='donasi'?'bg-white/20':''}">Data Donasi & Verifikasi</button>
-                            <button onclick="setAdminTab('aiConfig')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${state.adminSubTab==='aiConfig'?'bg-white/20':''}">Pengaturan Linuha AI</button>
-                        </nav>
-                    </div>
-                    <button onclick="logoutAdmin()" class="w-full p-3 bg-red-600/80 hover:bg-red-600 text-white font-bold text-xs rounded-xl flex items-center justify-center gap-2">Keluar Admin</button>
-                </div>
-
-                <!-- Main Content Area -->
-                <div class="flex-1 p-8 space-y-6 overflow-y-auto max-h-screen">
-                    <div class="flex justify-between items-center border-b pb-4">
-                        <h1 class="text-2xl font-bold text-gray-900 capitalize">CMS Admin - ${state.adminSubTab}</h1>
-                        <span class="text-xs bg-emerald-100 text-nuha-primary px-3 py-1 rounded-full font-bold">Admin Utama</span>
-                    </div>
-
-                    ${state.adminSubTab === 'dashboard' ? `
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Total Donasi Terkumpul</span>
-                                <h3 class="text-2xl font-bold text-nuha-primary mt-1">${formatRupiah(DB.stats.totalInfaq)}</h3>
-                            </div>
-                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Total Donatur</span>
-                                <h3 class="text-2xl font-bold text-gray-900 mt-1">${DB.stats.totalDonatur} Orang</h3>
-                            </div>
-                            <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Program Aktif</span>
-                                <h3 class="text-2xl font-bold text-nuha-gold mt-1">${DB.programs.length} Program</h3>
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${state.adminSubTab === 'heroSlides' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm">Tambah Slide Banner Hero Baru</h3>
-                            <div class="flex gap-3">
-                                <input type="text" id="new-slide-url" placeholder="Masukkan URL Foto Slide..." class="flex-1 p-3 border border-gray-200 rounded-2xl text-xs">
-                                <input type="file" id="new-slide-file" accept="image/*" onchange="handleImageUpload(event, 'new-slide-url')" class="hidden">
-                                <button onclick="document.getElementById('new-slide-file').click()" class="px-4 py-3 bg-gray-100 hover:bg-gray-200 rounded-2xl text-xs font-bold text-gray-700">Upload Foto</button>
-                                <button onclick="addHeroSlide()" class="px-6 py-3 bg-nuha-primary hover:bg-nuha-dark text-white rounded-2xl text-xs font-bold">Tambah Slide</button>
-                            </div>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                                ${DB.heroSlides.map((slide, idx) => `
-                                    <div class="relative rounded-2xl overflow-hidden border border-gray-100 shadow-sm group h-40">
-                                        <img src="${slide}" class="w-full h-full object-cover">
-                                        <button onclick="removeHeroSlide(${idx})" class="absolute top-2 right-2 p-2 bg-red-600 text-white rounded-xl text-xs font-bold shadow-md hover:bg-red-700">Hapus Slide</button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${state.adminSubTab === 'program' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm">Buat Program Unggulan Baru</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                                <input type="text" id="prog-judul" placeholder="Judul Program" class="p-3 border rounded-2xl">
-                                <select id="prog-kategori" class="p-3 border rounded-2xl bg-white">
-                                    <option value="Pendidikan">Pendidikan</option>
-                                    <option value="Infrastruktur">Infrastruktur</option>
-                                    <option value="Ekonomi">Ekonomi</option>
-                                    <option value="Kesehatan">Kesehatan</option>
-                                </select>
-                                <input type="number" id="prog-target" placeholder="Target Dana (Rp)" class="p-3 border rounded-2xl">
-                                <div class="flex gap-2">
-                                    <input type="text" id="prog-foto" placeholder="URL Foto Program" class="flex-1 p-3 border rounded-2xl">
-                                    <input type="file" id="prog-file" accept="image/*" onchange="handleImageUpload(event, 'prog-foto')" class="hidden">
-                                    <button onclick="document.getElementById('prog-file').click()" class="px-3 bg-gray-100 rounded-2xl font-bold">Upload</button>
-                                </div>
-                                <textarea id="prog-desc" rows="2" placeholder="Deskripsi Singkat Program..." class="sm:col-span-2 p-3 border rounded-2xl"></textarea>
-                            </div>
-                            <button onclick="addProgramAdmin()" class="px-6 py-3 bg-nuha-primary text-white font-bold text-xs rounded-2xl">Publikasikan Program &rarr;</button>
-
-                            <hr class="border-gray-100">
-
-                            <div class="space-y-3">
-                                <h4 class="font-bold text-xs text-gray-700">Daftar Program Aktif</h4>
-                                ${DB.programs.map(p => `
-                                    <div class="flex items-center justify-between p-4 border border-gray-100 rounded-2xl text-xs">
-                                        <div class="flex items-center gap-3">
-                                            <img src="${p.foto}" class="w-12 h-12 object-cover rounded-xl">
-                                            <div>
-                                                <h5 class="font-bold text-gray-900">${p.judul}</h5>
-                                                <span class="text-gray-400">Target: ${formatRupiah(p.target)}</span>
-                                            </div>
-                                        </div>
-                                        <button onclick="deleteProgramAdmin(${p.id})" class="text-red-500 font-bold hover:underline">Hapus</button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${state.adminSubTab === 'gallery' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm">Upload Foto Galeri Kegiatan</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                                <input type="text" id="gal-judul" placeholder="Judul / Keterangan Foto" class="p-3 border rounded-2xl">
-                                <div class="flex gap-2">
-                                    <input type="text" id="gal-foto" placeholder="URL Foto Galeri" class="flex-1 p-3 border rounded-2xl">
-                                    <input type="file" id="gal-file" accept="image/*" onchange="handleImageUpload(event, 'gal-foto')" class="hidden">
-                                    <button onclick="document.getElementById('gal-file').click()" class="px-3 bg-gray-100 rounded-2xl font-bold">Upload</button>
-                                </div>
-                            </div>
-                            <button onclick="addGalleryAdmin()" class="px-6 py-3 bg-nuha-primary text-white font-bold text-xs rounded-2xl">Simpan ke Galeri</button>
-
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
-                                ${DB.gallery.map(g => `
-                                    <div class="p-3 border border-gray-100 rounded-2xl space-y-2 text-xs">
-                                        <img src="${g.foto}" class="h-32 w-full object-cover rounded-xl">
-                                        <h5 class="font-bold text-gray-900">${g.judul}</h5>
-                                        <button onclick="deleteGalleryAdmin(${g.id})" class="text-red-500 font-bold hover:underline">Hapus Foto</button>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${state.adminSubTab === 'berita' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm">Tulis Berita Baru & Tautkan Program (Opsional)</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-                                <input type="text" id="news-judul" placeholder="Judul Berita" class="p-3 border rounded-2xl">
-                                <div class="flex gap-2">
-                                    <input type="text" id="news-foto" placeholder="URL Foto Utama Berita" class="flex-1 p-3 border rounded-2xl">
-                                    <input type="file" id="news-file" accept="image/*" onchange="handleImageUpload(event, 'news-foto')" class="hidden">
-                                    <button onclick="document.getElementById('news-file').click()" class="px-3 bg-gray-100 rounded-2xl font-bold">Upload</button>
-                                </div>
-
-                                <div class="sm:col-span-2 space-y-1">
-                                    <label class="font-bold text-gray-700">Pilih Program yang Ingin Dipasang pada Berita Ini (Opsional):</label>
-                                    <select id="news-program-link" class="w-full p-3 border border-gray-200 rounded-2xl bg-white font-semibold text-gray-800">
-                                        <option value="">-- Tanpa Program (Hanya Berita Biasa) --</option>
-                                        ${DB.programs.map(p => `<option value="${p.id}">${p.judul} (${p.kategori})</option>`).join('')}
-                                    </select>
-                                </div>
-
-                                <textarea id="news-ringkasan" rows="3" placeholder="Ringkasan Isi Berita..." class="sm:col-span-2 p-3 border rounded-2xl"></textarea>
-                            </div>
-                            <button onclick="addNewsAdmin()" class="px-6 py-3 bg-nuha-primary text-white font-bold text-xs rounded-2xl">Terbitkan Berita &rarr;</button>
-
-                            <hr class="border-gray-100">
-
-                            <div class="space-y-3">
-                                <h4 class="font-bold text-xs text-gray-700">Daftar Berita</h4>
-                                ${DB.news.map(n => {
-                                    const linkedProg = DB.programs.find(p => p.id === n.programId);
-                                    return `
-                                        <div class="flex items-center justify-between p-4 border border-gray-100 rounded-2xl text-xs">
-                                            <div class="flex items-center gap-3">
-                                                <img src="${n.foto}" class="w-12 h-12 object-cover rounded-xl">
-                                                <div>
-                                                    <h5 class="font-bold text-gray-900">${n.judul}</h5>
-                                                    <span class="text-emerald-600 font-semibold">${linkedProg ? 'Terhubung Program: ' + linkedProg.judul : 'Tanpa Program'}</span>
-                                                </div>
-                                            </div>
-                                            <button onclick="deleteNewsAdmin(${n.id})" class="text-red-500 font-bold hover:underline">Hapus</button>
-                                        </div>
-                                    `;
-                                }).join('')}
-                            </div>
-                        </div>
-                    ` : ''}
-
-                    ${state.adminSubTab === 'donasi' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm">
-                            <h3 class="font-bold text-sm mb-4">Daftar Transaksi Infaq Terbaru</h3>
-                            <table class="w-full text-left text-xs border-collapse">
-                                <thead>
-                                    <tr class="border-b text-gray-400">
-                                        <th class="p-2">ID</th>
-                                        <th class="p-2">Donatur</th>
-                                        <th class="p-2">Nominal</th>
-                                        <th class="p-2">Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    ${DB.donations.map(d => `
-                                        <tr class="border-b">
-                                            <td class="p-2 font-bold">${d.id}</td>
-                                            <td class="p-2">${d.nama}</td>
-                                            <td class="p-2">${formatRupiah(d.nominal)}</td>
-                                            <td class="p-2"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded-md font-bold">${d.status}</span></td>
-                                        </tr>
-                                    `).join('')}
-                                </tbody>
-                            </table>
-                        </div>
-                    ` : ''}
-
-                    ${state.adminSubTab === 'aiConfig' ? `
-                        <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-4 max-w-xl">
-                            <h3 class="font-bold text-sm">Konfigurasi Linuha AI (Sky 0.9.7)</h3>
-                            <div class="space-y-2">
-                                <label class="text-xs font-bold text-gray-700">Pesan Pembuka Virtual Assistant</label>
-                                <textarea id="ai-welcome-msg" rows="3" class="w-full p-3 border border-gray-200 rounded-2xl text-xs">${DB.settings.welcomeMessage}</textarea>
-                            </div>
-                            <button onclick="saveAiSettings()" class="px-5 py-2.5 bg-nuha-primary text-white font-bold text-xs rounded-xl">Simpan Pengaturan AI</button>
-                        </div>
-                    ` : ''}
-                </div>
-            `;
-            return container;
-        }
-
-        // --- CMS ADMIN ACTION HANDLERS ---
-        function handleImageUpload(event, targetInputId) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const input = document.getElementById(targetInputId);
-                    if (input) input.value = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
-        function addHeroSlide() {
-            const url = document.getElementById('new-slide-url')?.value.trim();
-            if (url) {
-                DB.heroSlides.push(url);
-                saveDB();
-                alert('Foto Slide Hero berhasil ditambahkan!');
-                renderApp();
-            }
-        }
-
-        function removeHeroSlide(index) {
-            if (DB.heroSlides.length <= 1) {
-                alert('Minimal harus ada 1 slide hero!');
-                return;
-            }
-            DB.heroSlides.splice(index, 1);
-            saveDB();
-            renderApp();
-        }
-
-        function addProgramAdmin() {
-            const judul = document.getElementById('prog-judul')?.value;
-            const kategori = document.getElementById('prog-kategori')?.value;
-            const target = parseFloat(document.getElementById('prog-target')?.value || 0);
-            const foto = document.getElementById('prog-foto')?.value || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80';
-            const desc = document.getElementById('prog-desc')?.value;
-
-            if (judul && target > 0) {
-                DB.programs.unshift({
-                    id: Date.now(),
-                    judul: judul,
-                    kategori: kategori,
-                    deskripsi: desc || 'Program kebaikan NUHA',
-                    target: target,
-                    terkumpul: 0,
-                    foto: foto
-                });
-                saveDB();
-                alert('Program Unggulan berhasil dipublikasikan!');
-                renderApp();
-            }
-        }
-
-        function deleteProgramAdmin(id) {
-            DB.programs = DB.programs.filter(p => p.id !== id);
-            saveDB();
-            renderApp();
-        }
-
-        function addGalleryAdmin() {
-            const judul = document.getElementById('gal-judul')?.value;
-            const foto = document.getElementById('gal-foto')?.value;
-            if (judul && foto) {
-                DB.gallery.unshift({
-                    id: Date.now(),
-                    judul: judul,
-                    foto: foto,
-                    tanggal: new Date().toISOString().split('T')[0]
-                });
-                saveDB();
-                alert('Foto berhasil disimpan ke Galeri!');
-                renderApp();
-            }
-        }
-
-        function deleteGalleryAdmin(id) {
-            DB.gallery = DB.gallery.filter(g => g.id !== id);
-            saveDB();
-            renderApp();
-        }
-
-        function addNewsAdmin() {
-            const judul = document.getElementById('news-judul')?.value;
-            const foto = document.getElementById('news-foto')?.value;
-            const ringkasan = document.getElementById('news-ringkasan')?.value;
-            const progId = document.getElementById('news-program-link')?.value;
-
-            if (judul && ringkasan) {
-                DB.news.unshift({
-                    id: Date.now(),
-                    judul: judul,
-                    tanggal: new Date().toISOString().split('T')[0],
-                    ringkasan: ringkasan,
-                    foto: foto || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80',
-                    programId: progId ? parseInt(progId) : null
-                });
-                saveDB();
-                alert('Berita berhasil diterbitkan!');
-                renderApp();
-            }
-        }
-
-        function deleteNewsAdmin(id) {
-            DB.news = DB.news.filter(n => n.id !== id);
-            saveDB();
-            renderApp();
-        }
-
-        function setAdminTab(tab) {
-            state.adminSubTab = tab;
-            renderApp();
-        }
-
-        function saveAiSettings() {
-            const val = document.getElementById('ai-welcome-msg')?.value;
-            if (val) {
-                DB.settings.welcomeMessage = val;
-                saveDB();
-                alert('Pengaturan Linuha AI berhasil disimpan!');
-            }
-        }
-
-        function logoutAdmin() {
-            state.isAuthenticated = false;
-            state.adminUser = null;
-            navigateTo('home');
-        }
-
-        // --- FOOTER COMPONENT ---
         function renderPublicFooter() {
             const footer = document.createElement('footer');
-            footer.className = "bg-[#0b4028] text-white pt-14 pb-10 font-sans border-t border-emerald-900/40";
+            footer.className = "bg-[#0a4228] text-white pt-14 pb-8 font-sans";
+            const logo = DB.settings.siteLogo || OFFICIAL_LOGO;
+
             footer.innerHTML = `
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs leading-relaxed">
-                        
-                        <!-- Kolom 1: Logo & Deskripsi -->
-                        <div class="md:col-span-5 space-y-5">
-                            <img src="${OFFICIAL_LOGO}" class="h-12 bg-white p-1.5 rounded-xl object-contain shadow-sm" alt="NUHA Logo" onerror="this.onerror=null; this.src='https://placehold.co/200x80/286B56/FFFFFF?text=NUHA';">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-8 text-xs">
+                        <div class="md:col-span-5 space-y-4">
+                            <div class="w-14 h-14 bg-white rounded-2xl p-2 flex items-center justify-center">
+                                <img src="${logo}" class="h-10 object-contain">
+                            </div>
                             <p class="text-emerald-100/90 leading-relaxed text-xs">
-                                <strong class="text-white font-semibold">Lembaga Infaq NUHA</strong> hadir untuk berkhidmat dalam rangka membantu kesejahteraan dan kemandirian umat; mengangkat harkat sosial dengan mendayagunakan dana Zakat, Infak, Sedekah (ZIS), CSR, serta Dana Sosial Keagamaan Lainnya (DSKL) sesuai regulasi dan ketentuan syariah.
+                                <strong class="text-white font-bold">${DB.settings.siteName}</strong> ${DB.settings.aboutText}
                             </p>
-                            
-                            <div class="p-4 bg-emerald-800/40 border border-emerald-600/30 rounded-2xl text-emerald-100 text-[11px] leading-relaxed">
+                            <div class="p-4 bg-emerald-900/60 border border-emerald-700/60 rounded-2xl text-[11px] text-emerald-100">
                                 Seluruh dana yang ditunaikan melalui Lembaga Infaq NUHA bukan bertujuan untuk pencucian uang (<em>money laundering</em>) dan bukan bersumber dari Dana Tindak Kejahatan (korupsi dan lain-lain).
                             </div>
                         </div>
 
-                        <!-- Kolom 2: Pusat Bantuan -->
-                        <div class="md:col-span-2 space-y-3">
+                        <div class="md:col-span-3 space-y-3">
                             <h4 class="font-bold text-sm text-white font-poppins">Pusat Bantuan</h4>
-                            <ul class="space-y-2.5 text-emerald-100/90 text-xs">
-                                <li><a onclick="navigateTo('kebijakan-privasi')" class="hover:text-white cursor-pointer transition">Kebijakan Privasi</a></li>
-                                <li><a onclick="navigateTo('about')" class="hover:text-white cursor-pointer transition">Syarat dan Ketentuan</a></li>
-                                <li><a onclick="toggleChat(true)" class="hover:text-white cursor-pointer transition">Hubungi Kami</a></li>
+                            <ul class="space-y-2 text-emerald-100/90 text-xs">
+                                <li>Kebijakan Privasi</li>
+                                <li>Syarat dan Ketentuan</li>
+                                <li>Hubungi Kami</li>
                             </ul>
                         </div>
 
-                        <!-- Kolom 3: Media Sosial -->
-                        <div class="md:col-span-2 space-y-3">
-                            <h4 class="font-bold text-sm text-white font-poppins">Media Sosial</h4>
-                            <div class="grid grid-cols-3 gap-2.5 max-w-[140px]">
-                                <a href="https://wa.me/6282333362299" target="_blank" title="WhatsApp" class="w-9 h-9 rounded-xl bg-emerald-800/50 border border-emerald-600/30 flex items-center justify-center text-emerald-200 hover:bg-emerald-700 hover:text-white transition">
-                                    <i class="fa-brands fa-whatsapp text-base"></i>
-                                </a>
-                                <a href="https://www.facebook.com/profile.php?id=61577316453684" target="_blank" title="Facebook" class="w-9 h-9 rounded-xl bg-emerald-800/50 border border-emerald-600/30 flex items-center justify-center text-emerald-200 hover:bg-emerald-700 hover:text-white transition">
-                                    <i class="fa-brands fa-facebook-f text-sm"></i>
-                                </a>
-                                <a href="https://www.instagram.com/lembagainfaqnurulhayah?vrfl=MXc1M2oycHNvaXdkeA==" target="_blank" title="Instagram" class="w-9 h-9 rounded-xl bg-emerald-800/50 border border-emerald-600/30 flex items-center justify-center text-emerald-200 hover:bg-emerald-700 hover:text-white transition">
-                                    <i class="fa-brands fa-instagram text-base"></i>
-                                </a>
-                                <a href="https://youtube.com/@infaqnurulhayah?si=XQbAwqPap0eZ9iig" target="_blank" title="YouTube" class="w-9 h-9 rounded-xl bg-emerald-800/50 border border-emerald-600/30 flex items-center justify-center text-emerald-200 hover:bg-emerald-700 hover:text-white transition">
-                                    <i class="fa-brands fa-youtube text-sm"></i>
-                                </a>
-                                <a href="https://www.tiktok.com/@lembagainfaqnurulhayah?_r=1&_t=ZS-9B7EgIlCIKN" target="_blank" title="TikTok" class="w-9 h-9 rounded-xl bg-emerald-800/50 border border-emerald-600/30 flex items-center justify-center text-emerald-200 hover:bg-emerald-700 hover:text-white transition">
-                                    <i class="fa-brands fa-tiktok text-sm"></i>
-                                </a>
-                            </div>
-                        </div>
-
-                        <!-- Kolom 4: Kontak & Alamat -->
-                        <div class="md:col-span-3 space-y-3">
+                        <div class="md:col-span-4 space-y-3">
                             <h4 class="font-bold text-sm text-white font-poppins">Kontak & Alamat</h4>
-                            <div class="space-y-2 text-emerald-100/90 text-xs leading-relaxed">
-                                <p>Pondok Pesantren Nurul Hayah, Ketanggungan, Brebes, 52263</p>
-                                <p><strong class="text-white">Telepon: (WA)</strong> +62 823 3336 2299</p>
-                                <p><strong class="text-white">Email:</strong> infaqnuha@gmail.com</p>
-                            </div>
+                            <p class="text-emerald-100/90 text-xs">Pondok Pesantren Nurul Hayah, Ketanggungan, Brebes, 52263</p>
+                            <p class="text-emerald-100/90 text-xs"><strong class="text-white">Telepon: (WA)</strong> ${DB.settings.phone}</p>
+                            <p class="text-emerald-100/90 text-xs"><strong class="text-white">Email:</strong> infaqnuha@gmail.com</p>
                         </div>
                     </div>
 
-                    <div class="border-t border-emerald-800/50 pt-6 text-center text-xs text-emerald-200/80">
+                    <div class="border-t border-emerald-800/60 pt-6 text-center text-xs text-emerald-200/90">
                         &copy; 2026 Lembaga Infaq Nurul Hayah (NUHA). All rights reserved.
                     </div>
                 </div>
             `;
             return footer;
+        }
+
+        function openLoginModal() {
+            document.getElementById('login-modal')?.classList.remove('hidden');
+            document.getElementById('login-modal')?.classList.add('flex');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('login-modal')?.classList.add('hidden');
+            document.getElementById('login-modal')?.classList.remove('flex');
+        }
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('modal-password');
+            if (passInput) passInput.type = passInput.type === 'password' ? 'text' : 'password';
+        }
+
+        function toggleModalAuthMode(isRegister) {
+            const extra = document.getElementById('reg-extra-fields');
+            if (isRegister) extra?.classList.remove('hidden');
+            else extra?.classList.add('hidden');
+        }
+
+        function submitModalLogin() {
+            const email = document.getElementById('modal-email')?.value;
+            if (email) {
+                closeLoginModal();
+                alert(`Login Berhasil sebagai ${email}`);
+            }
+        }
+
+        function openInfakCheckout(cat) {
+            navigateTo('checkout');
         }
 
         function navigateTo(tab) {
@@ -1991,9 +897,7 @@
             renderApp();
         }
 
-        // INITIAL APP STARTUP
         window.onload = function() {
-            applyTheme();
             renderApp();
         };
     </script>
