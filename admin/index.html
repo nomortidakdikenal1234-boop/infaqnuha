@@ -44,13 +44,78 @@
 
     <div id="admin-root" class="w-full min-h-screen flex"></div>
 
+    <!-- FIREBASE INITIALIZATION & REALTIME SYNC FOR ADMIN -->
+    <script type="module">
+        import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "AIzaSyDd-w0bzJ_Qijy-aMCv7NszYXO0isQHuXI",
+            authDomain: "linuhawebsite.firebaseapp.com",
+            projectId: "linuhawebsite",
+            storageBucket: "linuhawebsite.firebasestorage.app",
+            messagingSenderId: "976390167378",
+            appId: "1:976390167378:web:8d7af05b7b34ef0eef388b",
+            measurementId: "G-1N5Z4SE0D7"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'linuha-default-app';
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        async function initAdminCloudSync() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else if (!auth.currentUser) {
+                    await signInAnonymously(auth);
+                }
+
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'database', 'main_db');
+                
+                onSnapshot(docRef, (snapshot) => {
+                    if (snapshot.exists()) {
+                        window.DB = Object.assign({}, window.initialDB, snapshot.data());
+                    } else {
+                        window.DB = window.initialDB;
+                        setDoc(docRef, window.initialDB).catch(console.error);
+                    }
+                    localStorage.setItem('NUHA_DATABASE', JSON.stringify(window.DB));
+                    if (typeof window.renderAdminApp === 'function') {
+                        window.renderAdminApp();
+                    }
+                }, (error) => {
+                    console.warn("Firebase Admin Snapshot fallback to LocalStorage:", error);
+                });
+            } catch (err) {
+                console.error("Auth Firebase Admin Error:", err);
+            }
+        }
+
+        window.saveDBCloud = async function() {
+            if (!auth.currentUser) return;
+            try {
+                localStorage.setItem('NUHA_DATABASE', JSON.stringify(window.DB));
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'database', 'main_db');
+                await setDoc(docRef, window.DB, { merge: true });
+            } catch (err) {
+                console.error("Save DB Error:", err);
+            }
+        };
+
+        initAdminCloudSync();
+    </script>
+
     <script>
         const OFFICIAL_LOGO = "https://www.upload.ee/image/19930797/Primary_Logo_1.jpg";
 
-        let DB = JSON.parse(localStorage.getItem('NUHA_DATABASE')) || {
+        const initialDB = {
             settings: {
                 siteName: "Lembaga Infaq Nurul Hayah",
                 siteLogo: OFFICIAL_LOGO,
+                loginBanner: "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1920&q=80",
                 phone: "+6282333362299",
                 isLocked: false,
                 lockMessage: "Website sedang dalam pemeliharaan sistem. Silakan kembali beberapa saat lagi.",
@@ -114,8 +179,15 @@
             news: []
         };
 
+        window.initialDB = initialDB;
+        let DB = JSON.parse(localStorage.getItem('NUHA_DATABASE')) || initialDB;
+        window.DB = DB;
+
         function saveDB() {
             localStorage.setItem('NUHA_DATABASE', JSON.stringify(DB));
+            if (typeof window.saveDBCloud === 'function') {
+                window.saveDBCloud();
+            }
         }
 
         let adminState = {
@@ -142,24 +214,44 @@
 
         function renderAdminLoginPage() {
             const container = document.createElement('div');
-            container.className = "w-full min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-[#0f4e2b] via-[#146438] to-[#0a381e]";
-            container.innerHTML = `
-                <div class="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl space-y-6">
-                    <div class="text-center space-y-2">
-                        <img src="${DB.settings.siteLogo || OFFICIAL_LOGO}" class="h-14 mx-auto object-contain bg-emerald-50 p-1.5 rounded-2xl">
-                        <h2 class="text-xl font-bold font-poppins text-gray-900">${DB.settings.siteName || 'Lembaga Infaq Nurul Hayah'}</h2>
-                        <p class="text-xs text-gray-500 font-medium">Manage Website Infaq</p>
-                    </div>
+            container.className = "w-full min-h-screen flex font-sans bg-white overflow-hidden";
+            
+            const bannerUrl = DB.settings.loginBanner || "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1920&q=80";
 
-                    <form onsubmit="event.preventDefault(); processAdminLogin();" class="space-y-4">
-                        <div>
-                            <label class="text-xs font-bold text-gray-700">Kode Akses / Kata Sandi Admin</label>
-                            <input type="password" id="admin-pass" placeholder="Masukkan password admin..." class="w-full mt-1 p-3.5 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none" required>
+            container.innerHTML = `
+                <!-- SEBELAH KIRI (FULL FOTO BACKGROUND 50% - TEKS & BRAND DITENGAH PUSAT) -->
+                <div class="hidden md:flex md:w-1/2 relative bg-gray-900 p-8 items-center justify-center overflow-hidden border-r border-gray-200">
+                    <div class="absolute inset-0 bg-cover bg-center transition-all duration-700" style="background-image: url('${bannerUrl}');"></div>
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/70"></div>
+
+                    <!-- Konten Teks di Tengah-Tengah Foto -->
+                    <div class="relative z-10 flex flex-col items-center text-center max-w-md p-8 rounded-3xl backdrop-blur-md bg-black/30 border border-white/10 shadow-2xl space-y-4">
+                        <img src="${DB.settings.siteLogo || OFFICIAL_LOGO}" class="h-16 w-auto bg-white/95 p-2 rounded-2xl object-contain shadow-lg">
+                        <div class="text-white space-y-2">
+                            <h2 class="text-xl font-bold font-poppins leading-tight drop-shadow-md">${DB.settings.siteName || 'Lembaga Infaq Nurul Hayah'}</h2>
+                            <p class="text-xs text-gray-200 leading-relaxed font-normal drop-shadow-sm">Panel manajemen terpadu untuk pengelolaan infaq, program, serta donasi publik secara transparan.</p>
                         </div>
-                        <button type="submit" class="btn-shimmer w-full py-3.5 bg-[#146438] hover:bg-[#0f4e2b] text-white font-bold text-sm rounded-2xl transition shadow-lg flex items-center justify-center gap-2">
-                            <span>Masuk</span> &rarr;
-                        </button>
-                    </form>
+                    </div>
+                </div>
+
+                <!-- SEBELAH KANAN (FORM LOGIN 50%) -->
+                <div class="w-full md:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 bg-white">
+                    <div class="max-w-md w-full space-y-8">
+                        <div class="text-center space-y-2">
+                            <h2 class="text-3xl font-extrabold font-poppins text-gray-900 tracking-tight">ADMIN PANEL LINUHA</h2>
+                            <p class="text-xs text-gray-500 font-medium">Silakan masukkan kata sandi untuk mengelola website</p>
+                        </div>
+
+                        <form onsubmit="event.preventDefault(); processAdminLogin();" class="space-y-5 pt-2">
+                            <div>
+                                <label class="text-xs font-bold text-gray-700 block mb-1">Kode Akses / Kata Sandi Admin</label>
+                                <input type="password" id="admin-pass" placeholder="Masukkan password admin..." class="w-full p-4 border border-gray-200 rounded-2xl text-xs focus:ring-2 focus:ring-nuha-primary focus:outline-none transition shadow-xs" required>
+                            </div>
+                            <button type="submit" class="btn-shimmer w-full py-4 bg-[#146438] hover:bg-[#0f4e2b] text-white font-bold text-xs rounded-2xl transition shadow-lg flex items-center justify-center gap-2 cursor-pointer">
+                                <span>Masuk Admin</span> &rarr;
+                            </button>
+                        </form>
+                    </div>
                 </div>
             `;
             return container;
@@ -172,7 +264,7 @@
                 sessionStorage.setItem('NUHA_ADMIN_AUTH', 'true');
                 renderAdminApp();
             } else {
-                alert('Sandi Admin Salah! Gunakan: infaqnuha2025');
+                alert('Kata sandi admin tidak valid!');
             }
         }
 
@@ -186,9 +278,8 @@
                 <!-- Sidebar -->
                 <div class="w-64 bg-nuha-dark text-white p-6 space-y-8 flex flex-col justify-between shrink-0">
                     <div class="space-y-6">
-                        <div class="bg-white/10 p-3 rounded-2xl flex items-center gap-3">
-                            <img src="${DB.settings.siteLogo || OFFICIAL_LOGO}" class="h-8 w-8 bg-white p-1 rounded-xl object-contain">
-                            <span class="font-bold text-xs line-clamp-1">${DB.settings.siteName}</span>
+                        <div class="bg-white/10 p-3 rounded-2xl flex items-center justify-center">
+                            <img src="${DB.settings.siteLogo || OFFICIAL_LOGO}" class="h-9 w-auto bg-white p-1 rounded-xl object-contain">
                         </div>
                         <nav class="space-y-1 text-xs font-semibold">
                             <button onclick="setAdminTab('dashboard')" class="w-full text-left p-3 rounded-xl hover:bg-white/10 ${adminState.adminSubTab==='dashboard'?'bg-white/20':''}">Dashboard & Stat</button>
@@ -228,12 +319,12 @@
                     return `
                         <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
                             <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Total Donasi Terkumpul</span>
-                                <h3 class="text-2xl font-bold text-nuha-primary mt-1">${formatRupiah(DB.stats.totalInfaq)}</h3>
+                                <span class="text-xs text-gray-400">Total Program Aktif</span>
+                                <h3 class="text-2xl font-bold text-nuha-primary mt-1">${(DB.programs||[]).length} Program</h3>
                             </div>
                             <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
-                                <span class="text-xs text-gray-400">Total Donatur</span>
-                                <h3 class="text-2xl font-bold text-gray-900 mt-1">${DB.stats.totalDonatur} Orang</h3>
+                                <span class="text-xs text-gray-400">Total Foto Galeri</span>
+                                <h3 class="text-2xl font-bold text-gray-900 mt-1">${(DB.gallery||[]).length} Foto</h3>
                             </div>
                             <div class="p-6 bg-white border border-gray-100 rounded-3xl shadow-sm">
                                 <span class="text-xs text-gray-400">Status Akses Website</span>
@@ -268,6 +359,15 @@
                                     </div>
                                 </div>
 
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">URL Foto Halaman Login Sisi Kiri (Full-Screen)</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="set-login-banner" value="${DB.settings.loginBanner || ''}" placeholder="Link URL Foto..." class="flex-1 p-3 border border-gray-200 rounded-xl text-xs">
+                                        <input type="file" id="banner-file-input" onchange="uploadImageFile(this, 'set-login-banner')" class="hidden">
+                                        <button onclick="document.getElementById('banner-file-input').click()" class="px-4 py-2 bg-gray-100 border text-xs font-bold rounded-xl hover:bg-gray-200">Upload</button>
+                                    </div>
+                                </div>
+
                                 <div class="pt-4 border-t space-y-3">
                                     <h4 class="font-bold text-xs text-nuha-primary">Edit Teks Profil (Tentang, Visi & Misi)</h4>
                                     <div>
@@ -293,10 +393,6 @@
                                     <div class="flex gap-3">
                                         <button onclick="toggleWebsiteLock(true)" class="flex-1 py-3 bg-red-600 text-white font-bold text-xs rounded-xl hover:bg-red-700">Kunci Website (Maintenance)</button>
                                         <button onclick="toggleWebsiteLock(false)" class="flex-1 py-3 bg-emerald-600 text-white font-bold text-xs rounded-xl hover:bg-emerald-700">Buka Akses Website</button>
-                                    </div>
-                                    <div class="flex gap-3">
-                                        <button onclick="toggleDonationsLock(true)" class="flex-1 py-3 bg-amber-600 text-white font-bold text-xs rounded-xl hover:bg-amber-700">Kunci Semua Tombol Donasi</button>
-                                        <button onclick="toggleDonationsLock(false)" class="flex-1 py-3 bg-blue-600 text-white font-bold text-xs rounded-xl hover:bg-blue-700">Buka Tombol Donasi</button>
                                     </div>
                                 </div>
                             </div>
@@ -389,61 +485,30 @@
                 case 'pengurus':
                     return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola & Atur Level Hirarki Susunan Pengurus</h3>
-                            
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Susunan Pengurus</h3>
                             <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Jabatan Pengurus Baru</h4>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <input type="text" id="pengurus-nama" placeholder="Nama Lengkap & Gelar..." class="p-3 border rounded-xl text-xs">
-                                    <input type="text" id="pengurus-jabatan" placeholder="Jabatan (Contoh: Pengasuh/Ketua)..." class="p-3 border rounded-xl text-xs">
+                                    <input type="text" id="pengurus-nama" placeholder="Nama Lengkap..." class="p-3 border rounded-xl text-xs">
+                                    <input type="text" id="pengurus-jabatan" placeholder="Jabatan..." class="p-3 border rounded-xl text-xs">
                                 </div>
-                                
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Level Hirarki Jabatan</label>
-                                        <select id="pengurus-level" class="w-full mt-1 p-3 border rounded-xl text-xs font-bold bg-white">
-                                            <option value="1">Level 1 - Pengasuh / Pembina Utama</option>
-                                            <option value="2" selected>Level 2 - Pimpinan / Ketua Pengurus</option>
-                                            <option value="3">Level 3 - Bendahara / Staf</option>
-                                        </select>
-                                    </div>
-                                    <div>
-                                        <label class="text-xs font-bold text-gray-700">Foto Pengurus</label>
-                                        <div class="flex gap-2 mt-1">
-                                            <input type="text" id="pengurus-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
-                                            <input type="file" id="p-file" onchange="uploadImageFile(this, 'pengurus-foto')" class="hidden">
-                                            <button onclick="document.getElementById('p-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload</button>
-                                        </div>
+                                <div>
+                                    <label class="text-xs font-bold text-gray-700">Foto Pengurus</label>
+                                    <div class="flex gap-2 mt-1">
+                                        <input type="text" id="pengurus-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
+                                        <input type="file" id="p-file" onchange="uploadImageFile(this, 'pengurus-foto')" class="hidden">
+                                        <button onclick="document.getElementById('p-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload</button>
                                     </div>
                                 </div>
-
-                                <button onclick="addPengurus()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Simpan Pengurus Baru</button>
+                                <button onclick="addPengurus()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Simpan Pengurus</button>
                             </div>
-
-                            <div class="space-y-4 pt-4">
-                                <h4 class="font-bold text-xs text-gray-800">Daftar Susunan Pengurus Aktif</h4>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                    ${(DB.pengurusList||[]).map((p, idx) => `
-                                        <div class="p-4 border border-gray-200 rounded-2xl bg-white space-y-3">
-                                            <div class="space-y-2">
-                                                <label class="text-[10px] font-bold text-gray-400">Nama</label>
-                                                <input type="text" id="p-edit-nama-${idx}" value="${p.nama}" class="w-full p-2 border rounded-xl text-xs font-bold">
-                                                <label class="text-[10px] font-bold text-gray-400">Jabatan</label>
-                                                <input type="text" id="p-edit-jabatan-${idx}" value="${p.jabatan}" class="w-full p-2 border rounded-xl text-xs text-nuha-primary font-semibold">
-                                                <label class="text-[10px] font-bold text-gray-400">Level Hirarki</label>
-                                                <select id="p-edit-level-${idx}" class="w-full p-2 border rounded-xl text-xs font-bold bg-gray-50">
-                                                    <option value="1" ${p.level===1?'selected':''}>Level 1 (Pembina)</option>
-                                                    <option value="2" ${p.level===2||!p.level?'selected':''}>Level 2 (Ketua)</option>
-                                                    <option value="3" ${p.level===3?'selected':''}>Level 3 (Staf)</option>
-                                                </select>
-                                            </div>
-                                            <div class="flex gap-2">
-                                                <button onclick="updatePengurus(${idx})" class="flex-1 py-2 bg-emerald-600 text-white rounded-xl text-xs font-bold">Simpan Update</button>
-                                                <button onclick="removePengurus(${idx})" class="px-3 py-2 bg-red-600 text-white rounded-xl text-xs font-bold">Hapus</button>
-                                            </div>
-                                        </div>
-                                    `).join('')}
-                                </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t">
+                                ${(DB.pengurusList||[]).map((p, idx) => `
+                                    <div class="p-3 border rounded-2xl bg-white text-center space-y-2">
+                                        <h4 class="font-bold text-xs text-gray-900">${p.nama}</h4>
+                                        <span class="text-[10px] text-nuha-primary font-bold block">${p.jabatan}</span>
+                                        <button onclick="removePengurus(${idx})" class="w-full py-1 bg-red-100 text-red-600 rounded text-xs font-bold">Hapus</button>
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
                     `;
@@ -453,7 +518,6 @@
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
                             <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Galeri Foto LINUHA</h3>
                             <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Foto Galeri Baru</h4>
                                 <input type="text" id="gal-judul" placeholder="Judul / Keterangan Foto..." class="w-full p-3 border rounded-xl text-xs">
                                 <input type="date" id="gal-tanggal" class="w-full p-3 border rounded-xl text-xs">
                                 <div>
@@ -466,12 +530,12 @@
                                 </div>
                                 <button onclick="addGalleryItem()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Simpan ke Galeri</button>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4">
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t">
                                 ${(DB.gallery||[]).map((item, idx) => `
                                     <div class="p-3 border rounded-2xl bg-white space-y-2">
                                         <img src="${item.foto}" class="h-32 w-full object-cover rounded-xl">
                                         <h4 class="font-bold text-xs text-gray-900">${item.judul}</h4>
-                                        <span class="text-[10px] text-gray-400 block">${item.tanggal}</span>
+                                        <span class="text-[10px] text-gray-400 block">${item.tanggal || ''}</span>
                                         <button onclick="removeGalleryItem(${idx})" class="w-full py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus</button>
                                     </div>
                                 `).join('')}
@@ -482,11 +546,10 @@
                 case 'heroSlides':
                     return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Teks & Gambar Hero Slide Slider</h3>
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Hero Slide Slider</h3>
                             <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Slide Baru</h4>
                                 <input type="text" id="slide-judul" placeholder="Judul Teks Slide..." class="w-full p-3 border rounded-xl text-xs">
-                                <input type="text" id="slide-subjudul" placeholder="Subjudul / Keterangan Teks Slide..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="text" id="slide-subjudul" placeholder="Subjudul Teks Slide..." class="w-full p-3 border rounded-xl text-xs">
                                 <div>
                                     <label class="text-xs font-bold text-gray-700">Foto Hero Slide</label>
                                     <div class="flex gap-2 mt-1">
@@ -497,13 +560,13 @@
                                 </div>
                                 <button onclick="addHeroSlide()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Tambah Slide</button>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
                                 ${(DB.heroSlides||[]).map((slide, idx) => `
                                     <div class="p-4 border rounded-2xl bg-white space-y-2">
                                         <img src="${slide.foto}" class="h-32 w-full object-cover rounded-xl">
                                         <h4 class="font-bold text-xs text-gray-900">${slide.judul}</h4>
-                                        <p class="text-[10px] text-gray-500">${slide.subjudul}</p>
-                                        <button onclick="removeHeroSlide(${idx})" class="w-full py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus Slide Ini</button>
+                                        <p class="text-[10px] text-gray-500">${slide.subjudul || ''}</p>
+                                        <button onclick="removeHeroSlide(${idx})" class="w-full py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus Slide</button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -513,26 +576,19 @@
                 case 'verifikasi':
                     return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Daftar Konfirmasi Donasi Masuk</h3>
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Konfirmasi Donasi Masuk</h3>
                             <div class="space-y-4">
-                                ${(DB.pendingConfirmations||[]).length === 0 ? '<p class="text-xs text-gray-500">Belum ada konfirmasi donasi masuk.</p>' : ''}
+                                ${(DB.pendingConfirmations||[]).length === 0 ? '<p class="text-xs text-gray-500">Belum ada donasi masuk.</p>' : ''}
                                 ${(DB.pendingConfirmations||[]).map((c, idx) => `
-                                    <div class="p-5 border border-gray-200 rounded-2xl bg-white space-y-3 flex flex-col md:flex-row justify-between items-start md:items-center">
-                                        <div class="space-y-1">
-                                            <div class="flex items-center gap-2">
-                                                <span class="font-bold text-xs text-nuha-primary">${c.trxCode}</span>
-                                                <span class="px-2 py-0.5 text-[10px] rounded-full font-bold ${c.status.includes('Berhasil')?'bg-emerald-100 text-emerald-700':c.status.includes('Ditolak')?'bg-red-100 text-red-700':'bg-amber-100 text-amber-700'}">${c.status}</span>
-                                            </div>
+                                    <div class="p-4 border rounded-2xl bg-white flex justify-between items-center">
+                                        <div>
+                                            <span class="font-bold text-xs text-nuha-primary">${c.trxCode}</span>
                                             <h4 class="font-bold text-sm text-gray-900">${c.donorName}</h4>
-                                            <p class="text-xs text-gray-600">Nominal Transfer: <strong class="text-emerald-700">${formatRupiah(c.amount)}</strong></p>
-                                            <span class="text-[10px] text-gray-400 block">${c.timestamp} | IP: ${c.ip || 'N/A'}</span>
+                                            <p class="text-xs font-bold text-emerald-700">${formatRupiah(c.amount)}</p>
                                         </div>
-                                        <div class="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                                            ${c.proofImage ? `<a href="${c.proofImage}" target="_blank" class="px-4 py-2 bg-gray-100 text-gray-700 font-bold text-xs rounded-xl text-center hover:bg-gray-200">Lihat Bukti</a>` : ''}
-                                            ${c.status.includes('Menunggu') ? `
-                                                <button onclick="approveDonation(${idx})" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">Setujui</button>
-                                                <button onclick="rejectDonation(${idx})" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl">Tolak</button>
-                                            ` : ''}
+                                        <div class="flex gap-2">
+                                            <button onclick="approveDonation(${idx})" class="px-3 py-1.5 bg-emerald-600 text-white font-bold text-xs rounded-xl">Setujui</button>
+                                            <button onclick="rejectDonation(${idx})" class="px-3 py-1.5 bg-red-600 text-white font-bold text-xs rounded-xl">Tolak</button>
                                         </div>
                                     </div>
                                 `).join('')}
@@ -543,53 +599,10 @@
                 case 'logs':
                     return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <div class="flex justify-between items-center border-b pb-3">
-                                <h3 class="font-bold text-sm text-gray-900">Log Aktivitas & Pemblokiran IP</h3>
-                                <button onclick="clearLogs()" class="px-3 py-1 bg-red-100 text-red-600 font-bold text-xs rounded-xl">Bersihkan Log</button>
-                            </div>
-
-                            <div class="p-4 bg-red-50 border border-red-100 rounded-2xl space-y-3">
-                                <h4 class="font-bold text-xs text-red-800">Manajemen Pemblokiran IP (Blacklist)</h4>
-                                <div class="flex gap-2">
-                                    <input type="text" id="ip-to-block" placeholder="Masukkan Alamat IP..." class="flex-1 p-2.5 border border-red-200 rounded-xl text-xs">
-                                    <button onclick="blockIP()" class="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded-xl">Blokir IP Ini</button>
-                                </div>
-                                <div class="flex flex-wrap gap-2 pt-1">
-                                    ${(DB.blockedIPs||[]).map((ip, idx) => `
-                                        <span class="px-3 py-1 bg-white border border-red-200 text-red-700 rounded-lg text-xs font-mono font-bold flex items-center gap-2">
-                                            ${ip}
-                                            <button onclick="unblockIP(${idx})" class="text-gray-400 hover:text-red-800">&times;</button>
-                                        </span>
-                                    `).join('')}
-                                </div>
-                            </div>
-
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left text-xs border-collapse">
-                                    <thead>
-                                        <tr class="bg-gray-100 text-gray-700 border-b">
-                                            <th class="p-3">Waktu</th>
-                                            <th class="p-3">Aksi</th>
-                                            <th class="p-3">Detail</th>
-                                            <th class="p-3">Alamat IP</th>
-                                            <th class="p-3 text-right">Opsi</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody class="divide-y divide-gray-100">
-                                        ${(DB.logs||[]).length === 0 ? '<tr><td colspan="5" class="p-4 text-center text-gray-400">Belum ada log.</td></tr>' : ''}
-                                        ${(DB.logs||[]).map(log => `
-                                            <tr class="hover:bg-gray-50">
-                                                <td class="p-3 text-gray-500 whitespace-nowrap">${log.timestamp}</td>
-                                                <td class="p-3 font-bold text-nuha-primary">${log.action}</td>
-                                                <td class="p-3 text-gray-700">${log.details}</td>
-                                                <td class="p-3 font-mono text-gray-600">${log.ip || '127.0.0.1'}</td>
-                                                <td class="p-3 text-right">
-                                                    <button onclick="blockSpecificIP('${log.ip}')" class="px-2 py-1 bg-red-100 text-red-700 font-bold text-[10px] rounded-lg">Blokir IP</button>
-                                                </td>
-                                            </tr>
-                                        `).join('')}
-                                    </tbody>
-                                </table>
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Log Aktivitas IP</h3>
+                            <div class="flex gap-2">
+                                <input type="text" id="ip-to-block" placeholder="Masukkan Alamat IP..." class="flex-1 p-3 border rounded-xl text-xs">
+                                <button onclick="blockIP()" class="px-4 py-3 bg-red-600 text-white font-bold text-xs rounded-xl">Blokir IP</button>
                             </div>
                         </div>
                     `;
@@ -599,12 +612,11 @@
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
                             <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Berita & Embed Media</h3>
                             <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Berita Baru</h4>
                                 <input type="text" id="news-judul" placeholder="Judul Berita..." class="w-full p-3 border rounded-xl text-xs">
                                 <textarea id="news-ringkasan" rows="2" placeholder="Ringkasan Berita..." class="w-full p-3 border rounded-xl text-xs"></textarea>
-                                <input type="text" id="news-embed" placeholder="URL Link YouTube/TikTok/IG/FB..." class="w-full p-3 border rounded-xl text-xs">
+                                <input type="text" id="news-embed" placeholder="Link Media (YouTube / TikTok / IG)..." class="w-full p-3 border rounded-xl text-xs">
                                 <div>
-                                    <label class="text-xs font-bold text-gray-700">Foto Berita</label>
+                                    <label class="text-xs font-bold text-gray-700">Foto Sampul Berita</label>
                                     <div class="flex gap-2 mt-1">
                                         <input type="text" id="news-foto" placeholder="Paste URL Foto..." class="flex-1 p-3 border rounded-xl text-xs">
                                         <input type="file" id="n-file" onchange="uploadImageFile(this, 'news-foto')" class="hidden">
@@ -613,12 +625,12 @@
                                 </div>
                                 <button onclick="addNewsItem()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Terbitkan Berita</button>
                             </div>
-                            <div class="space-y-3 pt-4">
+                            <div class="space-y-3 pt-4 border-t">
                                 ${(DB.news||[]).map((n, idx) => `
                                     <div class="p-4 border rounded-2xl bg-white flex justify-between items-center gap-4">
                                         <div>
                                             <h4 class="font-bold text-xs text-gray-900">${n.judul}</h4>
-                                            <p class="text-[10px] text-gray-500">${n.tanggal}</p>
+                                            <p class="text-[10px] text-gray-500">${n.tanggal || ''}</p>
                                         </div>
                                         <button onclick="removeNewsItem(${idx})" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus</button>
                                     </div>
@@ -630,29 +642,20 @@
                 case 'pembayaran':
                     return `
                         <div class="bg-white p-6 border border-gray-100 rounded-3xl shadow-sm space-y-6">
-                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Metode Pembayaran & QRIS</h3>
+                            <h3 class="font-bold text-sm text-gray-900 border-b pb-3">Kelola Bank & QRIS</h3>
                             <div class="space-y-3 p-4 bg-gray-50 rounded-2xl">
-                                <h4 class="font-bold text-xs text-nuha-primary">Tambah Bank / QRIS Baru</h4>
                                 <input type="text" id="pay-name" placeholder="Nama Bank / QRIS..." class="w-full p-3 border rounded-xl text-xs">
-                                <input type="text" id="pay-account" placeholder="Nomor Rekening & Atas Nama..." class="w-full p-3 border rounded-xl text-xs">
-                                <div>
-                                    <label class="text-xs font-bold text-gray-700">Foto QRIS (Opsional)</label>
-                                    <div class="flex gap-2 mt-1">
-                                        <input type="text" id="pay-qr" placeholder="Paste URL Foto QRIS..." class="flex-1 p-3 border rounded-xl text-xs">
-                                        <input type="file" id="pay-file" onchange="uploadImageFile(this, 'pay-qr')" class="hidden">
-                                        <button onclick="document.getElementById('pay-file').click()" class="px-3 py-2 bg-gray-200 text-xs font-bold rounded-xl">Upload QR</button>
-                                    </div>
-                                </div>
-                                <button onclick="addPaymentMethod()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold hover:bg-nuha-dark">Simpan Pembayaran</button>
+                                <input type="text" id="pay-account" placeholder="Nomor Rekening / Keterangan..." class="w-full p-3 border rounded-xl text-xs">
+                                <button onclick="addPaymentMethod()" class="w-full py-3 bg-nuha-primary text-white rounded-xl text-xs font-bold">Simpan Pembayaran</button>
                             </div>
-                            <div class="space-y-3 pt-4">
+                            <div class="space-y-2 pt-4 border-t">
                                 ${(DB.paymentMethods||[]).map((m, idx) => `
-                                    <div class="p-4 border rounded-2xl bg-white flex justify-between items-center">
+                                    <div class="p-3 border rounded-xl bg-white flex justify-between items-center">
                                         <div>
                                             <h4 class="font-bold text-xs text-gray-900">${m.name}</h4>
                                             <p class="text-[10px] text-nuha-primary font-mono">${m.account}</p>
                                         </div>
-                                        <button onclick="removePaymentMethod(${idx})" class="px-3 py-1.5 bg-red-100 text-red-600 rounded-lg text-xs font-bold">Hapus</button>
+                                        <button onclick="removePaymentMethod(${idx})" class="px-3 py-1 bg-red-100 text-red-600 text-xs font-bold rounded">Hapus</button>
                                     </div>
                                 `).join('')}
                             </div>
@@ -664,7 +667,6 @@
             }
         }
 
-        // MANAGEMENT FUNCTIONS
         function setAdminTab(tab) {
             adminState.adminSubTab = tab;
             renderAdminApp();
@@ -692,11 +694,12 @@
             DB.settings.siteName = document.getElementById('set-site-name')?.value || DB.settings.siteName;
             DB.settings.phone = document.getElementById('set-phone')?.value || DB.settings.phone;
             DB.settings.siteLogo = document.getElementById('set-logo-url')?.value || DB.settings.siteLogo;
+            DB.settings.loginBanner = document.getElementById('set-login-banner')?.value || DB.settings.loginBanner;
             DB.settings.aboutText = document.getElementById('set-about-text')?.value || DB.settings.aboutText;
             DB.settings.visiText = document.getElementById('set-visi-text')?.value || DB.settings.visiText;
             DB.settings.misiText = document.getElementById('set-misi-text')?.value || DB.settings.misiText;
             saveDB();
-            alert('Pengaturan Website Berhasil Diperbarui!');
+            alert('Pengaturan Berhasil Disimpan!');
             renderAdminApp();
         }
 
@@ -707,10 +710,126 @@
             renderAdminApp();
         }
 
-        function toggleDonationsLock(lock) {
-            DB.settings.disableDonations = lock;
+        function addProgram() {
+            const j = document.getElementById('prog-judul')?.value;
+            const k = document.getElementById('prog-kategori')?.value || 'Program';
+            const d = document.getElementById('prog-deskripsi')?.value;
+            const t = parseFloat(document.getElementById('prog-target')?.value || 0);
+            const m = document.getElementById('prog-calc-mode')?.value || 'auto';
+            const val = parseFloat(document.getElementById('prog-terkumpul-manual')?.value || 0);
+            const f = document.getElementById('prog-foto')?.value;
+
+            if (j) {
+                if(!DB.programs) DB.programs = [];
+                DB.programs.push({
+                    id: Date.now(), judul: j, kategori: k, deskripsi: d, target: t, calcMode: m, terkumpulManual: val, terkumpul: val, foto: f
+                });
+                saveDB();
+                alert('Program Berhasil Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function updateProgram(idx) {
+            if (DB.programs && DB.programs[idx]) {
+                DB.programs[idx].judul = document.getElementById(`prog-edit-judul-${idx}`)?.value || DB.programs[idx].judul;
+                DB.programs[idx].target = parseFloat(document.getElementById(`prog-edit-target-${idx}`)?.value || 0);
+                DB.programs[idx].calcMode = document.getElementById(`prog-edit-mode-${idx}`)?.value;
+                const manualVal = parseFloat(document.getElementById(`prog-edit-manual-${idx}`)?.value || 0);
+                DB.programs[idx].terkumpulManual = manualVal;
+                DB.programs[idx].terkumpul = manualVal;
+                saveDB();
+                alert('Program Diperbarui!');
+                renderAdminApp();
+            }
+        }
+
+        function removeProgram(idx) {
+            DB.programs.splice(idx, 1);
             saveDB();
-            alert(lock ? 'Semua Tombol Donasi Dikunci!' : 'Tombol Donasi Dibuka!');
+            renderAdminApp();
+        }
+
+        function addHeroSlide() {
+            const j = document.getElementById('slide-judul')?.value;
+            const sub = document.getElementById('slide-subjudul')?.value;
+            const f = document.getElementById('slide-foto')?.value;
+
+            if (j && f) {
+                if(!DB.heroSlides) DB.heroSlides = [];
+                DB.heroSlides.push({ id: Date.now(), judul: j, subjudul: sub, foto: f });
+                saveDB();
+                alert('Hero Slide Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function removeHeroSlide(idx) {
+            DB.heroSlides.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
+
+        function addGalleryItem() {
+            const j = document.getElementById('gal-judul')?.value;
+            const t = document.getElementById('gal-tanggal')?.value || new Date().toISOString().split('T')[0];
+            const f = document.getElementById('gal-foto')?.value;
+
+            if (j && f) {
+                if(!DB.gallery) DB.gallery = [];
+                DB.gallery.unshift({ id: Date.now(), judul: j, tanggal: t, foto: f });
+                saveDB();
+                alert('Foto Galeri Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function removeGalleryItem(idx) {
+            DB.gallery.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
+
+        function addNewsItem() {
+            const j = document.getElementById('news-judul')?.value;
+            const r = document.getElementById('news-ringkasan')?.value;
+            const e = document.getElementById('news-embed')?.value;
+            const f = document.getElementById('news-foto')?.value;
+
+            if (j) {
+                if(!DB.news) DB.news = [];
+                DB.news.unshift({
+                    id: Date.now(), judul: j, ringkasan: r, embedUrl: e, foto: f, tanggal: new Date().toISOString().split('T')[0]
+                });
+                saveDB();
+                alert('Berita Diterbitkan!');
+                renderAdminApp();
+            }
+        }
+
+        function removeNewsItem(idx) {
+            DB.news.splice(idx, 1);
+            saveDB();
+            renderAdminApp();
+        }
+
+        function addPengurus() {
+            const n = document.getElementById('pengurus-nama')?.value;
+            const j = document.getElementById('pengurus-jabatan')?.value;
+            const f = document.getElementById('pengurus-foto')?.value;
+
+            if (n && j) {
+                if(!DB.pengurusList) DB.pengurusList = [];
+                DB.pengurusList.push({ id: Date.now(), nama: n, jabatan: j, foto: f });
+                saveDB();
+                alert('Pengurus Ditambahkan!');
+                renderAdminApp();
+            }
+        }
+
+        function removePengurus(idx) {
+            DB.pengurusList.splice(idx, 1);
+            saveDB();
             renderAdminApp();
         }
 
@@ -718,7 +837,7 @@
             if (DB.pendingConfirmations && DB.pendingConfirmations[idx]) {
                 DB.pendingConfirmations[idx].status = 'Berhasil Terverifikasi';
                 saveDB();
-                alert('Donasi telah disetujui!');
+                alert('Donasi disetujui!');
                 renderAdminApp();
             }
         }
@@ -727,7 +846,6 @@
             if (DB.pendingConfirmations && DB.pendingConfirmations[idx]) {
                 DB.pendingConfirmations[idx].status = 'Ditolak';
                 saveDB();
-                alert('Donasi ditolak.');
                 renderAdminApp();
             }
         }
@@ -743,173 +861,13 @@
             }
         }
 
-        function blockSpecificIP(ip) {
-            if (ip) {
-                if (!DB.blockedIPs) DB.blockedIPs = [];
-                if (!DB.blockedIPs.includes(ip)) DB.blockedIPs.push(ip);
-                saveDB();
-                alert(`IP ${ip} Diblokir!`);
-                renderAdminApp();
-            }
-        }
-
-        function unblockIP(idx) {
-            if (DB.blockedIPs) {
-                DB.blockedIPs.splice(idx, 1);
-                saveDB();
-                renderAdminApp();
-            }
-        }
-
-        function clearLogs() {
-            DB.logs = [];
-            saveDB();
-            renderAdminApp();
-        }
-
-        function addProgram() {
-            const judul = document.getElementById('prog-judul')?.value;
-            const kat = document.getElementById('prog-kategori')?.value || 'Umum';
-            const desc = document.getElementById('prog-deskripsi')?.value;
-            const target = parseFloat(document.getElementById('prog-target')?.value || 0);
-            const mode = document.getElementById('prog-calc-mode')?.value || 'auto';
-            const manual = parseFloat(document.getElementById('prog-terkumpul-manual')?.value || 0);
-            const foto = document.getElementById('prog-foto')?.value || 'https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=800&q=80';
-
-            if (judul) {
-                DB.programs.push({
-                    id: Date.now(),
-                    judul: judul,
-                    kategori: kat,
-                    deskripsi: desc,
-                    target: target,
-                    calcMode: mode,
-                    terkumpulManual: manual,
-                    terkumpul: manual,
-                    foto: foto
-                });
-                saveDB();
-                alert('Program Ditambahkan!');
-                renderAdminApp();
-            }
-        }
-
-        function updateProgram(idx) {
-            if (DB.programs && DB.programs[idx]) {
-                const j = document.getElementById(`prog-edit-judul-${idx}`)?.value;
-                const t = parseFloat(document.getElementById(`prog-edit-target-${idx}`)?.value || 0);
-                const m = document.getElementById(`prog-edit-mode-${idx}`)?.value;
-                const val = parseFloat(document.getElementById(`prog-edit-manual-${idx}`)?.value || 0);
-
-                if (j) DB.programs[idx].judul = j;
-                if (t) DB.programs[idx].target = t;
-                if (m) DB.programs[idx].calcMode = m;
-                DB.programs[idx].terkumpulManual = val;
-                DB.programs[idx].terkumpul = val;
-                saveDB();
-                alert('Program Diperbarui!');
-                renderAdminApp();
-            }
-        }
-
-        function removeProgram(idx) {
-            if (confirm('Hapus program ini?')) {
-                DB.programs.splice(idx, 1);
-                saveDB();
-                renderAdminApp();
-            }
-        }
-
-        function addPengurus() {
-            const nama = document.getElementById('pengurus-nama')?.value;
-            const jabatan = document.getElementById('pengurus-jabatan')?.value;
-            const level = parseInt(document.getElementById('pengurus-level')?.value || 2);
-            const foto = document.getElementById('pengurus-foto')?.value;
-
-            if (nama && jabatan) {
-                DB.pengurusList.push({ id: Date.now(), nama: nama, jabatan: jabatan, level: level, foto: foto });
-                saveDB();
-                alert('Pengurus Ditambahkan!');
-                renderAdminApp();
-            }
-        }
-
-        function updatePengurus(idx) {
-            if (DB.pengurusList && DB.pengurusList[idx]) {
-                const n = document.getElementById(`p-edit-nama-${idx}`)?.value;
-                const j = document.getElementById(`p-edit-jabatan-${idx}`)?.value;
-                const l = parseInt(document.getElementById(`p-edit-level-${idx}`)?.value || 2);
-
-                if (n) DB.pengurusList[idx].nama = n;
-                if (j) DB.pengurusList[idx].jabatan = j;
-                DB.pengurusList[idx].level = l;
-                saveDB();
-                alert('Pengurus Diperbarui!');
-                renderAdminApp();
-            }
-        }
-
-        function removePengurus(idx) {
-            if (confirm('Hapus pengurus ini?')) {
-                DB.pengurusList.splice(idx, 1);
-                saveDB();
-                renderAdminApp();
-            }
-        }
-
-        function addGalleryItem() {
-            const judul = document.getElementById('gal-judul')?.value;
-            const tanggal = document.getElementById('gal-tanggal')?.value || new Date().toISOString().split('T')[0];
-            const foto = document.getElementById('gal-foto')?.value;
-
-            if (judul && foto) {
-                DB.gallery.unshift({ id: Date.now(), judul: judul, tanggal: tanggal, foto: foto });
-                saveDB();
-                alert('Foto Galeri Ditambahkan!');
-                renderAdminApp();
-            }
-        }
-
-        function removeGalleryItem(idx) {
-            DB.gallery.splice(idx, 1);
-            saveDB();
-            renderAdminApp();
-        }
-
-        function addNewsItem() {
-            const judul = document.getElementById('news-judul')?.value;
-            const ringkasan = document.getElementById('news-ringkasan')?.value;
-            const embed = document.getElementById('news-embed')?.value;
-            const foto = document.getElementById('news-foto')?.value || 'https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=800&q=80';
-
-            if (judul) {
-                DB.news.unshift({
-                    id: Date.now(),
-                    judul: judul,
-                    ringkasan: ringkasan,
-                    embedUrl: embed,
-                    foto: foto,
-                    tanggal: new Date().toISOString().split('T')[0]
-                });
-                saveDB();
-                alert('Berita Diterbitkan!');
-                renderAdminApp();
-            }
-        }
-
-        function removeNewsItem(idx) {
-            DB.news.splice(idx, 1);
-            saveDB();
-            renderAdminApp();
-        }
-
         function addPaymentMethod() {
-            const name = document.getElementById('pay-name')?.value;
-            const acc = document.getElementById('pay-account')?.value;
-            const qr = document.getElementById('pay-qr')?.value;
+            const n = document.getElementById('pay-name')?.value;
+            const a = document.getElementById('pay-account')?.value;
 
-            if (name && acc) {
-                DB.paymentMethods.push({ id: Date.now(), name: name, account: acc, qrImage: qr, active: true });
+            if (n && a) {
+                if(!DB.paymentMethods) DB.paymentMethods = [];
+                DB.paymentMethods.push({ id: Date.now(), name: n, account: a, active: true });
                 saveDB();
                 alert('Metode Pembayaran Ditambahkan!');
                 renderAdminApp();
@@ -918,25 +876,6 @@
 
         function removePaymentMethod(idx) {
             DB.paymentMethods.splice(idx, 1);
-            saveDB();
-            renderAdminApp();
-        }
-
-        function addHeroSlide() {
-            const judul = document.getElementById('slide-judul')?.value;
-            const sub = document.getElementById('slide-subjudul')?.value;
-            const foto = document.getElementById('slide-foto')?.value;
-
-            if (judul && foto) {
-                DB.heroSlides.push({ id: Date.now(), judul: judul, subjudul: sub, foto: foto });
-                saveDB();
-                alert('Hero Slide Ditambahkan!');
-                renderAdminApp();
-            }
-        }
-
-        function removeHeroSlide(idx) {
-            DB.heroSlides.splice(idx, 1);
             saveDB();
             renderAdminApp();
         }
